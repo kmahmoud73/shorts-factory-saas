@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 4, 2026 (v2 -- landing page + deck built)
+**Last Updated**: March 4, 2026 (v3 -- deck slide transitions fixed, ElevenLabs TTS added to SAAS_DEMO.html, deployed to GitHub Pages at https://kmahmoud73.github.io/shorts-factory-saas/)
 
 ---
 
@@ -114,7 +114,8 @@ Live URL (after setup): `https://digisov.github.io/shorts-factory-saas/`
 Each client gets their own directory with CLAUDE.md, stories, output, and reports. Story JSONs are pipeline-compatible (same format as `shorts-factory/stories/`).
 
 ## Status
+- v3: Deck slide transitions fixed, ElevenLabs added to SAAS_DEMO.html (Mar 4, 2026)
 - v2: Landing page + client deck BUILT (Mar 4, 2026)
 - SAAS_DEMO.html moved here from shorts-factory (Mar 3)
 - `client_1/` created as virtual test client sandbox (Mar 3)
-- GitHub Pages deployment pending
+- **GitHub Pages LIVE**: https://kmahmoud73.github.io/shorts-factory-saas/ (repo: kmahmoud73/shorts-factory-saas)
