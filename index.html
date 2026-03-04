@@ -371,6 +371,109 @@ nav .container {
   color: var(--accent-blue);
 }
 
+/* ---- DEMO TEASER ---- */
+.demo-teaser {
+  padding: 80px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.demo-teaser::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.04) 40%, transparent 70%);
+  pointer-events: none;
+}
+.demo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border: 1px solid rgba(139,92,246,0.3);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--accent-purple);
+  margin-bottom: 24px;
+  background: rgba(139,92,246,0.06);
+}
+.demo-badge .pulse-dot {
+  width: 8px; height: 8px;
+  background: var(--accent-purple);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+.demo-teaser h2 {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+.demo-teaser h2 .gradient {
+  background: var(--accent-gradient-h);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.demo-teaser .demo-desc {
+  font-size: 17px;
+  color: var(--text-muted);
+  max-width: 540px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+.demo-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+.demo-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.demo-step .ds-icon { font-size: 16px; }
+.demo-arrow {
+  color: var(--text-dim);
+  font-size: 14px;
+  animation: arrowPulse 1.5s infinite;
+}
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; color: var(--accent-blue); }
+}
+.demo-cta-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.demo-cta-note {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 16px;
+}
+
 /* ---- PRICING ---- */
 .pricing { padding: 100px 0; }
 .pricing-grid {
@@ -647,6 +750,7 @@ footer p {
       <li><a href="#how-it-works">How It Works</a></li>
       <li><a href="#features">Features</a></li>
       <li><a href="#results">Results</a></li>
+      <li><a href="#demo">Live Demo</a></li>
       <li><a href="#pricing">Pricing</a></li>
     </ul>
     <a href="#" onclick="openForm('General');return false" class="nav-cta">Get Started</a>
@@ -661,6 +765,7 @@ footer p {
   <a href="#how-it-works" onclick="toggleMobileMenu()">How It Works</a>
   <a href="#features" onclick="toggleMobileMenu()">Features</a>
   <a href="#results" onclick="toggleMobileMenu()">Results</a>
+  <a href="#demo" onclick="toggleMobileMenu()">Live Demo</a>
   <a href="#pricing" onclick="toggleMobileMenu()">Pricing</a>
   <a href="#" onclick="toggleMobileMenu();openForm('General');return false" style="padding:12px 32px;background:var(--accent-gradient);border-radius:8px;font-weight:600;">Get Started</a>
 </div>
@@ -854,6 +959,35 @@ footer p {
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- DEMO TEASER -->
+<section class="demo-teaser" id="demo">
+  <div class="container">
+    <div class="demo-badge">
+      <span class="pulse-dot"></span>
+      Coming Soon
+    </div>
+    <h2>Watch the Entire Pipeline<br><span class="gradient">Running Live</span></h2>
+    <p class="demo-desc">A real-time demo where you see the full workflow humming — from trend discovery to a finished video with real results. No slides. No mockups. The machine, running.</p>
+
+    <div class="demo-pipeline">
+      <div class="demo-step"><span class="ds-icon">&#128270;</span> Trend Scan</div>
+      <span class="demo-arrow">&#8594;</span>
+      <div class="demo-step"><span class="ds-icon">&#9997;</span> AI Script</div>
+      <span class="demo-arrow">&#8594;</span>
+      <div class="demo-step"><span class="ds-icon">&#127916;</span> Video Build</div>
+      <span class="demo-arrow">&#8594;</span>
+      <div class="demo-step"><span class="ds-icon">&#128640;</span> Live Upload</div>
+      <span class="demo-arrow">&#8594;</span>
+      <div class="demo-step"><span class="ds-icon">&#128200;</span> Results</div>
+    </div>
+
+    <div class="demo-cta-row">
+      <a href="#" onclick="openForm('Demo');return false" class="btn-primary">Request Early Access</a>
+    </div>
+    <p class="demo-cta-note">Limited spots. We'll walk you through a live pipeline run, end to end.</p>
   </div>
 </section>
 
