@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shorts Factory — SaaS Transformation Strategy</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg-card: #111113;
+  --bg-card-hover: #18181b;
+  --bg-section: #0d0d10;
+  --border: #1e1e24;
+  --text: #e4e4e7;
+  --text-muted: #71717a;
+  --text-dim: #52525b;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --accent-gradient-h: linear-gradient(135deg, #60a5fa, #a78bfa);
+  --green: #22c55e;
+  --yellow: #eab308;
+  --red: #ef4444;
+  --orange: #f97316;
+  --cyan: #06b6d4;
+  --pink: #ec4899;
+  --gold: #d4af37;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a { color: var(--accent-blue); text-decoration: none; }
+a:hover { color: #60a5fa; text-decoration: underline; }
+
+.container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+
+/* ---- NAV ---- */
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 100;
+  background: rgba(10,10,10,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border); padding: 14px 0;
+}
+nav .container { display: flex; justify-content: space-between; align-items: center; }
+nav .brand { font-size: 18px; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+nav .nav-links { display: flex; gap: 24px; }
+nav .nav-links a { color: var(--text-muted); font-size: 14px; font-weight: 500; }
+nav .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+/* ---- HERO ---- */
+.hero {
+  padding: 140px 0 80px;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.08) 0%, transparent 70%);
+}
+.hero h1 { font-size: 44px; font-weight: 800; line-height: 1.15; margin-bottom: 20px; }
+.hero h1 span { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero .subtitle { color: var(--text-muted); font-size: 20px; max-width: 750px; margin: 0 auto 30px; }
+.hero .meta-bar { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+.hero .meta-item { font-size: 13px; color: var(--text-dim); }
+.hero .meta-item strong { color: var(--accent-blue); }
+
+/* ---- SECTIONS ---- */
+section { padding: 80px 0; }
+section:nth-child(odd) { background: var(--bg-section); }
+.section-header { text-align: center; margin-bottom: 50px; }
+.section-header .section-number {
+  display: inline-block; background: var(--accent-gradient);
+  color: white; font-size: 12px; font-weight: 700; padding: 4px 14px;
+  border-radius: 20px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;
+}
+.section-header h2 { font-size: 34px; font-weight: 800; margin-bottom: 10px; }
+.section-header p { color: var(--text-muted); font-size: 17px; max-width: 700px; margin: 0 auto; }
+
+/* ---- BADGES ---- */
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.badge-green { background: rgba(34,197,94,0.15); color: #4ade80; }
+.badge-purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.badge-yellow { background: rgba(234,179,8,0.15); color: #facc15; }
+.badge-red { background: rgba(239,68,68,0.15); color: #f87171; }
+.badge-cyan { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.badge-orange { background: rgba(249,115,22,0.15); color: #fb923c; }
+.badge-pink { background: rgba(236,72,153,0.15); color: #f472b6; }
+
+/* ---- CARDS ---- */
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 28px; transition: border-color 0.2s;
+}
+.card:hover { border-color: rgba(59,130,246,0.3); }
+.card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.card p { color: var(--text-muted); font-size: 14px; }
+
+/* ---- GRID LAYOUTS ---- */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+/* ---- TABLES ---- */
+.table-wrap { overflow-x: auto; margin: 24px 0; border-radius: 12px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--bg-card); }
+thead { background: rgba(59,130,246,0.08); }
+th { font-weight: 700; text-align: left; padding: 14px 16px; color: var(--text); border-bottom: 1px solid var(--border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+td { padding: 12px 16px; border-bottom: 1px solid rgba(30,30,36,0.5); color: var(--text-muted); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(59,130,246,0.03); }
+td code { background: rgba(139,92,246,0.12); color: #c4b5fd; padding: 2px 7px; border-radius: 4px; font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; }
+
+/* ---- COLLAPSIBLES ---- */
+details { margin: 16px 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+details summary {
+  cursor: pointer; padding: 16px 20px; font-weight: 700; font-size: 15px;
+  display: flex; align-items: center; gap: 10px;
+  transition: background 0.2s;
+}
+details summary:hover { background: rgba(59,130,246,0.04); }
+details summary::marker { content: ''; }
+details summary::before { content: '\25B6'; font-size: 10px; color: var(--accent-blue); transition: transform 0.2s; display: inline-block; }
+details[open] summary::before { transform: rotate(90deg); }
+details .details-content { padding: 0 20px 20px; }
+
+/* ---- FLOW DIAGRAMS ---- */
+.flow-diagram { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 24px 0; }
+.flow-node {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 18px; font-size: 13px; font-weight: 600; text-align: center; min-width: 120px;
+}
+.flow-node.intel { border-color: rgba(6,182,212,0.4); color: #22d3ee; }
+.flow-node.editorial { border-color: rgba(234,179,8,0.4); color: #facc15; }
+.flow-node.production { border-color: rgba(139,92,246,0.4); color: #a78bfa; }
+.flow-node.distribution { border-color: rgba(34,197,94,0.4); color: #4ade80; }
+.flow-node.engagement { border-color: rgba(236,72,153,0.4); color: #f472b6; }
+.flow-node.analytics { border-color: rgba(249,115,22,0.4); color: #fb923c; }
+.flow-arrow { color: var(--text-dim); font-size: 18px; }
+
+/* ---- METRIC BOXES ---- */
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0; }
+.metric-box {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 20px; text-align: center;
+}
+.metric-box .value { font-size: 28px; font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.metric-box .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+/* ---- OPEN QUESTION BLOCKS ---- */
+.oq-block {
+  background: rgba(234,179,8,0.06); border: 1px solid rgba(234,179,8,0.2);
+  border-radius: 10px; padding: 16px 20px; margin: 16px 0;
+}
+.oq-block .oq-title { font-weight: 700; color: #facc15; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.oq-block p { color: var(--text-muted); font-size: 14px; }
+
+/* ---- RISK CARDS ---- */
+.risk-high { border-left: 3px solid var(--red); }
+.risk-medium { border-left: 3px solid var(--orange); }
+.risk-low { border-left: 3px solid var(--yellow); }
+
+/* ---- PHASE TIMELINE ---- */
+.timeline { position: relative; margin: 40px 0; padding-left: 40px; }
+.timeline::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.timeline-item { position: relative; margin-bottom: 36px; }
+.timeline-item::before {
+  content: ''; position: absolute; left: -33px; top: 6px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent-gradient); border: 3px solid var(--bg);
+}
+.timeline-item h4 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.timeline-item p { color: var(--text-muted); font-size: 14px; }
+
+/* ---- FOOTER ---- */
+footer { padding: 40px 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-dim); font-size: 13px; }
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 900px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 30px; }
+  .section-header h2 { font-size: 26px; }
+  .flow-diagram { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
+  nav .nav-links { gap: 14px; }
+  nav .nav-links a { font-size: 12px; }
+}
+
+/* ---- CODE / PRE ---- */
+pre {
+  background: #0d0d12; border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px 20px; font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace;
+  overflow-x: auto; color: var(--text-muted); line-height: 1.7; margin: 16px 0;
+}
+
+/* ---- SUBSECTION ---- */
+.subsection { margin: 36px 0; }
+.subsection h3 { font-size: 20px; font-weight: 700; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.subsection h4 { font-size: 16px; font-weight: 600; margin: 20px 0 10px; color: var(--accent-blue); }
+
+/* ---- LAYER INDICATOR ---- */
+.layer-tag {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 6px;
+}
+.layer-fixed { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.layer-config { background: rgba(34,197,94,0.15); color: #4ade80; }
+.layer-tenant { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.layer-market { background: rgba(249,115,22,0.15); color: #fb923c; }
+
+/* ASCII DIAGRAM */
+.ascii-box {
+  background: #0a0a10; border: 1px solid var(--border); border-radius: 10px;
+  padding: 24px; margin: 20px 0; overflow-x: auto;
+  font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 12px; line-height: 1.6; color: var(--text-muted); white-space: pre;
+}
+
+/* SCROLL LINKS */
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+/* CHECKLIST */
+.checklist { list-style: none; padding: 0; }
+.checklist li { padding: 6px 0; font-size: 14px; color: var(--text-muted); }
+.checklist li::before { content: '\2610'; margin-right: 10px; color: var(--accent-blue); }
+.checklist li.done::before { content: '\2611'; color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- ████ NAVIGATION ████ -->
+<nav>
+  <div class="container">
+    <div class="brand">Shorts Factory SaaS Transformation</div>
+    <div class="nav-links">
+      <a href="#section-1">Architecture</a>
+      <a href="#section-2">Blueprint</a>
+      <a href="#section-3">Strategy</a>
+      <a href="#section-4">Roadmap</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ████ HERO ████ -->
+<div class="hero">
+  <div class="container">
+    <h1>SaaS Transformation<br><span>Strategy & Architecture</span></h1>
+    <p class="subtitle">A comprehensive analysis of the Shorts Factory codebase: mapping every module, decision point, and data flow from single-tenant CLI scripts to a multi-tenant autonomous content platform.</p>
+    <div class="meta-bar">
+      <div class="meta-item"><strong>29</strong> Python modules analyzed</div>
+      <div class="meta-item"><strong>19</strong> launchd automation agents</div>
+      <div class="meta-item"><strong>11</strong> external API integrations</div>
+      <div class="meta-item"><strong>2</strong> live YouTube channels</div>
+      <div class="meta-item">Generated <strong>March 4, 2026</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ██████████████████████████████████████████████████████████████████ -->
+<!-- SECTION 1: CURRENT STATE ARCHITECTURE MAP                         -->
+<!-- ██████████████████████████████████████████████████████████████████ -->
+<section id="section-1">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Section 1</div>
+      <h2>Current State Architecture Map</h2>
+      <p>Complete topology of the existing codebase: 29 modules across 6 functional layers, their interconnections, decision points, and data flows.</p>
+    </div>
+
+    <!-- SYSTEM METRICS -->
+    <div class="metrics">
+      <div class="metric-box"><div class="value">29</div><div class="label">Python Modules</div></div>
+      <div class="metric-box"><div class="value">19</div><div class="label">Launchd Agents</div></div>
+      <div class="metric-box"><div class="value">11</div><div class="label">External APIs</div></div>
+      <div class="metric-box"><div class="value">6</div><div class="label">Functional Layers</div></div>
+      <div class="metric-box"><div class="value">3</div><div class="label">Fallback Chains</div></div>
+      <div class="metric-box"><div class="value">$0</div><div class="label">Daily LLM Cost</div></div>
+    </div>
+
+    <!-- PIPELINE FLOW -->
+    <div class="subsection">
+      <h3>End-to-End Pipeline Flow</h3>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">The autonomous pipeline runs daily with zero human intervention. Each node is a Python module; arrows show data flow.</p>
+
+      <div class="flow-diagram">
+        <div class="flow-node intel">YouTube<br>Researcher</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node intel">Auto<br>Scout</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node editorial">CiT<br>Editor</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node editorial">Auto Story<br>Writer</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node editorial">Auto<br>Compliance</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node production">Trending<br>Builder</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node production">Shorts<br>Maker</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node distribution">Trending<br>Uploader</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node engagement">Comment<br>Replier</div>
+      </div>
+
+      <div style="text-align:center;margin:10px 0 24px;">
+        <span class="badge badge-cyan">Intelligence</span>
+        <span class="badge badge-yellow">Editorial</span>
+        <span class="badge badge-purple">Production</span>
+        <span class="badge badge-green">Distribution</span>
+        <span class="badge badge-pink">Engagement</span>
+        <span class="badge badge-orange">Analytics</span>
+      </div>
+
+      <div class="ascii-box">
+DAILY SCHEDULE (Amman Time)                     FEEDBACK LOOP
+=====================================           ============================
+05:00  youtube_researcher.py  [INTEL]           performance_tracker.py
+05:10  auto_scout.py          [INTEL]               |
+05:30  cit_editor.py          [EDITORIAL]      .performance_tracker.json
+05:45  auto_story_writer.py   [EDITORIAL]           |
+05:55  auto_compliance.py     [EDITORIAL]      cit_editor.py reads it
+06:00  trending_builder.py    [PRODUCTION]     (HOT/WARM/COLD/DEAD scores)
+07:15  daily_builder.py (JV)  [PRODUCTION]          |
+10:00  trending_uploader.py   [DISTRIBUTION]   algo_intel.py (weekly)
+09:00  comment_replier.py     [ENGAGEMENT]     auto_story_writer.py reads it
+14:00  comment_replier.py     [ENGAGEMENT]     (length/title/tag rules)
+19:00  comment_replier.py     [ENGAGEMENT]
+22:00  channel_monitor.py     [ANALYTICS]
+22:05  cit_channel_monitor.py [ANALYTICS]
+22:10  performance_tracker.py [ANALYTICS]
+22:15  analytics_collector.py [ANALYTICS]
+Sun    algo_intel.py          [ANALYTICS]
+Sun    weekly_channel_report  [ANALYTICS]
+Wed    auto_compilation.py    [PRODUCTION]</div>
+    </div>
+
+    <!-- FULL MODULE INVENTORY -->
+    <div class="subsection">
+      <h3>Complete Module Inventory</h3>
+
+      <details>
+        <summary><span class="badge badge-cyan">Intelligence Layer</span> 3 Modules &mdash; Data gathering, trend discovery, API research</summary>
+        <div class="details-content">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Module</th><th>Inputs</th><th>Outputs</th><th>External APIs</th><th>Decision Points</th><th>SaaS Impact</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>youtube_researcher.py</code></td>
+                  <td>YouTube API categories (News, Sports, Entertainment, Music), custom keywords, region code, lookback hours</td>
+                  <td><code>.cit_yt_research_YYYY-MM-DD.json</code> (ranked opportunity list with virality scores)</td>
+                  <td>YouTube Data API v3 (trending + search, ~860 quota/run)</td>
+                  <td>Virality scoring formula: <code>min(views_per_hour / channel_factor, 1000)</code>. Channel factor floor: 0.1. Language filter rejects >30% non-Latin. Music-only filter skips Official Video/Audio.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Categories, keywords, region, lookback, language filter, virality cap</td>
+                </tr>
+                <tr>
+                  <td><code>auto_scout.py</code></td>
+                  <td>Latest <code>.cit_yt_research_*.json</code> file (top 30 opportunities)</td>
+                  <td><code>.trend_scout_YYYY-MM-DD.json</code> (10-15 story-worthy topics as JSON array)</td>
+                  <td>LLM via <code>llm_client.py</code> (Haiku tier, ~$0.05 per call)</td>
+                  <td>LLM prompt encodes channel strategy: prioritize star power + event timing, avoid dead categories (crypto, tech, politics). Scout returns headline, summary, category, slug per topic.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Scout prompt, category blacklist, star power rules, max topics</td>
+                </tr>
+                <tr>
+                  <td><code>algo_intel.py</code></td>
+                  <td>5 web sources (YouTube Creator Blog, vidIQ, TubeBuddy, Tubefilter, OutlierKit), channel performance data, baseline algorithm rules</td>
+                  <td><code>.algo_intel_brief.json</code> (algorithm changes, updated rules, action items, risk alerts)</td>
+                  <td>HTTP scraping (requests), LLM via <code>llm_client.py</code> (Haiku tier)</td>
+                  <td>Baseline rules define optimal length (40-60s), max narration words (160), hook timing (2s), upload time (18:00), title limits (70 chars). LLM cross-refs scraped data against baseline + channel performance.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Source URLs, baseline rules, analysis prompt. <span class="layer-tag layer-tenant">PER-TENANT</span> Channel-specific performance data</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary><span class="badge badge-yellow">Editorial Layer</span> 3 Modules &mdash; Scoring, story writing, compliance gate</summary>
+        <div class="details-content">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Module</th><th>Inputs</th><th>Outputs</th><th>External APIs</th><th>Decision Points</th><th>SaaS Impact</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>cit_editor.py</code></td>
+                  <td>Scout data, YouTube research, existing story slugs (dupe detection), <code>.performance_tracker.json</code>, <code>.algo_intel_brief.json</code></td>
+                  <td>Editorial brief JSON with scored, ranked candidates (greenlit vs killed)</td>
+                  <td>None (pure local computation)</td>
+                  <td><strong>Star Power dictionary</strong> (245 entries, tier 1-10). <strong>Event timing keywords</strong> (~50 keywords). <strong>Category performance</strong> (HOT/WARM/COLD/DEAD thresholds: >200/50-200/20-50/<20 avg views). <strong>Quality filter</strong> (non-English, emoji spam, music-only, generic viral). <strong>Minimum star power floor</strong> (default 5). <strong>Score threshold</strong> (default 23). <strong>Max greenlit</strong> (default 5).</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Threshold, max-n, star power names, category weights, quality rules. <span class="layer-tag layer-tenant">PER-TENANT</span> Star power dictionary should be tenant-specific (a cooking channel has different "household names")</td>
+                </tr>
+                <tr>
+                  <td><code>auto_story_writer.py</code></td>
+                  <td>Editorial brief (top N candidates), algo intel rules (if available), video engine rotation list</td>
+                  <td>Complete story JSONs in <code>stories/trending/</code> with narration, image_prompt, video_prompt, video_engine, ken_burns, YouTube metadata</td>
+                  <td>LLM via <code>llm_client.py</code> (Sonnet tier, ~$0.15/story)</td>
+                  <td>System prompt encodes the CiT formula (HOOK-WHAT-WHY IT MATTERS-CLOSER), 5 scenes per story, voice assignment, engine rotation rules. <strong>CTR optimizer</strong> post-processes title/description via Haiku for power words, curiosity gaps, front-loaded keywords.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Story formula, scene count, voice, system prompt, engine preferences, CTR rules. <span class="layer-tag layer-tenant">PER-TENANT</span> Complete rewrite needed per channel/niche</td>
+                </tr>
+                <tr>
+                  <td><code>auto_compliance.py</code></td>
+                  <td>Story JSONs without corresponding <code>_compliance.md</code></td>
+                  <td><code>{stem}_compliance.md</code> (PASS/APPROVE WITH EDITS/FAIL with specific findings)</td>
+                  <td>LLM via <code>llm_client.py</code> (Haiku tier, ~$0.03/story)</td>
+                  <td>Reviews against YouTube Community Guidelines, advertiser-friendliness, metadata quality (title <100 chars, hashtags, tags), AI disclosure, defamation risk. Verdicts parsed by <code>compliance_checker.py</code> as a pre-build gate.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> Core compliance rules are platform-level. <span class="layer-tag layer-config">CONFIGURABLE</span> Additional per-tenant rules (e.g., no competitor mentions)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary><span class="badge badge-purple">Production Layer</span> 7 Modules &mdash; Video rendering, avatar, mascot, compilation</summary>
+        <div class="details-content">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Module</th><th>Inputs</th><th>Outputs</th><th>External APIs</th><th>Fallback Chain</th><th>SaaS Impact</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>shorts_maker.py</code><br><span class="badge badge-purple">CORE</span></td>
+                  <td>Story JSON, voice setting, feature flags (animated subs, gen images, SFX, AI music, avatar, engine selection)</td>
+                  <td>MP4 file (1080x1920, 9:16) + metadata .txt</td>
+                  <td>Leonardo AI (images), Pollinations.ai (images), DALL-E 3 (images), Runway (video), Minimax/Hailuo (video), Kling (video), ElevenLabs (TTS), edge-tts (TTS), Hedra (avatar)</td>
+                  <td><strong>Images:</strong> Leonardo &rarr; Pollinations &rarr; DALL-E &rarr; black frame<br><strong>Animation:</strong> Runway &rarr; Minimax &rarr; Kling &rarr; Ken Burns<br><strong>TTS:</strong> ElevenLabs &rarr; edge-tts<br><strong>Avatar:</strong> Hedra 3D &rarr; SadTalker &rarr; 2D floating</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> Core rendering pipeline. <span class="layer-tag layer-config">CONFIGURABLE</span> Output resolution, FPS, subtitle style, highlight palette, watermark text/position, font, voice. <span class="layer-tag layer-tenant">PER-TENANT</span> API keys for image/video/TTS, avatar assets, brand colors</td>
+                </tr>
+                <tr>
+                  <td><code>daily_builder.py</code></td>
+                  <td>Story queue (<code>stories/queue/*.json</code>), build tracker, compliance gate</td>
+                  <td>Built MP4 in <code>ready-to-upload/</code>, auto-uploads to JV channel</td>
+                  <td>YouTube Data API (upload, dupe check, engagement comment, playlist)</td>
+                  <td>None (single path)</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Max daily builds, jitter range, upload flag, compliance skip. <span class="layer-tag layer-tenant">PER-TENANT</span> Queue directory, channel credentials, channel ID</td>
+                </tr>
+                <tr>
+                  <td><code>trending_builder.py</code></td>
+                  <td>Trending stories (<code>stories/trending/*.json</code>), build tracker, compliance gate</td>
+                  <td>Built MP4 in <code>output/</code>, added to <code>.trending_upload_queue.json</code></td>
+                  <td>None (build only, no upload)</td>
+                  <td>None</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Voice enforcement, queue alert threshold. <span class="layer-tag layer-tenant">PER-TENANT</span> Stories directory, tracker files</td>
+                </tr>
+                <tr>
+                  <td><code>compilation_stitcher.py</code></td>
+                  <td>Config JSON listing which MP4s to stitch, branding colors, intro/chapter/outro card durations</td>
+                  <td>Single long-form MP4 + .chapters.txt for YouTube timestamps</td>
+                  <td>None (all local ffmpeg/moviepy)</td>
+                  <td>None</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Card durations, branding colors, card design. <span class="layer-tag layer-tenant">PER-TENANT</span> Brand assets, compilation config</td>
+                </tr>
+                <tr>
+                  <td><code>auto_compilation.py</code></td>
+                  <td>Available JV shorts (uncompiled), compilation tracker</td>
+                  <td>Themed compilation MP4, auto-uploaded to JV as regular video</td>
+                  <td>LLM (Haiku for theme selection), YouTube (upload)</td>
+                  <td>None</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Min chapters, theme selection prompt. <span class="layer-tag layer-tenant">PER-TENANT</span> Source shorts, upload credentials</td>
+                </tr>
+                <tr>
+                  <td><code>overlay_mascot.py</code></td>
+                  <td>Existing MP4, mascot base PNG, Hedra API (optional)</td>
+                  <td>Same MP4 with avatar composited, <code>.has_mascot</code> marker</td>
+                  <td>Hedra API (optional, for 3D lip-sync)</td>
+                  <td>Hedra 3D &rarr; 2D floating &rarr; skip</td>
+                  <td><span class="layer-tag layer-tenant">PER-TENANT</span> Mascot PNG, avatar position/size, Hedra API key</td>
+                </tr>
+                <tr>
+                  <td><code>hedra_avatar.py</code> / <code>sadtalker_avatar.py</code> / <code>avatar_animator.py</code></td>
+                  <td>Portrait PNG, audio file, scene duration</td>
+                  <td>Transparent video clip with animated character</td>
+                  <td>Hedra Character-3 API (hedra), SadTalker (local), none (2D)</td>
+                  <td>Hedra &rarr; SadTalker &rarr; 2D</td>
+                  <td><span class="layer-tag layer-tenant">PER-TENANT</span> Character image, animation params, API key</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary><span class="badge badge-green">Distribution Layer</span> 3 Modules &mdash; Upload, playlist, scheduling</summary>
+        <div class="details-content">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Module</th><th>Inputs</th><th>Outputs</th><th>External APIs</th><th>Decision Points</th><th>SaaS Impact</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>youtube_uploader.py</code></td>
+                  <td>MP4 file, title, description, tags (or metadata .txt file)</td>
+                  <td>YouTube video ID + URL</td>
+                  <td>YouTube Data API (videos.insert, chunked upload)</td>
+                  <td><code>is_short</code> flag: True adds <code>shorts.pendingShort</code> to body. <code>containsSyntheticMedia: true</code> always set. Upload size limit handled by MediaFileUpload with resumable chunked upload.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> Upload mechanism. <span class="layer-tag layer-tenant">PER-TENANT</span> OAuth token, client secret, channel ID</td>
+                </tr>
+                <tr>
+                  <td><code>trending_uploader.py</code></td>
+                  <td><code>.trending_upload_queue.json</code>, interval tracking file, burst flag</td>
+                  <td>Uploaded video, queue entry removed, engagement comment posted, playlist updated</td>
+                  <td>YouTube Data API (upload, comments, playlists), overlay_mascot (optional pre-upload)</td>
+                  <td><strong>Interval gate:</strong> skips if <1 day since last upload. <strong>Burst mode:</strong> 2/run for 3 days. <strong>not_before date gate:</strong> holds time-sensitive content. <strong>Jitter:</strong> 0-15 min random sleep. <strong>Auto-overlay:</strong> checks <code>.has_mascot</code> marker, overlays if missing.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Upload interval, burst mode, jitter range, not_before. <span class="layer-tag layer-tenant">PER-TENANT</span> Queue file, OAuth token, channel ID</td>
+                </tr>
+                <tr>
+                  <td><code>auto_playlist.py</code></td>
+                  <td>Video ID, title, channel identifier ("jv"/"cit")</td>
+                  <td>Video added to correct playlist(s)</td>
+                  <td>YouTube Data API (playlists.list, playlistItems.insert)</td>
+                  <td>JV classification: keyword-based (shorts, long-form, memorabilia, moments). CiT: all videos go to "Every Trending Story" (auto-created on first run, ID cached). Handles duplicates silently.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Playlist names, classification rules. <span class="layer-tag layer-tenant">PER-TENANT</span> Playlist IDs, channel playlists</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary><span class="badge badge-pink">Engagement Layer</span> 3 Modules &mdash; Comments, community posts, engagement seeding</summary>
+        <div class="details-content">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Module</th><th>Inputs</th><th>Outputs</th><th>External APIs</th><th>Decision Points</th><th>SaaS Impact</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>comment_replier.py</code></td>
+                  <td>All videos on both channels, reply tracker, spam filter rules</td>
+                  <td>LLM-generated replies posted to viewer comments, tracker updated</td>
+                  <td>YouTube Data API (commentThreads, comments.insert), LLM via <code>llm_client.py</code> (Haiku)</td>
+                  <td><strong>Spam filter:</strong> sub4sub, self-promo, URLs, emoji spam detection. <strong>Age filter:</strong> max 14 days. <strong>Rate limit:</strong> 3s between replies, max 10 per channel per run. <strong>Self-reply protection:</strong> never replies to channel owner's engagement comments. <strong>Thread follow-up:</strong> continues conversations after viewer responds.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Max replies, rate limit, age filter, spam rules. <span class="layer-tag layer-tenant">PER-TENANT</span> Channel voice/personality, channel IDs, tokens</td>
+                </tr>
+                <tr>
+                  <td><code>community_poster.py</code></td>
+                  <td>Channel subscriber count, upload schedule, tracker</td>
+                  <td>Community posts (polls, teasers, questions) via YouTube Studio browser automation</td>
+                  <td>LLM via <code>llm_client.py</code> (Haiku), undetected-chromedriver (browser automation)</td>
+                  <td><strong>500-sub eligibility gate:</strong> auto-activates when subs >= 500. <strong>Post type selection:</strong> upload days favor teasers (60%), non-upload days split polls/questions. <strong>Max 1 post/channel/day.</strong> Persistent Chrome profiles for session persistence.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Post types, eligibility threshold, frequency. <span class="layer-tag layer-tenant">PER-TENANT</span> Chrome profiles, channel branding, post voice</td>
+                </tr>
+                <tr>
+                  <td><code>post_engagement_comments.py</code></td>
+                  <td>All videos on channel, existing comment check</td>
+                  <td>Unique engagement comment posted per video (as channel owner)</td>
+                  <td>YouTube Data API (comments.insert)</td>
+                  <td>Skips videos with existing owner comments. Template selection: 20 JV templates, 20 CiT templates (warm collector vs sharp news energy). 2s rate limiting.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Comment templates, rate limit. <span class="layer-tag layer-tenant">PER-TENANT</span> Comment voice, channel credentials</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary><span class="badge badge-orange">Analytics Layer</span> 6 Modules &mdash; Channel stats, performance, anomaly detection, reporting</summary>
+        <div class="details-content">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Module</th><th>Inputs</th><th>Outputs</th><th>External APIs</th><th>Decision Points</th><th>SaaS Impact</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>channel_monitor.py</code> / <code>cit_channel_monitor.py</code></td>
+                  <td>OAuth tokens</td>
+                  <td><code>analytics/channel_stats.json</code> / <code>cit_channel_stats.json</code> (snapshots with per-video breakdown)</td>
+                  <td>YouTube Data API (channels, videos)</td>
+                  <td>Saves dated snapshots nightly. Provides data for dashboards.</td>
+                  <td><span class="layer-tag layer-tenant">PER-TENANT</span> Token, channel ID, snapshot storage</td>
+                </tr>
+                <tr>
+                  <td><code>performance_tracker.py</code></td>
+                  <td>YouTube API (auto-discovers all CiT videos), story JSONs (for category tagging)</td>
+                  <td><code>.performance_tracker.json</code> (per-video: category, star_power, event_timing, views)</td>
+                  <td>YouTube Data API</td>
+                  <td>Category inference from story JSONs + title heuristics. Feeds back into <code>cit_editor.py</code> for HOT/WARM/COLD/DEAD classification.</td>
+                  <td><span class="layer-tag layer-tenant">PER-TENANT</span> Category taxonomy, tagging rules, channel data</td>
+                </tr>
+                <tr>
+                  <td><code>analytics_collector.py</code></td>
+                  <td>OAuth tokens with <code>yt-analytics.readonly</code> scope</td>
+                  <td>Dated snapshots: AVD, watch time, traffic sources, subs gained/lost, per-video metrics</td>
+                  <td>YouTube Analytics API v2</td>
+                  <td>Date range: (today-6) to (today-3) to avoid incomplete data. Runs suppression detector inline after collection.</td>
+                  <td><span class="layer-tag layer-tenant">PER-TENANT</span> Token, channel ID, date range preferences</td>
+                </tr>
+                <tr>
+                  <td><code>suppression_detector.py</code></td>
+                  <td>Historical analytics snapshots (minimum 3 days)</td>
+                  <td><code>.suppression_alerts.json</code> (HIGH/MEDIUM alerts)</td>
+                  <td>None (local analysis)</td>
+                  <td>4 alert rules: AVD drop >25%, traffic shift >10pts, views cliff >50%, watch time drop >30%. Needs 3+ days of snapshots.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Alert thresholds, min snapshots. <span class="layer-tag layer-tenant">PER-TENANT</span> Channel data</td>
+                </tr>
+                <tr>
+                  <td><code>weekly_channel_report.py</code></td>
+                  <td>Channel stats, performance tracker, queue trackers, algo intel brief</td>
+                  <td><code>reports/weekly_YYYY-MM-DD.md</code> (WoW growth, top/bottom performers, queue health, recommendations)</td>
+                  <td>None (local analysis)</td>
+                  <td>Generates recommendations based on data patterns (stagnant views, queue low, etc.)</td>
+                  <td><span class="layer-tag layer-tenant">PER-TENANT</span> All channel data. <span class="layer-tag layer-config">CONFIGURABLE</span> Report format, recommendation rules</td>
+                </tr>
+                <tr>
+                  <td><code>verify_replies.py</code></td>
+                  <td>All videos on both channels (full scan)</td>
+                  <td><code>.reply_audit_report.json</code> (good/bad replies, self-replies, duplicates)</td>
+                  <td>YouTube Data API, LLM (relevance scoring)</td>
+                  <td><code>--fix</code> mode deletes bad bot replies + duplicates. Never touches manual replies.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> Audit logic is platform-level. <span class="layer-tag layer-tenant">PER-TENANT</span> Channel data</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary><span class="badge badge-blue">Support Layer</span> 4 Modules &mdash; LLM client, video enhancement, prompt rewriting, compliance gate</summary>
+        <div class="details-content">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Module</th><th>Purpose</th><th>Key Details</th><th>SaaS Impact</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>llm_client.py</code><br><span class="badge badge-blue">CORE</span></td>
+                  <td>Unified LLM interface with 3-tier fallback</td>
+                  <td><strong>Tier 1:</strong> Claude CLI (<code>/Users/digisov/.local/bin/claude -p</code>, free via Pro sub). <strong>Tier 2:</strong> Anthropic API (paid, per-token). <strong>Tier 3:</strong> Groq Llama 3.3 70B (free, 30 RPM). Model mapping: haiku/sonnet per tier. Auto-fallback on auth/credit/quota errors. Returns <code>(text, provider)</code> tuple.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> Fallback logic is platform-level. <span class="layer-tag layer-tenant">PER-TENANT</span> API keys, model preferences. <strong>SaaS CRITICAL:</strong> Claude CLI path is hardcoded. Must be replaced with API-only approach for cloud deployment.</td>
+                </tr>
+                <tr>
+                  <td><code>video_enhancer.py</code></td>
+                  <td>Kling AI animation, SFX engine, MusicGen, Pexels stock footage</td>
+                  <td>Kling image-to-video via JWT auth. SFX library in <code>assets/sfx/</code>. Auto-SFX plan based on scene count and duration.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> SFX engine. <span class="layer-tag layer-tenant">PER-TENANT</span> Kling API keys, SFX library</td>
+                </tr>
+                <tr>
+                  <td><code>compliance_checker.py</code></td>
+                  <td>Pre-build gate: checks for passing compliance report before allowing build</td>
+                  <td>3 lookup strategies: individual <code>_compliance.md</code>, <code>_compliance.json</code>, batch <code>compliance_report_*.md</code>. 5 matching strategies for batch reports. Passing verdicts include: pass, approve, approve with edits, fully compliant.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> Gate logic is platform-level safety feature. Never configurable per tenant.</td>
+                </tr>
+                <tr>
+                  <td><code>rewrite_prompts.py</code></td>
+                  <td>Batch-rewrites <code>image_prompt</code> fields for motion-rich cinematic prompts</td>
+                  <td>Uses LLM to enhance image prompts with lighting, camera angle, motion direction.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Rewrite style/prompt. <span class="layer-tag layer-tenant">PER-TENANT</span> Visual style preferences</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- EXTERNAL API MAP -->
+    <div class="subsection">
+      <h3>External API Integration Map</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>API</th><th>Purpose</th><th>Used By</th><th>Auth Method</th><th>Cost Model</th><th>SaaS Tenancy</th></tr></thead>
+          <tbody>
+            <tr><td>YouTube Data API v3</td><td>Upload, comments, playlists, channel stats, trending</td><td>8 modules</td><td>OAuth 2.0 refresh token + client_secret.json</td><td>Free (10K quota/day)</td><td><span class="badge badge-blue">Per-tenant OAuth</span></td></tr>
+            <tr><td>YouTube Analytics API v2</td><td>AVD, watch time, traffic sources, subs</td><td>analytics_collector.py</td><td>OAuth 2.0 (yt-analytics.readonly scope)</td><td>Free</td><td><span class="badge badge-blue">Per-tenant OAuth</span></td></tr>
+            <tr><td>Leonardo AI</td><td>Image generation (Phoenix model)</td><td>shorts_maker.py</td><td>Bearer token (API key)</td><td>Pay-per-image ($0.016/img)</td><td><span class="badge badge-purple">Per-tenant API key</span></td></tr>
+            <tr><td>Pollinations.ai</td><td>Free image fallback (Flux model)</td><td>shorts_maker.py</td><td>Bearer token (publishable key)</td><td>Free</td><td><span class="badge badge-green">Platform-shared or per-tenant</span></td></tr>
+            <tr><td>Runway Gen-3</td><td>Image-to-video animation</td><td>shorts_maker.py</td><td>Bearer token (API key)</td><td>~$0.25/5s clip</td><td><span class="badge badge-purple">Per-tenant API key</span></td></tr>
+            <tr><td>Minimax/Hailuo 2.3</td><td>Image-to-video animation</td><td>shorts_maker.py</td><td>Bearer token (API key)</td><td>~$0.27/6s clip</td><td><span class="badge badge-purple">Per-tenant API key</span></td></tr>
+            <tr><td>Kling v1.5</td><td>Image-to-video animation</td><td>shorts_maker.py, video_enhancer.py</td><td>JWT (access_key + secret_key)</td><td>~$0.42-0.84/clip</td><td><span class="badge badge-purple">Per-tenant API key</span></td></tr>
+            <tr><td>ElevenLabs</td><td>TTS (natural voices)</td><td>shorts_maker.py</td><td>xi-api-key header</td><td>Free tier 10K chars/mo</td><td><span class="badge badge-purple">Per-tenant API key</span></td></tr>
+            <tr><td>Edge TTS (Microsoft)</td><td>TTS fallback (free)</td><td>shorts_maker.py</td><td>None (free endpoint)</td><td>Free</td><td><span class="badge badge-green">Platform-shared</span></td></tr>
+            <tr><td>Hedra Character-3</td><td>3D lip-synced avatar</td><td>hedra_avatar.py</td><td>Bearer token (API key)</td><td>$24/mo (5,400 credits)</td><td><span class="badge badge-purple">Per-tenant API key</span></td></tr>
+            <tr><td>Anthropic / Groq</td><td>LLM for all AI decisions</td><td>llm_client.py (used by 8+ modules)</td><td>API key</td><td>Anthropic: per-token. Groq: free</td><td><span class="badge badge-purple">Platform key or per-tenant</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DATA FLOW MAP -->
+    <div class="subsection">
+      <h3>Critical Data Files (State Map)</h3>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">These JSON/text files constitute the system's state. Each must become a database table or object store record in the SaaS version.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>File</th><th>Written By</th><th>Read By</th><th>Purpose</th><th>SaaS Equivalent</th></tr></thead>
+          <tbody>
+            <tr><td><code>.queue_tracker.json</code></td><td>daily_builder</td><td>daily_builder</td><td>JV build progress</td><td><code>channels.build_tracker</code> table</td></tr>
+            <tr><td><code>.trending_build_tracker.json</code></td><td>trending_builder</td><td>trending_builder</td><td>CiT build progress</td><td><code>channels.build_tracker</code> table</td></tr>
+            <tr><td><code>.trending_upload_queue.json</code></td><td>trending_builder</td><td>trending_uploader</td><td>CiT upload queue (ordered)</td><td><code>upload_queue</code> table</td></tr>
+            <tr><td><code>.trending_last_upload</code></td><td>trending_uploader</td><td>trending_uploader</td><td>Last upload timestamp</td><td><code>channels.last_upload_at</code> column</td></tr>
+            <tr><td><code>.performance_tracker.json</code></td><td>performance_tracker</td><td>cit_editor</td><td>Category performance scores</td><td><code>content_performance</code> table</td></tr>
+            <tr><td><code>.algo_intel_brief.json</code></td><td>algo_intel</td><td>cit_editor, auto_story_writer</td><td>Algorithm rules + risk alerts</td><td><code>algorithm_briefs</code> table</td></tr>
+            <tr><td><code>.comment_replies_tracker.json</code></td><td>comment_replier</td><td>comment_replier, dashboards</td><td>Replied comment IDs (dedup)</td><td><code>comment_replies</code> table</td></tr>
+            <tr><td><code>.community_posts_tracker.json</code></td><td>community_poster</td><td>community_poster, dashboards</td><td>Posted community content</td><td><code>community_posts</code> table</td></tr>
+            <tr><td><code>.engagement_comments_report.json</code></td><td>post_engagement_comments</td><td>dashboards</td><td>Engagement comment log</td><td><code>engagement_comments</code> table</td></tr>
+            <tr><td><code>.suppression_alerts.json</code></td><td>suppression_detector</td><td>dashboards</td><td>Active anomaly alerts</td><td><code>alerts</code> table</td></tr>
+            <tr><td><code>.youtube_token.json</code> / <code>.youtube_token_trending.json</code></td><td>OAuth flow</td><td>All YouTube-connected modules</td><td>YouTube OAuth refresh tokens</td><td><code>tenants.youtube_credentials</code> (encrypted)</td></tr>
+            <tr><td><code>analytics/*.json</code></td><td>channel_monitor, analytics_collector</td><td>dashboards, weekly_report, suppression_detector</td><td>Historical snapshots</td><td><code>analytics_snapshots</code> table</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ██████████████████████████████████████████████████████████████████ -->
+<!-- SECTION 2: VISUAL PLATFORM BLUEPRINT                              -->
+<!-- ██████████████████████████████████████████████████████████████████ -->
+<section id="section-2">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Section 2</div>
+      <h2>Visual Platform Blueprint</h2>
+      <p>Wireframe-level design for the SaaS control plane: real-time pipeline visualization, decision audit trail, and configuration management.</p>
+    </div>
+
+    <!-- WIREFRAME 1: WORKFLOW CANVAS -->
+    <div class="subsection">
+      <h3>1. Process Visualization &mdash; Real-Time Workflow Canvas</h3>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Pipeline Overview Screen</h3>
+          <p>Visual canvas showing all active pipelines as a node graph (similar to n8n or Retool Workflows). Each node is a module. Connections show data flow. Nodes pulse green when running, amber when queued, red on failure.</p>
+          <ul style="margin-top:12px;color:var(--text-muted);font-size:13px;list-style:disc;padding-left:20px;">
+            <li>Left panel: channel selector (switch between tenant channels)</li>
+            <li>Center: live node graph with animated data particles on active connections</li>
+            <li>Right panel: selected node detail (last run time, status, input/output preview)</li>
+            <li>Bottom bar: timeline scrubber showing today's schedule with completed/pending/failed markers</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Build Monitor</h3>
+          <p>Real-time video build progress. Shows current scene being rendered, which engine is active (Runway/Minimax/Ken Burns), TTS progress, and estimated completion time.</p>
+          <ul style="margin-top:12px;color:var(--text-muted);font-size:13px;list-style:disc;padding-left:20px;">
+            <li>Scene-by-scene progress bar with engine badges per scene</li>
+            <li>Live thumbnail preview of last rendered frame</li>
+            <li>Fallback chain indicator (shows which tier each scene used)</li>
+            <li>Cost tracker: per-build cost based on API calls made</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIREFRAME 2: DECISION AUDIT -->
+    <div class="subsection">
+      <h3>2. Decision Visibility &mdash; Audit Trail Dashboard</h3>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Decision Log</h3>
+          <p>Every automated decision rendered as a card with: timestamp, module, decision type, inputs considered, result, confidence score (where applicable).</p>
+          <ul style="margin-top:12px;color:var(--text-muted);font-size:13px;list-style:disc;padding-left:20px;">
+            <li><strong>Editorial decisions:</strong> "Story #83 GREENLIT: Star Power 9 (Bruno Mars) + Event Timing 8 (Grammy 2026) + Category HOT (music_awards, 406 avg views) = Score 28. Threshold: 23."</li>
+            <li><strong>Compliance decisions:</strong> "Story #51: PASS. 0 findings. Title 48/100 chars. Tags: 12 relevant."</li>
+            <li><strong>Engine decisions:</strong> "Scene 3: Runway timeout after 5min. Minimax selected. Task ID mm_abc123. Completed in 3.2min."</li>
+            <li><strong>Upload decisions:</strong> "Skipped upload: last_upload was 8h ago, interval is 24h. Next eligible: 10:00 AM Mar 5."</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Override Console</h3>
+          <p>Allows human operators to intervene at any decision gate: promote/reject editorial candidates, force-approve/reject compliance, reorder upload queue, override engine selection.</p>
+          <ul style="margin-top:12px;color:var(--text-muted);font-size:13px;list-style:disc;padding-left:20px;">
+            <li>Drag-and-drop upload queue reordering</li>
+            <li>One-click compliance override with mandatory reason field</li>
+            <li>"Pause all" emergency stop for entire pipeline</li>
+            <li>Manual story injection (upload custom JSON, bypass editorial scoring)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIREFRAME 3: ACTION TRACE -->
+    <div class="subsection">
+      <h3>3. Action Traceability &mdash; Immutable Event Log</h3>
+      <div class="card">
+        <h3>Event Stream Architecture</h3>
+        <p>Every system action emits a structured event to an append-only log. Events are typed, timestamped, and linked to the tenant + channel + story/video they relate to.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Event Type</th><th>Example Payload Fields</th><th>Source Module</th></tr></thead>
+            <tbody>
+              <tr><td><code>research.completed</code></td><td>region, categories, opportunity_count, quota_used</td><td>youtube_researcher</td></tr>
+              <tr><td><code>scout.topics_found</code></td><td>topic_count, llm_provider, latency_ms, cost_usd</td><td>auto_scout</td></tr>
+              <tr><td><code>editor.greenlit</code></td><td>story_slug, score, star_power, event_timing, category, is_1k_target</td><td>cit_editor</td></tr>
+              <tr><td><code>editor.killed</code></td><td>story_slug, reason (dead_category / below_threshold / quality_filter / star_floor)</td><td>cit_editor</td></tr>
+              <tr><td><code>story.written</code></td><td>story_path, scene_count, word_count, llm_provider, cost_usd</td><td>auto_story_writer</td></tr>
+              <tr><td><code>compliance.reviewed</code></td><td>story_path, verdict (pass/fail/edits), findings_count</td><td>auto_compliance</td></tr>
+              <tr><td><code>build.started</code></td><td>story_path, engines_enabled, avatar_enabled</td><td>trending_builder / daily_builder</td></tr>
+              <tr><td><code>build.scene_rendered</code></td><td>scene_index, engine_used, fallback_count, duration_sec, cost_usd</td><td>shorts_maker</td></tr>
+              <tr><td><code>build.completed</code></td><td>output_path, file_size_mb, duration_sec, total_cost_usd</td><td>shorts_maker</td></tr>
+              <tr><td><code>upload.completed</code></td><td>video_id, url, title, channel_id</td><td>youtube_uploader / trending_uploader</td></tr>
+              <tr><td><code>engagement.comment_posted</code></td><td>video_id, comment_text, is_reply</td><td>comment_replier / post_engagement_comments</td></tr>
+              <tr><td><code>analytics.snapshot</code></td><td>channel_id, subs, views, avd, top_traffic_source</td><td>analytics_collector</td></tr>
+              <tr><td><code>alert.suppression</code></td><td>alert_type, severity, metric_name, threshold, actual_value</td><td>suppression_detector</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIREFRAME 4: COMMS AUDIT -->
+    <div class="subsection">
+      <h3>4. Communication Audit &mdash; Inbound/Outbound Tracking</h3>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Outbound Communications</h3>
+          <ul style="color:var(--text-muted);font-size:14px;list-style:disc;padding-left:20px;">
+            <li><strong>YouTube uploads:</strong> Every upload logged with video ID, title, description, tags, upload time</li>
+            <li><strong>Comments posted:</strong> Every bot comment with video context, generated text, LLM provider used</li>
+            <li><strong>Community posts:</strong> Content, type, channel, browser session status</li>
+            <li><strong>API calls:</strong> Every external API call with endpoint, latency, cost, response status</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Inbound Signals</h3>
+          <ul style="color:var(--text-muted);font-size:14px;list-style:disc;padding-left:20px;">
+            <li><strong>Viewer comments:</strong> All received comments with spam filter results and reply decisions</li>
+            <li><strong>Algorithm signals:</strong> AVD changes, traffic source shifts, views patterns</li>
+            <li><strong>Alert triggers:</strong> Suppression alerts with full diagnostic context</li>
+            <li><strong>YouTube quotas:</strong> Daily API quota consumption tracking (10K limit)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIREFRAME 5: TEMPLATE MANAGER -->
+    <div class="subsection">
+      <h3>5. Template Manager &mdash; Dynamic Variable Inventory</h3>
+      <div class="card">
+        <h3>Story JSON Template Editor</h3>
+        <p>Visual editor for story JSON templates. Shows all dynamic variables with their allowed values, current defaults, and per-tenant overrides.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Variable</th><th>Location in JSON</th><th>Type</th><th>Default</th><th>Configurable?</th></tr></thead>
+            <tbody>
+              <tr><td>Voice</td><td><code>story.voice</code></td><td>Enum</td><td>en-US-ChristopherNeural (JV) / en-US-AriaNeural (CiT)</td><td>Per-channel</td></tr>
+              <tr><td>Channel</td><td><code>story.channel</code></td><td>Enum</td><td>jersey_vault / caught_it_trending</td><td>Per-tenant</td></tr>
+              <tr><td>Scene count</td><td><code>story.scenes.length</code></td><td>Integer</td><td>5</td><td>Per-template</td></tr>
+              <tr><td>Title max length</td><td><code>story.youtube.title</code></td><td>String (max 100)</td><td>70 chars (algo rule)</td><td>Per-channel</td></tr>
+              <tr><td>Category</td><td><code>story.youtube.category</code></td><td>Enum</td><td>"25" (News) / "17" (Sports)</td><td>Per-channel</td></tr>
+              <tr><td>Ken Burns effect</td><td><code>scene.ken_burns</code></td><td>Enum</td><td>Random from 8 options</td><td>Per-scene</td></tr>
+              <tr><td>Video engine</td><td><code>scene.video_engine</code></td><td>Enum</td><td>Rotation: kling/runway/seedance</td><td>Per-tenant (available engines)</td></tr>
+              <tr><td>Pause after</td><td><code>scene.pause_after</code></td><td>Float</td><td>0.8-1.2s</td><td>Per-scene</td></tr>
+              <tr><td>Image prompt</td><td><code>scene.image_prompt</code></td><td>String</td><td>LLM-generated</td><td>Per-scene</td></tr>
+              <tr><td>Highlight color</td><td>Build-time random</td><td>RGB tuple</td><td>Random from HIGHLIGHT_PALETTE (7 colors)</td><td>Per-tenant brand palette</td></tr>
+              <tr><td>Watermark text</td><td>Build-time constant</td><td>String</td><td>"The Jersey Vault" / "Caught It Trending"</td><td>Per-channel</td></tr>
+              <tr><td>Subtitle style</td><td>Build-time config</td><td>Object</td><td>Font 64px, white base, animated highlight</td><td>Per-tenant</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPONENT INVENTORY -->
+    <div class="subsection">
+      <h3>Platform Component Inventory</h3>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">Every visual component needed for the SaaS control plane, mapped to the data source it consumes.</p>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Dashboard Widgets</h3>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:8px;">
+            <li>Channel stats cards (subs, views, videos)</li>
+            <li>Upload queue depth gauge</li>
+            <li>Build queue progress bar</li>
+            <li>Cost tracker (per-day, per-build)</li>
+            <li>Alert banner (suppression alerts)</li>
+            <li>Per-video leaderboard table</li>
+            <li>Traffic source bar chart</li>
+            <li>WoW growth sparklines</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Management Panels</h3>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:8px;">
+            <li>Story queue manager (drag-reorder)</li>
+            <li>Upload queue manager (drag-reorder, date gates)</li>
+            <li>Schedule configurator (cron-like UI)</li>
+            <li>API key vault (encrypted storage)</li>
+            <li>Channel connection wizard (OAuth flow)</li>
+            <li>Voice/brand settings editor</li>
+            <li>Compliance rule editor</li>
+            <li>Star power dictionary editor</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Content Tools</h3>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:8px;">
+            <li>Story JSON editor (form-based, not raw JSON)</li>
+            <li>Video preview player (in-browser)</li>
+            <li>Thumbnail generator</li>
+            <li>Compilation config builder</li>
+            <li>Mascot/avatar uploader + position editor</li>
+            <li>Performance theory visualizer</li>
+            <li>A/B test configurator (title variants)</li>
+            <li>Batch action console</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ██████████████████████████████████████████████████████████████████ -->
+<!-- SECTION 3: SAAS TRANSFORMATION STRATEGY                           -->
+<!-- ██████████████████████████████████████████████████████████████████ -->
+<section id="section-3">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Section 3</div>
+      <h2>SaaS Transformation Strategy</h2>
+      <p>The path from single-tenant CLI scripts to a multi-tenant autonomous content platform: component abstraction, configuration layers, tenancy model, and marketplace.</p>
+    </div>
+
+    <!-- COMPONENT ABSTRACTION MAP -->
+    <div class="subsection">
+      <h3>Component Abstraction Map</h3>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">Every workflow step becomes a reusable component. Each component has a defined interface (inputs/outputs), configuration surface, and isolation boundary.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Component</th><th>Current Module</th><th>Abstracted Interface</th><th>Configuration Surface</th><th>Isolation Level</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>TrendScanner</strong></td>
+              <td>youtube_researcher.py + auto_scout.py</td>
+              <td><code>scan(config) -> Opportunity[]</code></td>
+              <td>Platform (YouTube API), categories, keywords, region, scout prompt, category blacklist</td>
+              <td>Tenant (separate API quota, separate keyword lists)</td>
+            </tr>
+            <tr>
+              <td><strong>EditorialEngine</strong></td>
+              <td>cit_editor.py</td>
+              <td><code>score(opportunities, history) -> Brief</code></td>
+              <td>Star power dictionary, category taxonomy, score threshold, quality filter rules, performance feedback data</td>
+              <td>Tenant (each channel has different "household names" and category performance)</td>
+            </tr>
+            <tr>
+              <td><strong>StoryWriter</strong></td>
+              <td>auto_story_writer.py</td>
+              <td><code>write(brief, rules) -> StoryJSON[]</code></td>
+              <td>Story formula (system prompt), scene count, voice, engine rotation, algo rules, CTR optimizer rules</td>
+              <td>Tenant (complete rewrite of system prompt per niche)</td>
+            </tr>
+            <tr>
+              <td><strong>ComplianceGate</strong></td>
+              <td>auto_compliance.py + compliance_checker.py</td>
+              <td><code>review(story) -> Verdict</code></td>
+              <td>Review criteria (platform-level YouTube rules + tenant-level custom rules)</td>
+              <td>Mixed (platform rules are fixed, tenant can add custom rules)</td>
+            </tr>
+            <tr>
+              <td><strong>ImageGenerator</strong></td>
+              <td>shorts_maker.py (generate_scene_images)</td>
+              <td><code>generate(prompt, size) -> ImagePath</code></td>
+              <td>Engine preference order, fallback chain, default prompt suffix, image dimensions</td>
+              <td>Tenant (API keys, credit allocation)</td>
+            </tr>
+            <tr>
+              <td><strong>VideoAnimator</strong></td>
+              <td>shorts_maker.py (animate_with_*)</td>
+              <td><code>animate(image, duration, prompt) -> VideoClip</code></td>
+              <td>Engine priority (Runway > Minimax > Kling > Ken Burns), timeout, resolution</td>
+              <td>Tenant (API keys, engine availability based on plan tier)</td>
+            </tr>
+            <tr>
+              <td><strong>VoiceSynthesizer</strong></td>
+              <td>shorts_maker.py (generate_tts, generate_tts_elevenlabs)</td>
+              <td><code>speak(text, voice) -> (AudioPath, WordTimestamps)</code></td>
+              <td>TTS engine preference (ElevenLabs > edge-tts), voice ID, stability/similarity settings</td>
+              <td>Tenant (ElevenLabs API key, voice cloning)</td>
+            </tr>
+            <tr>
+              <td><strong>VideoComposer</strong></td>
+              <td>shorts_maker.py (build_short)</td>
+              <td><code>compose(scenes, config) -> MP4</code></td>
+              <td>Resolution, FPS, watermark, subtitle style, highlight palette, avatar toggle, SFX toggle</td>
+              <td>Tenant (brand assets, visual identity)</td>
+            </tr>
+            <tr>
+              <td><strong>AvatarEngine</strong></td>
+              <td>hedra_avatar.py + sadtalker_avatar.py + avatar_animator.py</td>
+              <td><code>createAvatar(portrait, audio, duration) -> VideoClip</code></td>
+              <td>Portrait image, position, size, animation params, engine preference</td>
+              <td>Tenant (character design, Hedra API key)</td>
+            </tr>
+            <tr>
+              <td><strong>Distributor</strong></td>
+              <td>youtube_uploader.py + trending_uploader.py + auto_playlist.py</td>
+              <td><code>upload(video, metadata, config) -> VideoID</code></td>
+              <td>Upload interval, burst mode, jitter range, not_before dates, playlist rules</td>
+              <td>Tenant (OAuth tokens, channel ID, playlists)</td>
+            </tr>
+            <tr>
+              <td><strong>EngagementBot</strong></td>
+              <td>comment_replier.py + post_engagement_comments.py + community_poster.py</td>
+              <td><code>engage(channel, config) -> ActionLog</code></td>
+              <td>Reply frequency, max replies, spam rules, comment voice/personality, post types, sub threshold</td>
+              <td>Tenant (channel personality, OAuth tokens, Chrome profiles)</td>
+            </tr>
+            <tr>
+              <td><strong>AnalyticsEngine</strong></td>
+              <td>analytics_collector.py + performance_tracker.py + suppression_detector.py + weekly_channel_report.py</td>
+              <td><code>collect(channel) -> Snapshot</code></td>
+              <td>Collection frequency, alert thresholds, report format</td>
+              <td>Tenant (channel data, OAuth tokens)</td>
+            </tr>
+            <tr>
+              <td><strong>LLMRouter</strong></td>
+              <td>llm_client.py</td>
+              <td><code>call(tier, messages, system) -> (text, provider)</code></td>
+              <td>Fallback chain, model mapping, timeout, max_tokens</td>
+              <td>Mixed (platform manages fallback chain, tenant can bring own API keys)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CONFIGURATION LAYER -->
+    <div class="subsection">
+      <h3>Configuration Layer: FIXED vs CONFIGURABLE vs PER-TENANT</h3>
+      <div class="grid-3">
+        <div class="card" style="border-top:3px solid #a78bfa;">
+          <h3><span class="layer-tag layer-fixed">FIXED</span> Platform Core</h3>
+          <p style="font-size:13px;margin-top:8px;">Immutable across all tenants. Defines the system's safety boundaries and core rendering engine.</p>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:10px;">
+            <li>Video composition pipeline (moviepy/ffmpeg)</li>
+            <li>YouTube API upload mechanism</li>
+            <li>Compliance gate logic (PASS/FAIL parsing)</li>
+            <li>YouTube policy compliance rules</li>
+            <li>LLM fallback chain architecture</li>
+            <li>Event logging schema</li>
+            <li>Reply audit/verification</li>
+            <li>SFX engine and overlay mechanics</li>
+            <li>Ken Burns effect implementations</li>
+            <li>Subtitle rendering engine</li>
+            <li><code>containsSyntheticMedia: true</code> flag (always set)</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top:3px solid #4ade80;">
+          <h3><span class="layer-tag layer-config">CONFIGURABLE</span> Workflow Rules</h3>
+          <p style="font-size:13px;margin-top:8px;">Adjustable per channel or per workflow instance. Defines "how" the pipeline behaves.</p>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:10px;">
+            <li>Upload cadence (interval, jitter range)</li>
+            <li>Build schedule (times, max per day)</li>
+            <li>Score thresholds and max greenlit</li>
+            <li>Quality filter rules</li>
+            <li>Suppression alert thresholds</li>
+            <li>Comment reply limits and frequency</li>
+            <li>Community post types and frequency</li>
+            <li>Algorithm baseline rules</li>
+            <li>Engine fallback priority order</li>
+            <li>Scene count, pause timing</li>
+            <li>CTR optimization rules</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top:3px solid #60a5fa;">
+          <h3><span class="layer-tag layer-tenant">PER-TENANT</span> Identity & Credentials</h3>
+          <p style="font-size:13px;margin-top:8px;">Unique per customer. Defines "who" and "what" the pipeline produces for.</p>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:10px;">
+            <li>YouTube OAuth tokens + client secrets</li>
+            <li>Channel IDs and names</li>
+            <li>API keys (Leonardo, Runway, Minimax, etc.)</li>
+            <li>Brand identity (colors, watermark, voice)</li>
+            <li>Avatar/mascot assets</li>
+            <li>Story formula / system prompt</li>
+            <li>Star power dictionary (niche-specific)</li>
+            <li>Category taxonomy and performance data</li>
+            <li>Playlist configuration</li>
+            <li>Comment voice/personality</li>
+            <li>Engagement comment templates</li>
+            <li>Content niche / editorial direction</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- MULTI-TENANT ARCHITECTURE -->
+    <div class="subsection">
+      <h3>Multi-Tenant Architecture</h3>
+
+      <div class="ascii-box">
+                          MULTI-TENANT ARCHITECTURE
+  ┌──────────────────────────────────────────────────────────────┐
+  │                    CONTROL PLANE (Web UI)                     │
+  │  Dashboard  |  Queue Manager  |  Config Editor  |  Audit Log │
+  └──────────────────────┬───────────────────────────────────────┘
+                         │
+  ┌──────────────────────▼───────────────────────────────────────┐
+  │                    API GATEWAY (FastAPI)                      │
+  │  Auth (JWT)  |  Tenant Context  |  Rate Limiting  |  RBAC   │
+  └──────────────────────┬───────────────────────────────────────┘
+                         │
+  ┌──────────────────────▼───────────────────────────────────────┐
+  │                  ORCHESTRATION LAYER                          │
+  │  Job Scheduler (replaces launchd)  |  Queue System (Redis)  │
+  │  Event Bus  |  Workflow Engine  |  Config Resolver           │
+  └────┬──────────┬──────────┬──────────┬──────────┬────────────┘
+       │          │          │          │          │
+  ┌────▼───┐ ┌───▼────┐ ┌───▼────┐ ┌───▼────┐ ┌───▼────┐
+  │ INTEL  │ │EDITOR  │ │BUILDER │ │ UPLOAD │ │ENGAGE  │
+  │ Worker │ │ Worker │ │ Worker │ │ Worker │ │ Worker │
+  └────────┘ └────────┘ └────────┘ └────────┘ └────────┘
+       Each worker: stateless, receives tenant context + config
+       from orchestrator, writes results to tenant-scoped storage
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │                    DATA LAYER                                 │
+  │  PostgreSQL (tenant data, configs, events, analytics)        │
+  │  Redis (job queues, rate limiting, caches)                   │
+  │  S3/GCS (video files, images, avatars, story JSONs)          │
+  │  Vault (encrypted API keys, OAuth tokens)                    │
+  └──────────────────────────────────────────────────────────────┘</div>
+
+      <h4>Data Isolation Model</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Data Category</th><th>Current Storage</th><th>SaaS Storage</th><th>Isolation Strategy</th></tr></thead>
+          <tbody>
+            <tr><td>Story JSONs</td><td>Filesystem (<code>stories/queue/</code>, <code>stories/trending/</code>)</td><td>S3 bucket per tenant OR PostgreSQL JSONB</td><td>Tenant-scoped prefix (<code>/{tenant_id}/stories/</code>)</td></tr>
+            <tr><td>Built videos (MP4)</td><td>Filesystem (<code>output/</code>)</td><td>S3 with lifecycle policies</td><td>Tenant-scoped prefix, signed URLs for access</td></tr>
+            <tr><td>OAuth tokens</td><td>JSON files (<code>.youtube_token*.json</code>)</td><td>HashiCorp Vault or AWS Secrets Manager</td><td>Encrypted at rest, tenant-scoped access policies</td></tr>
+            <tr><td>API keys</td><td><code>~/.zshrc</code> env vars</td><td>Vault with tenant-scoped secrets</td><td>Injected into worker environment at runtime</td></tr>
+            <tr><td>Analytics snapshots</td><td>Filesystem (<code>analytics/*.json</code>)</td><td>PostgreSQL with <code>tenant_id</code> column</td><td>Row-level security (RLS)</td></tr>
+            <tr><td>Tracker state</td><td>JSON files (<code>.queue_tracker.json</code>, etc.)</td><td>PostgreSQL tables</td><td>Foreign key to tenants table, RLS</td></tr>
+            <tr><td>Event log</td><td>Log files (<code>build.log</code>, etc.)</td><td>PostgreSQL events table (append-only)</td><td>Tenant ID on every event row</td></tr>
+            <tr><td>Brand assets</td><td>Filesystem (<code>assets/avatar/</code>)</td><td>S3 per tenant</td><td>Tenant-scoped prefix</td></tr>
+            <tr><td>Chrome profiles</td><td>Filesystem (<code>.yt_studio_profile_*/</code>)</td><td>Containerized browser per tenant (Browserless)</td><td>Separate container per tenant session</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Permission Model (RBAC)</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Capabilities</th><th>Restrictions</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Platform Admin</strong></td><td>All tenants, system config, component registry, user management</td><td>None</td></tr>
+            <tr><td><strong>Tenant Owner</strong></td><td>All channels within tenant, API key management, billing, user invites</td><td>Cannot access other tenants</td></tr>
+            <tr><td><strong>Channel Manager</strong></td><td>Full control of assigned channel(s): queue, uploads, settings, analytics</td><td>Cannot modify tenant-level settings or other channels</td></tr>
+            <tr><td><strong>Viewer</strong></td><td>Read-only access to dashboards and reports for assigned channels</td><td>No write operations</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="oq-block">
+        <div class="oq-title">Open Question: Compute Isolation</div>
+        <p>Video rendering is CPU/GPU-intensive (moviepy + ffmpeg). Options: (A) Shared worker pool with tenant-scoped job queues and fair scheduling, (B) Dedicated container per tenant for builds, (C) Serverless GPU functions (e.g., Modal, RunPod). Option A is cheapest but risks noisy neighbor. Option B is most isolated but expensive. Option C is pay-per-use but adds cold start latency. Recommendation: Start with A, offer B as Enterprise tier upgrade.</p>
+      </div>
+
+      <div class="oq-block">
+        <div class="oq-title">Open Question: Claude CLI Dependency</div>
+        <p>The current <code>llm_client.py</code> has a hardcoded path to the Claude CLI binary (<code>/Users/digisov/.local/bin/claude</code>) as Tier 1 LLM. This works on the owner's machine (free via Claude Pro subscription) but cannot be replicated for tenants in a cloud environment. SaaS must remove the CLI tier and use API-only approach: Anthropic API (primary) with Groq (free fallback). This changes the cost model from $0/day to approximately $0.20-0.50/day per active tenant.</p>
+      </div>
+
+      <div class="oq-block">
+        <div class="oq-title">Open Question: YouTube OAuth at Scale</div>
+        <p>YouTube requires per-channel OAuth consent. Each tenant's channel needs a one-time OAuth flow (browser-based). Options: (A) Platform acts as the OAuth app (single client_id, all tenants authorize through it), (B) Tenants bring their own Google Cloud project. Option A is simpler but puts all tenants under one quota bucket and one Google Cloud project's ToS. Option B is more isolated but increases onboarding friction. Current system uses dual-client approach (separate Google Cloud projects per channel) which maps to Option B.</p>
+      </div>
+    </div>
+
+    <!-- MARKETPLACE MODEL -->
+    <div class="subsection">
+      <h3>Marketplace Model</h3>
+      <div class="grid-3">
+        <div class="card">
+          <h3><span class="badge badge-blue">Template Library</span></h3>
+          <p style="font-size:13px;margin-top:8px;">Pre-built story formulas and editorial configurations for common niches.</p>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:10px;">
+            <li>Trending News (current CiT formula)</li>
+            <li>Sports Highlights</li>
+            <li>Football Memorabilia (current JV formula)</li>
+            <li>Tech Reviews</li>
+            <li>Cooking / Food</li>
+            <li>True Crime Shorts</li>
+            <li>Finance / Markets</li>
+            <li>Gaming Highlights</li>
+          </ul>
+          <p style="font-size:12px;color:var(--text-dim);margin-top:10px;">Each template includes: story formula prompt, star power dictionary, category taxonomy, voice recommendation, brand color palette, example stories.</p>
+        </div>
+        <div class="card">
+          <h3><span class="badge badge-purple">Engine Marketplace</span></h3>
+          <p style="font-size:13px;margin-top:8px;">Pluggable AI engine integrations that tenants can enable/disable based on their plan.</p>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:10px;">
+            <li>Image: Leonardo, Pollinations, DALL-E, Midjourney (future)</li>
+            <li>Video: Runway, Minimax, Kling, Seedance (future)</li>
+            <li>TTS: ElevenLabs, edge-tts, Azure TTS (future)</li>
+            <li>Avatar: Hedra, SadTalker, 2D, D-ID (future)</li>
+            <li>LLM: Anthropic, OpenAI, Groq, local (future)</li>
+          </ul>
+          <p style="font-size:12px;color:var(--text-dim);margin-top:10px;">BYOK (Bring Your Own Key) model for all paid engines. Platform provides free fallbacks (Pollinations, edge-tts, Ken Burns, 2D avatar).</p>
+        </div>
+        <div class="card">
+          <h3><span class="badge badge-green">Extension Model</span></h3>
+          <p style="font-size:13px;margin-top:8px;">Platform capabilities that can be added as modules.</p>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:10px;">
+            <li>Reddit Seeder (cross-posting)</li>
+            <li>TikTok Distributor</li>
+            <li>Instagram Reels Distributor</li>
+            <li>Google Ads Auto-Promote</li>
+            <li>Thumbnail A/B Tester</li>
+            <li>Multi-Language Translator</li>
+            <li>Custom Webhook Integrations</li>
+            <li>Zapier / Make.com Connectors</li>
+          </ul>
+          <p style="font-size:12px;color:var(--text-dim);margin-top:10px;">Extensions follow the component interface pattern. Third-party developers could build extensions using a published SDK.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ██████████████████████████████████████████████████████████████████ -->
+<!-- SECTION 4: ROADMAP                                                -->
+<!-- ██████████████████████████████████████████████████████████████████ -->
+<section id="section-4">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Section 4</div>
+      <h2>Migration Roadmap</h2>
+      <p>Phase-by-phase plan from current single-tenant CLI to production multi-tenant SaaS, with MVP definition and risk register.</p>
+    </div>
+
+    <!-- MVP DEFINITION -->
+    <div class="subsection">
+      <h3>MVP Definition: "Managed Autonomous Channel"</h3>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">The MVP is NOT a self-service SaaS. It is a <strong>managed service</strong> where the platform operator onboards clients manually but the pipeline runs autonomously per client. This matches the current pricing model ($997-$1,997/mo) and proves the multi-tenant architecture before investing in self-service UI.</p>
+
+      <div class="grid-2">
+        <div class="card" style="border-top:3px solid var(--green);">
+          <h3>MVP Includes</h3>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:10px;">
+            <li>Multi-tenant config: separate <code>tenant.json</code> per client with all channel/brand/API settings</li>
+            <li>All 6 pipeline layers running per-tenant (intel, editorial, production, distribution, engagement, analytics)</li>
+            <li>Tenant-scoped file storage (stories, output, analytics in <code>/tenant_id/</code> directories)</li>
+            <li>Per-tenant scheduling (separate launchd/cron entries per client channel)</li>
+            <li>Client dashboard (reuse existing <code>dashboard.html</code> pattern, tenant-filtered)</li>
+            <li>Weekly report auto-generated per client</li>
+            <li>Manual onboarding (operator runs OAuth flow, configures tenant.json, sets up schedule)</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top:3px solid var(--red);">
+          <h3>MVP Excludes (Deferred)</h3>
+          <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:10px;">
+            <li>Self-service sign-up and onboarding</li>
+            <li>Web-based control plane UI (manage via CLI/config files in MVP)</li>
+            <li>Cloud deployment (MVP runs on the existing Mac with separate tenant directories)</li>
+            <li>Automated billing (manual invoicing in MVP, Stripe integration later)</li>
+            <li>Real-time pipeline visualization (use logs + existing dashboards)</li>
+            <li>Template marketplace</li>
+            <li>Extension/plugin system</li>
+            <li>Multi-platform distribution (TikTok, Instagram)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE TIMELINE -->
+    <div class="subsection">
+      <h3>Phase Plan</h3>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <h4><span class="badge badge-green">Phase 1</span> Multi-Tenant Config Layer &mdash; 2-3 weeks</h4>
+          <p><strong>Goal:</strong> Run the existing pipeline for 2+ clients simultaneously on the same machine without code conflicts.</p>
+          <ul class="checklist" style="margin-top:10px;">
+            <li>Create <code>tenant_config.py</code> module that loads a <code>tenant.json</code> and injects all paths, API keys, channel settings into module globals</li>
+            <li>Replace all hardcoded <code>BASE_DIR = Path(__file__).parent</code> with <code>get_tenant_base_dir(tenant_id)</code></li>
+            <li>Replace all hardcoded channel IDs (e.g., <code>UCjispA9UIoqkXI9etQicbog</code>) with <code>config.channel_id</code></li>
+            <li>Replace <code>CHANNEL_NAME = "The Jersey Vault"</code> and similar with <code>config.channel_name</code></li>
+            <li>Replace hardcoded voice assignments with <code>config.default_voice</code></li>
+            <li>Move all <code>.env</code> / <code>~/.zshrc</code> API keys into <code>tenant.json.api_keys</code> (encrypted at rest)</li>
+            <li>Create <code>tenant_scheduler.py</code> that generates per-tenant launchd plists from a schedule template</li>
+            <li>Create <code>client_2/</code> directory structure mirroring <code>shorts-factory/</code> but with its own stories, output, analytics</li>
+            <li>Run both JV/CiT (existing) + client_2 in parallel, verify zero cross-contamination</li>
+          </ul>
+          <div style="margin-top:12px;padding:12px;background:rgba(34,197,94,0.06);border-radius:8px;font-size:13px;color:var(--text-muted);">
+            <strong>Deliverable:</strong> A working second client running autonomously alongside JV/CiT on the same machine. Proves multi-tenancy at the config level. Can onboard the first paying Starter client ($997/mo).
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <h4><span class="badge badge-yellow">Phase 2</span> Database + Dashboard + Event Bus &mdash; 4-6 weeks</h4>
+          <p><strong>Goal:</strong> Replace JSON file state with a proper database, build a multi-tenant web dashboard, and add structured event logging.</p>
+          <ul class="checklist" style="margin-top:10px;">
+            <li>Design PostgreSQL schema: tenants, channels, stories, builds, uploads, analytics_snapshots, events, alerts</li>
+            <li>Migrate all JSON tracker files to PostgreSQL (use existing SQLite MCP server as stepping stone)</li>
+            <li>Build FastAPI backend with JWT auth, tenant context middleware, RBAC</li>
+            <li>Build React dashboard (or Svelte/Vue) with real-time WebSocket updates</li>
+            <li>Implement event bus: every module emits structured events to PostgreSQL events table</li>
+            <li>Build decision audit trail UI (filterable event log with decision explanations)</li>
+            <li>Build queue management UI (drag-reorder, pause/resume, manual inject)</li>
+            <li>Build API key vault (encrypt all tenant secrets at rest)</li>
+            <li>Deploy to a Linux server (DigitalOcean / Railway / Fly.io) for first cloud-hosted client</li>
+          </ul>
+          <div style="margin-top:12px;padding:12px;background:rgba(234,179,8,0.06);border-radius:8px;font-size:13px;color:var(--text-muted);">
+            <strong>Deliverable:</strong> A web-accessible dashboard where clients can see their pipeline status, analytics, and event log. Operator still handles onboarding, but clients have visibility. Can onboard Growth clients ($1,997/mo) with the dashboard as a differentiator.
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <h4><span class="badge badge-purple">Phase 3</span> Self-Service + Cloud Scale &mdash; 8-12 weeks</h4>
+          <p><strong>Goal:</strong> Self-service onboarding, containerized workers, auto-scaling, and marketplace.</p>
+          <ul class="checklist" style="margin-top:10px;">
+            <li>Build onboarding wizard: niche selection, YouTube OAuth flow, brand configuration, schedule setup</li>
+            <li>Containerize each pipeline layer as a Docker service (worker pattern)</li>
+            <li>Deploy with Kubernetes or Docker Compose on cloud GPU instances</li>
+            <li>Implement job queue (Redis + Celery or BullMQ) replacing launchd</li>
+            <li>Build template library: pre-built niche configurations users can start from</li>
+            <li>Build engine marketplace: BYOK panel for each AI engine</li>
+            <li>Implement Stripe billing: metered (per video) or flat (per plan tier)</li>
+            <li>Add multi-platform distribution (TikTok, Instagram Reels)</li>
+            <li>Build extension SDK for third-party integrations</li>
+            <li>SOC 2 / security audit for enterprise readiness</li>
+          </ul>
+          <div style="margin-top:12px;padding:12px;background:rgba(139,92,246,0.06);border-radius:8px;font-size:13px;color:var(--text-muted);">
+            <strong>Deliverable:</strong> A fully self-service SaaS platform. Users sign up, connect their YouTube channel, choose a niche template, configure their brand, and the pipeline starts producing videos autonomously. Enterprise tier with dedicated infrastructure.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RISK REGISTER -->
+    <div class="subsection">
+      <h3>Risk Register</h3>
+      <div style="display:grid;gap:16px;">
+        <div class="card risk-high">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3>YouTube ToS Compliance at Scale</h3>
+            <span class="badge badge-red">HIGH RISK</span>
+          </div>
+          <p style="margin-top:8px;">YouTube's Terms of Service prohibit automated uploads that "mislead users about the purpose of the content." Running 50+ channels with the same pipeline architecture could trigger platform-level enforcement if YouTube detects pattern similarity across channels.</p>
+          <p style="margin-top:8px;color:var(--text-muted);font-size:13px;"><strong>Mitigation:</strong> (1) AI disclosure is already baked in (<code>containsSyntheticMedia: true</code>). (2) Each tenant has unique brand, voice, visual style, and content niche. (3) Upload jitter already randomizes timing. (4) Rate-limit total platform uploads to avoid triggering YouTube's bot detection. (5) Legal review of YouTube API ToS for commercial automation use.</p>
+        </div>
+
+        <div class="card risk-high">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3>API Cost Explosion</h3>
+            <span class="badge badge-red">HIGH RISK</span>
+          </div>
+          <p style="margin-top:8px;">Current pipeline runs at $0/day via Claude CLI free tier. SaaS replaces this with paid API calls. At 10 tenants, each producing 1 video/day with 5 scenes: ~50 LLM calls/day (scout + write + compliance + CTR + comment replies) + 50 image generations + 50 video animations = potentially $50-100/day in API costs.</p>
+          <p style="margin-top:8px;color:var(--text-muted);font-size:13px;"><strong>Mitigation:</strong> (1) BYOK model: tenants bring their own API keys for paid engines. (2) Platform provides free fallbacks only (Pollinations, edge-tts, Ken Burns, Groq). (3) Tiered pricing reflects actual API costs. (4) Implement per-tenant usage caps and metering. (5) Negotiate volume discounts with API providers.</p>
+        </div>
+
+        <div class="card risk-medium">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3>YouTube API Quota Sharing</h3>
+            <span class="badge badge-orange">MEDIUM RISK</span>
+          </div>
+          <p style="margin-top:8px;">YouTube Data API has a 10,000 unit daily quota per Google Cloud project. If the platform uses a single project for all tenants, quota exhaustion would affect all clients. Research alone uses ~860 units/run, uploads ~1,600 units each.</p>
+          <p style="margin-top:8px;color:var(--text-muted);font-size:13px;"><strong>Mitigation:</strong> Require each tenant to provide their own Google Cloud project (current dual-client pattern). This isolates quota per tenant. Onboarding wizard includes step-by-step Google Cloud setup.</p>
+        </div>
+
+        <div class="card risk-medium">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3>Community Poster Browser Automation Fragility</h3>
+            <span class="badge badge-orange">MEDIUM RISK</span>
+          </div>
+          <p style="margin-top:8px;"><code>community_poster.py</code> relies on undetected-chromedriver to automate YouTube Studio (because the API does not support community posts). This is fragile: Chrome updates break detection bypass, Google session cookies expire, YouTube Studio UI changes break selectors.</p>
+          <p style="margin-top:8px;color:var(--text-muted);font-size:13px;"><strong>Mitigation:</strong> (1) Use cloud browser service (Browserless.io, $50/mo) for reliable headless Chrome. (2) Make community posting optional/degraded gracefully. (3) Monitor for YouTube API community post support (deprecated in 2020 but may return). (4) Per-tenant browser containers for session isolation.</p>
+        </div>
+
+        <div class="card risk-medium">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3>Video Build Performance at Scale</h3>
+            <span class="badge badge-orange">MEDIUM RISK</span>
+          </div>
+          <p style="margin-top:8px;">Each video build takes 5-20 minutes (TTS + image gen + animation + composition). On a single machine, parallel builds can cause CPU contention, TTS collisions (already fixed with story_id prefix), and memory pressure (moviepy/ffmpeg is RAM-hungry).</p>
+          <p style="margin-top:8px;color:var(--text-muted);font-size:13px;"><strong>Mitigation:</strong> (1) Job queue with concurrency limits (max N builds simultaneously). (2) Cloud GPU instances for builds (Modal, RunPod). (3) Pre-generate assets asynchronously (images overnight, builds early morning). (4) Build caching: don't regenerate TTS/images if story JSON unchanged.</p>
+        </div>
+
+        <div class="card risk-low">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3>LLM Quality Variance Across Tiers</h3>
+            <span class="badge badge-yellow">LOW RISK</span>
+          </div>
+          <p style="margin-top:8px;">Groq/Llama 3.3 (free fallback) produces noticeably different story quality than Claude Sonnet (Tier 1). Tenants on free fallback may get inferior content quality, leading to complaints or churn.</p>
+          <p style="margin-top:8px;color:var(--text-muted);font-size:13px;"><strong>Mitigation:</strong> (1) Clearly communicate LLM tier in pricing (Starter = Groq, Growth = Claude Haiku, Enterprise = Claude Sonnet). (2) Let tenants BYOK for Anthropic/OpenAI. (3) Quality scoring on LLM outputs with auto-retry on low-quality results.</p>
+        </div>
+
+        <div class="card risk-low">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3>Content Liability</h3>
+            <span class="badge badge-yellow">LOW RISK</span>
+          </div>
+          <p style="margin-top:8px;">AI-generated content could contain factual errors, defamatory statements, or copyright issues. The compliance gate catches most issues, but LLM-generated compliance reviews are not legally bulletproof.</p>
+          <p style="margin-top:8px;color:var(--text-muted);font-size:13px;"><strong>Mitigation:</strong> (1) Compliance gate is mandatory and non-configurable. (2) Terms of service place content liability on tenant (their channel, their content). (3) Platform provides tools, not guarantees. (4) Optional human review tier for Enterprise clients. (5) Content insurance for platform-managed channels.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK WINS -->
+    <div class="subsection">
+      <h3>Phase 1 Quick Wins (Actionable Now)</h3>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">Changes that can be made to the existing codebase today to prepare for multi-tenancy without breaking current operations.</p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>1. Extract Config Constants</h3>
+          <p style="font-size:13px;margin-top:8px;">Create a <code>tenant_config.py</code> that centralizes all hardcoded values: channel IDs, channel names, voice assignments, brand colors, API keys, directory paths. All modules import from this single source instead of defining their own constants.</p>
+          <pre>
+# tenant_config.py
+import json
+from pathlib import Path
+
+def load_config(tenant_id="default"):
+    config_path = Path(f"tenants/{tenant_id}/config.json")
+    with open(config_path) as f:
+        return json.load(f)
+
+# Usage in any module:
+# from tenant_config import load_config
+# cfg = load_config(os.environ.get("TENANT_ID", "default"))
+# CHANNEL_ID = cfg["channel_id"]
+# CHANNEL_NAME = cfg["channel_name"]</pre>
+        </div>
+        <div class="card">
+          <h3>2. Parameterize BASE_DIR</h3>
+          <p style="font-size:13px;margin-top:8px;">Every module uses <code>BASE_DIR = Path(__file__).parent</code>. For multi-tenancy, this should resolve to the tenant's directory. A simple change: <code>BASE_DIR = Path(os.environ.get("TENANT_DIR", str(Path(__file__).parent)))</code>. No breaking change for existing usage, but enables per-tenant directory isolation via environment variable.</p>
+        </div>
+        <div class="card">
+          <h3>3. Remove Claude CLI Dependency</h3>
+          <p style="font-size:13px;margin-top:8px;"><code>llm_client.py</code> line 28: <code>CLAUDE_CLI = "/Users/digisov/.local/bin/claude"</code>. This hardcoded path must become configurable. For SaaS, remove Tier 1 (CLI) entirely and make Anthropic API the primary with Groq fallback. The cost increase (~$0.20-0.50/day per tenant) is absorbed into the $997/mo pricing.</p>
+        </div>
+        <div class="card">
+          <h3>4. Structured Event Logging</h3>
+          <p style="font-size:13px;margin-top:8px;">Every module has its own <code>log()</code> function writing to its own log file. Replace with a shared <code>emit_event(type, data)</code> function that writes structured JSON events to a single event store (initially a JSON lines file, later PostgreSQL). This gives immediate audit trail without changing module logic.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- COST MODEL -->
+    <div class="subsection">
+      <h3>SaaS Unit Economics (Per Tenant Per Month)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cost Category</th><th>Current (Owner)</th><th>SaaS Starter</th><th>SaaS Growth</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>LLM (scout + write + comply + CTR + replies)</td><td>$0 (CLI free)</td><td>~$6-15</td><td>~$12-30</td><td>Anthropic Haiku + Sonnet. Growth = 2 channels = 2x</td></tr>
+            <tr><td>Image generation</td><td>~$5 (Leonardo)</td><td>BYOK or ~$5</td><td>BYOK or ~$10</td><td>Pollinations free fallback available</td></tr>
+            <tr><td>Video animation</td><td>~$10-20 (Minimax)</td><td>BYOK or ~$15</td><td>BYOK or ~$30</td><td>Ken Burns free fallback always available</td></tr>
+            <tr><td>TTS</td><td>$0 (ElevenLabs free + edge-tts)</td><td>$0</td><td>$0-5</td><td>ElevenLabs free tier covers ~12 videos/mo</td></tr>
+            <tr><td>Avatar (Hedra)</td><td>$24/mo</td><td>BYOK or $0 (2D)</td><td>BYOK or $24</td><td>2D free fallback always available</td></tr>
+            <tr><td>Compute (server)</td><td>$0 (local Mac)</td><td>~$30-50</td><td>~$50-80</td><td>DigitalOcean / Railway shared workers</td></tr>
+            <tr><td>Storage (S3)</td><td>$0 (local)</td><td>~$2-5</td><td>~$5-10</td><td>Videos + images + analytics</td></tr>
+            <tr><td><strong>Total COGS</strong></td><td><strong>~$35-50</strong></td><td><strong>~$55-90</strong></td><td><strong>~$115-190</strong></td><td></td></tr>
+            <tr style="background:rgba(34,197,94,0.05);"><td><strong>Revenue</strong></td><td><strong>N/A</strong></td><td><strong>$997</strong></td><td><strong>$1,997</strong></td><td></td></tr>
+            <tr style="background:rgba(34,197,94,0.08);"><td><strong>Gross Margin</strong></td><td><strong>N/A</strong></td><td><strong>$907-942 (91-94%)</strong></td><td><strong>$1,807-1,882 (90-94%)</strong></td><td>Exceptional SaaS margins due to BYOK + free fallbacks</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ████ FOOTER ████ -->
+<footer>
+  <div class="container">
+    <p>Shorts Factory SaaS Transformation Strategy &mdash; v1.0 &mdash; March 4, 2026</p>
+    <p style="margin-top:6px;">Generated from codebase analysis of 29 Python modules, 19 launchd agents, and 11 API integrations.</p>
+    <p style="margin-top:6px;color:var(--text-dim);">Source: <code>/Users/digisov/Documents/shorts-factory/</code> &rarr; Target: <code>/Users/digisov/Documents/shorts-factory-saas/</code></p>
+  </div>
+</footer>
+
+<!-- Smooth scroll for nav links -->
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+
+</body>
+</html>
