@@ -1012,7 +1012,6 @@ body {
     const goingForward = index > current;
 
     prev.classList.remove('active');
-    prev.classList.add(goingForward ? 'exit-left' : '');
     prev.style.transform = goingForward ? 'translateX(-60px)' : 'translateX(60px)';
     prev.style.opacity = '0';
 
@@ -1020,16 +1019,21 @@ body {
     next.style.opacity = '0';
     next.classList.remove('exit-left');
 
-    // Force reflow
+    // Force reflow so browser registers the off-screen position
     void next.offsetWidth;
 
+    // Add active + clear inline styles so CSS class transitions take over
     next.classList.add('active');
+    next.style.transform = '';
+    next.style.opacity = '';
 
     current = index;
     updateUI();
 
     setTimeout(function() {
-      prev.classList.remove('exit-left');
+      // Clean up prev inline styles so CSS class handles state
+      prev.style.transform = '';
+      prev.style.opacity = '';
       isAnimating = false;
     }, 500);
   }
