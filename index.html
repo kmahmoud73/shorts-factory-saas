@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shorts Factory — Autonomous YouTube Production</title>
+<meta name="description" content="Your YouTube channel, fully autonomous. AI-powered content research, video production, uploads, engagement, and analytics. Zero human intervention.">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg-card: #111113;
+  --bg-card-hover: #18181b;
+  --border: #1e1e24;
+  --text: #e4e4e7;
+  --text-muted: #71717a;
+  --text-dim: #52525b;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --accent-gradient-h: linear-gradient(135deg, #60a5fa, #a78bfa);
+  --green: #22c55e;
+  --red: #ef4444;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a { color: var(--accent-blue); text-decoration: none; }
+a:hover { color: #60a5fa; }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---- NAV ---- */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  background: rgba(10,10,10,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+nav .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+}
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { color: var(--text-muted); font-size: 14px; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-cta {
+  padding: 8px 20px;
+  background: var(--accent-gradient);
+  border-radius: 8px;
+  color: #fff !important;
+  font-weight: 600;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+.nav-cta:hover { opacity: 0.9; }
+.hamburger { display: none; cursor: pointer; background: none; border: none; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--text); margin: 5px 0; transition: 0.3s; }
+
+/* ---- HERO ---- */
+.hero {
+  padding: 160px 0 100px;
+  text-align: center;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.04) 40%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+.hero-badge .dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.hero h1 {
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  max-width: 800px;
+  margin: 0 auto 24px;
+}
+.hero h1 .gradient {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero p {
+  font-size: 20px;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 48px;
+  line-height: 1.5;
+}
+.hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: var(--accent-gradient);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(59,130,246,0.3);
+  color: #fff;
+}
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  text-decoration: none;
+}
+.btn-secondary:hover {
+  border-color: var(--text-dim);
+  background: var(--bg-card);
+  color: var(--text);
+}
+
+/* ---- STATS ---- */
+.stats {
+  padding: 80px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  text-align: center;
+}
+.stat-item .stat-number {
+  font-size: 48px;
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+.stat-item .stat-label {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* ---- HOW IT WORKS ---- */
+.how-it-works { padding: 100px 0; }
+.section-label {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-blue);
+  margin-bottom: 16px;
+}
+.section-title {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+}
+.section-subtitle {
+  font-size: 18px;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin-bottom: 64px;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.step {
+  background: var(--bg-card);
+  padding: 40px 28px;
+  position: relative;
+  transition: background 0.3s;
+}
+.step:hover { background: var(--bg-card-hover); }
+.step-number {
+  font-size: 64px;
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.3;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+.step-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+.step h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.step p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+/* ---- FEATURES ---- */
+.features { padding: 100px 0; }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.feature {
+  background: var(--bg-card);
+  padding: 40px 32px;
+  transition: background 0.3s;
+}
+.feature:hover { background: var(--bg-card-hover); }
+.feature-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: rgba(59,130,246,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+.feature h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.feature p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+/* ---- LIVE RESULTS ---- */
+.results { padding: 100px 0; }
+.results-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+.result-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px;
+  transition: border-color 0.3s;
+}
+.result-card:hover { border-color: var(--text-dim); }
+.result-card .channel-name {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+.result-card .channel-name.jv { color: #d4af37; }
+.result-card .channel-name.cit { color: var(--red); }
+.result-card .channel-tagline {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.result-stat .rs-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.result-stat .rs-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+.result-card .top-video {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.result-card .top-video .tv-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.result-card .top-video .tv-title {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.result-card .top-video .tv-views {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-blue);
+}
+
+/* ---- PRICING ---- */
+.pricing { padding: 100px 0; }
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+.price-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 32px;
+  position: relative;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.price-card:hover { border-color: var(--text-dim); transform: translateY(-4px); }
+.price-card.featured {
+  border-color: var(--accent-blue);
+  background: linear-gradient(180deg, rgba(59,130,246,0.05) 0%, var(--bg-card) 40%);
+}
+.price-card.featured::before {
+  content: 'MOST POPULAR';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 16px;
+  background: var(--accent-gradient);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fff;
+}
+.price-card .tier { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.price-card .price { font-size: 48px; font-weight: 800; line-height: 1.1; margin-bottom: 4px; }
+.price-card .price-sub { font-size: 14px; color: var(--text-dim); margin-bottom: 32px; }
+.price-card ul { list-style: none; margin-bottom: 32px; }
+.price-card li {
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.price-card li::before {
+  content: '';
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(34,197,94,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.price-card .price-cta {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+  transition: 0.2s;
+  text-decoration: none;
+}
+.price-card .price-cta.outline {
+  border: 1px solid var(--border);
+  color: var(--text);
+  background: transparent;
+}
+.price-card .price-cta.outline:hover { border-color: var(--text-dim); background: var(--bg-card-hover); }
+.price-card .price-cta.filled {
+  background: var(--accent-gradient);
+  color: #fff;
+  border: none;
+}
+.price-card .price-cta.filled:hover { box-shadow: 0 8px 30px rgba(59,130,246,0.3); }
+
+/* ---- SOCIAL PROOF ---- */
+.social-proof {
+  padding: 100px 0;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+.social-proof .big-text {
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 700;
+  max-width: 700px;
+  margin: 0 auto 16px;
+  letter-spacing: -0.5px;
+}
+.social-proof .sub-text {
+  font-size: 18px;
+  color: var(--text-muted);
+  margin-bottom: 40px;
+}
+
+/* ---- FOOTER ---- */
+footer {
+  padding: 48px 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+footer .footer-logo {
+  font-size: 18px;
+  font-weight: 700;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+footer p {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 900px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .steps-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: 1fr; }
+  .results-cards { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 440px; margin-left: auto; margin-right: auto; }
+}
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .steps-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .hamburger { display: block; }
+  .hero h1 { font-size: 36px; letter-spacing: -1px; }
+  .hero p { font-size: 16px; }
+  .result-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .result-stat .rs-value { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container">
+    <div class="logo">Shorts Factory</div>
+    <ul class="nav-links">
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+    </ul>
+    <a href="mailto:hello@shortsfactory.ai" class="nav-cta">Get Started</a>
+    <button class="hamburger" onclick="this.classList.toggle('active')">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      2 live channels running autonomously
+    </div>
+    <h1>Your YouTube Channel,<br><span class="gradient">Fully Autonomous</span></h1>
+    <p>AI-powered content research, video production, uploads, engagement, and analytics. 19 autonomous agents running your channel while you sleep.</p>
+    <div class="hero-buttons">
+      <a href="mailto:hello@shortsfactory.ai" class="btn-primary">Get Started</a>
+      <a href="#results" class="btn-secondary">See Live Results</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number">2</div>
+        <div class="stat-label">Live Channels</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">10,700+</div>
+        <div class="stat-label">Total Views</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">19</div>
+        <div class="stat-label">Autonomous Agents</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">$0</div>
+        <div class="stat-label">Daily LLM Cost</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <div class="section-title">Four stages. Zero humans.</div>
+    <div class="section-subtitle">Our pipeline runs every day, automatically. From trend discovery to YouTube upload, every step is handled by specialized AI agents.</div>
+
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-number">01</div>
+        <div class="step-icon">&#128270;</div>
+        <h3>Research</h3>
+        <p>AI agents scan trending topics, analyze YouTube search data, and score opportunities by virality, star power, and event timing.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">02</div>
+        <div class="step-icon">&#9997;</div>
+        <h3>Write</h3>
+        <p>An editorial AI scores and greenights the best stories. A writer agent crafts scripts optimized for retention, with cinematic visual direction.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">03</div>
+        <div class="step-icon">&#127916;</div>
+        <h3>Produce</h3>
+        <p>AI-generated images, animated video clips, professional voiceover, animated subtitles, and sound design are assembled into broadcast-quality shorts.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">04</div>
+        <div class="step-icon">&#128640;</div>
+        <h3>Upload &amp; Engage</h3>
+        <p>Videos are uploaded to YouTube with optimized metadata. Comment bots engage viewers 3x daily. Weekly reports track performance and adapt strategy.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <div class="section-title">Everything a YouTube channel needs.</div>
+    <div class="section-subtitle">Built from 43 production sessions and two live channels. Not theory. Battle-tested infrastructure.</div>
+
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">&#128202;</div>
+        <h3>AI Content Research</h3>
+        <p>Scans YouTube trending data, scores opportunities by virality and star power, and filters dead categories automatically using a performance feedback loop.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#127909;</div>
+        <h3>Automated Video Production</h3>
+        <p>AI-generated images, multi-engine video animation with automatic fallback, professional TTS voiceover, animated subtitles, and sound design.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128172;</div>
+        <h3>Smart Engagement</h3>
+        <p>Comment reply bot runs 3x daily with on-brand LLM-generated responses. Thread follow-ups continue conversations. Community posts drive return visits.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128200;</div>
+        <h3>Performance Analytics</h3>
+        <p>Nightly stats collection, average view duration tracking, traffic source analysis, and anomaly detection. Suppression alerts when metrics drop.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#129504;</div>
+        <h3>Algorithm Intelligence</h3>
+        <p>Weekly scraping of YouTube algorithm research sources. AI analysis against baseline rules. Optimizations fed back into the content pipeline automatically.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#127760;</div>
+        <h3>Multi-Channel Support</h3>
+        <p>Run multiple channels with distinct identities, voices, and content strategies. Separate OAuth, separate analytics, zero content overlap.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#129302;</div>
+        <h3>AI Mascot Avatar</h3>
+        <p>3D lip-synced AI presenter avatar using Hedra Character-3. Consistent brand identity across all videos. Automatic overlay on every upload.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128220;</div>
+        <h3>Compliance Gate</h3>
+        <p>Every story passes an AI compliance review for YouTube Community Guidelines, advertiser-friendliness, and platform safety before production.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">&#128209;</div>
+        <h3>Weekly Reports</h3>
+        <p>Automated weekly digest covering both channels: subscriber growth, view trends, top and bottom performers, queue health, and actionable recommendations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE RESULTS -->
+<section class="results" id="results">
+  <div class="container">
+    <div class="section-label">Live Results</div>
+    <div class="section-title">Real channels. Real numbers.</div>
+    <div class="section-subtitle">These are not projections. These are two live YouTube channels running autonomously since February 2026.</div>
+
+    <div class="results-cards">
+      <div class="result-card">
+        <div class="channel-name jv">The Jersey Vault</div>
+        <div class="channel-tagline">Football jersey history and memorabilia</div>
+        <div class="result-stats">
+          <div class="result-stat">
+            <div class="rs-value">1,280</div>
+            <div class="rs-label">Subscribers</div>
+          </div>
+          <div class="result-stat">
+            <div class="rs-value">7,009</div>
+            <div class="rs-label">Total Views</div>
+          </div>
+          <div class="result-stat">
+            <div class="rs-value">24</div>
+            <div class="rs-label">Videos</div>
+          </div>
+        </div>
+        <div class="top-video">
+          <div class="tv-label">Top Performer</div>
+          <div class="tv-title">St. Regis Venice -- The Most Beautiful Hotel View in the World</div>
+          <div class="tv-views">1,619 views</div>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <div class="channel-name cit">Caught It Trending</div>
+        <div class="channel-tagline">Breaking news and trending moments</div>
+        <div class="result-stats">
+          <div class="result-stat">
+            <div class="rs-value">30</div>
+            <div class="rs-label">Subscribers</div>
+          </div>
+          <div class="result-stat">
+            <div class="rs-value">3,696</div>
+            <div class="rs-label">Total Views</div>
+          </div>
+          <div class="result-stat">
+            <div class="rs-value">25</div>
+            <div class="rs-label">Videos</div>
+          </div>
+        </div>
+        <div class="top-video">
+          <div class="tv-label">Top Performer</div>
+          <div class="tv-title">They Were LOSING With 2 Minutes Left -- Then THIS Happened</div>
+          <div class="tv-views">907 views</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <div class="section-title">Scale your YouTube presence.</div>
+    <div class="section-subtitle">Choose the plan that fits your ambition. All plans include the full autonomous pipeline.</div>
+
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="tier">Starter</div>
+        <div class="price">$997</div>
+        <div class="price-sub">per month</div>
+        <ul>
+          <li>1 YouTube channel</li>
+          <li>Daily content production</li>
+          <li>Automated uploads</li>
+          <li>Smart comment engagement</li>
+          <li>Weekly performance reports</li>
+          <li>Email support</li>
+        </ul>
+        <a href="mailto:hello@shortsfactory.ai?subject=Starter Plan Inquiry" class="price-cta outline">Get Started</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="tier">Growth</div>
+        <div class="price">$1,997</div>
+        <div class="price-sub">per month</div>
+        <ul>
+          <li>2 YouTube channels</li>
+          <li>Daily content production</li>
+          <li>AI mascot avatar</li>
+          <li>Algorithm intelligence</li>
+          <li>Performance feedback loop</li>
+          <li>Suppression detection</li>
+          <li>Community posts</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="mailto:hello@shortsfactory.ai?subject=Growth Plan Inquiry" class="price-cta filled">Get Started</a>
+      </div>
+
+      <div class="price-card">
+        <div class="tier">Enterprise</div>
+        <div class="price">Custom</div>
+        <div class="price-sub">tailored to your needs</div>
+        <ul>
+          <li>Unlimited channels</li>
+          <li>Custom content strategy</li>
+          <li>Custom AI voice and avatar</li>
+          <li>Long-form compilations</li>
+          <li>Cross-platform distribution</li>
+          <li>Dedicated account manager</li>
+          <li>White-label option</li>
+          <li>SLA guarantee</li>
+        </ul>
+        <a href="mailto:hello@shortsfactory.ai?subject=Enterprise Inquiry" class="price-cta outline">Contact Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section class="social-proof">
+  <div class="container">
+    <div class="big-text">Join the first wave of autonomous YouTube channels.</div>
+    <div class="sub-text">We built it for ourselves first. Now we are making it available to you.</div>
+    <a href="mailto:hello@shortsfactory.ai?subject=I want an autonomous YouTube channel" class="btn-primary">Start Your Channel</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-logo">Shorts Factory</div>
+    <p>&copy; 2026 Shorts Factory. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shorts Factory - Client Presentation</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg-card: #111113;
+  --bg-card-hover: #18181b;
+  --border: #1e1e24;
+  --text: #e4e4e7;
+  --text-muted: #71717a;
+  --text-dim: #52525b;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --gold: #d4af37;
+  --red: #ef4444;
+  --green: #22c55e;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ---- SLIDE CONTAINER ---- */
+.deck {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.slide {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 80px;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+  overflow-y: auto;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.slide.exit-left {
+  opacity: 0;
+  transform: translateX(-60px);
+}
+
+/* ---- PROGRESS BAR ---- */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  background: var(--accent-gradient);
+  transition: width 0.4s ease;
+  z-index: 200;
+}
+
+/* ---- NAV DOTS ---- */
+.nav-dots {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 200;
+}
+.nav-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  cursor: pointer;
+  transition: 0.3s;
+  border: none;
+}
+.nav-dot.active {
+  background: var(--accent-blue);
+  transform: scale(1.3);
+}
+.nav-dot:hover { background: var(--text-muted); }
+
+/* ---- SLIDE COUNTER ---- */
+.slide-counter {
+  position: fixed;
+  bottom: 24px;
+  right: 28px;
+  font-size: 13px;
+  color: var(--text-dim);
+  z-index: 200;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+/* ---- KEYBOARD HINT ---- */
+.key-hint {
+  position: fixed;
+  bottom: 24px;
+  left: 28px;
+  font-size: 12px;
+  color: var(--text-dim);
+  z-index: 200;
+  display: flex;
+  gap: 16px;
+}
+.key-hint kbd {
+  padding: 2px 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ---- COMMON SLIDE ELEMENTS ---- */
+.slide-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-blue);
+  margin-bottom: 16px;
+}
+
+.slide-title {
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  text-align: center;
+  max-width: 900px;
+}
+
+.slide-title .gradient {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.slide-subtitle {
+  font-size: 20px;
+  color: var(--text-muted);
+  max-width: 700px;
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 48px;
+}
+
+/* ---- SLIDE 1: COVER ---- */
+.cover-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(139,92,246,0.05) 40%, transparent 70%);
+  pointer-events: none;
+}
+.cover-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 40px;
+}
+.cover-badge .dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.cover-tagline {
+  font-size: 18px;
+  color: var(--text-muted);
+  max-width: 500px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ---- SLIDE 2: PROBLEM ---- */
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 900px;
+  width: 100%;
+}
+.problem-item {
+  background: var(--bg-card);
+  padding: 32px 24px;
+  text-align: center;
+}
+.problem-item .p-icon { font-size: 32px; margin-bottom: 12px; }
+.problem-item .p-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.problem-item .p-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+.problem-item .p-time {
+  margin-top: 10px;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--red);
+}
+
+/* ---- SLIDE 3: SOLUTION ---- */
+.flow-visual {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  max-width: 960px;
+  width: 100%;
+  margin-top: 16px;
+}
+.flow-step {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  position: relative;
+}
+.flow-step .fs-icon { font-size: 28px; margin-bottom: 8px; }
+.flow-step .fs-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.flow-step .fs-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+.flow-step .fs-time { font-size: 11px; color: var(--accent-blue); margin-top: 8px; font-weight: 600; }
+.flow-arrow {
+  font-size: 20px;
+  color: var(--text-dim);
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+.flow-loop {
+  margin-top: 20px;
+  padding: 12px 24px;
+  border: 1px dashed var(--gold);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--gold);
+  text-align: center;
+  max-width: 960px;
+  width: 100%;
+}
+
+/* ---- SLIDE 4: RESULTS ---- */
+.results-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 900px;
+  width: 100%;
+}
+.channel-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+}
+.channel-card .cc-name {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 2px;
+}
+.channel-card .cc-name.jv { color: var(--gold); }
+.channel-card .cc-name.cit { color: var(--red); }
+.channel-card .cc-niche { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+.cc-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.cc-stat .cc-val { font-size: 28px; font-weight: 800; line-height: 1.2; }
+.cc-stat .cc-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.cc-highlight {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.cc-highlight .cc-hl-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.cc-highlight .cc-hl-val { font-size: 14px; font-weight: 600; }
+.cc-highlight .cc-hl-val span { color: var(--accent-blue); }
+
+.results-summary {
+  display: flex;
+  gap: 48px;
+  margin-top: 32px;
+  padding: 20px 40px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.rs-item { text-align: center; }
+.rs-item .rs-big { font-size: 32px; font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.rs-item .rs-small { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+/* ---- SLIDE 5: TECHNOLOGY ---- */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 900px;
+  width: 100%;
+}
+.tech-item {
+  background: var(--bg-card);
+  padding: 28px 24px;
+}
+.tech-item .t-num {
+  font-size: 32px;
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+}
+.tech-item .t-label { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.tech-item .t-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+/* ---- SLIDE 6: WHAT YOU GET ---- */
+.deliverables-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 960px;
+  width: 100%;
+}
+.deliverable {
+  background: var(--bg-card);
+  padding: 28px 24px;
+}
+.deliverable .d-icon { font-size: 24px; margin-bottom: 10px; }
+.deliverable .d-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.deliverable .d-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+/* ---- SLIDE 7: MASCOT ---- */
+.mascot-section {
+  display: flex;
+  gap: 48px;
+  align-items: center;
+  max-width: 900px;
+  width: 100%;
+}
+.mascot-visual {
+  width: 280px; height: 400px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.mascot-visual::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--accent-gradient);
+}
+.mascot-icon { font-size: 80px; margin-bottom: 16px; }
+.mascot-label { font-size: 14px; color: var(--text-muted); text-align: center; padding: 0 20px; }
+.mascot-features { flex: 1; }
+.mascot-features h3 { font-size: 14px; font-weight: 600; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+.mascot-feature {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.mascot-feature .mf-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.mascot-feature .mf-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.mascot-feature .mf-desc { font-size: 13px; color: var(--text-muted); }
+
+/* ---- SLIDE 8: PRICING ---- */
+.pricing-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 940px;
+  width: 100%;
+}
+.price-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  position: relative;
+}
+.price-card.featured {
+  border-color: var(--accent-blue);
+  background: linear-gradient(180deg, rgba(59,130,246,0.06) 0%, var(--bg-card) 40%);
+}
+.price-card.featured::before {
+  content: 'RECOMMENDED';
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 14px;
+  background: var(--accent-gradient);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fff;
+}
+.price-card .pc-tier { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.price-card .pc-price { font-size: 40px; font-weight: 800; line-height: 1.1; margin-bottom: 2px; }
+.price-card .pc-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; }
+.price-card ul { list-style: none; }
+.price-card li {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.price-card li::before {
+  content: '';
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px;
+}
+
+/* ---- SLIDE 9: NEXT STEPS ---- */
+.next-steps-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 48px 56px;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+.next-steps-card .ns-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+.ns-steps {
+  text-align: left;
+  margin-bottom: 32px;
+}
+.ns-step {
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ns-step:last-child { border-bottom: none; }
+.ns-step .ns-num {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: rgba(59,130,246,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  flex-shrink: 0;
+}
+.ns-step .ns-text { font-size: 15px; line-height: 1.5; }
+.ns-step .ns-text strong { color: var(--text); }
+.ns-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 36px;
+  background: var(--accent-gradient);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  text-decoration: none;
+}
+.ns-cta:hover {
+  box-shadow: 0 8px 30px rgba(59,130,246,0.3);
+  transform: translateY(-2px);
+  color: #fff;
+}
+.ns-email {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 900px) {
+  .slide { padding: 40px 32px; }
+  .problem-grid { grid-template-columns: repeat(2, 1fr); }
+  .flow-visual { flex-wrap: wrap; gap: 8px; }
+  .flow-arrow { display: none; }
+  .flow-step { min-width: 140px; }
+  .results-row { grid-template-columns: 1fr; }
+  .tech-grid { grid-template-columns: repeat(2, 1fr); }
+  .deliverables-grid { grid-template-columns: repeat(2, 1fr); }
+  .pricing-row { grid-template-columns: 1fr; max-width: 400px; }
+  .mascot-section { flex-direction: column; }
+  .mascot-visual { width: 200px; height: 280px; }
+  .results-summary { flex-wrap: wrap; gap: 24px; }
+  .nav-dots { display: none; }
+}
+@media (max-width: 640px) {
+  .slide { padding: 32px 20px; }
+  .slide-title { font-size: 28px; letter-spacing: -1px; }
+  .slide-subtitle { font-size: 16px; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .cc-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cc-stat .cc-val { font-size: 22px; }
+  .tech-grid { grid-template-columns: 1fr; }
+  .deliverables-grid { grid-template-columns: 1fr; }
+  .key-hint { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- NAV DOTS -->
+<div class="nav-dots" id="navDots"></div>
+
+<!-- SLIDE COUNTER -->
+<div class="slide-counter" id="slideCounter">1 / 9</div>
+
+<!-- KEYBOARD HINT -->
+<div class="key-hint">
+  <span><kbd>&larr;</kbd> Previous</span>
+  <span><kbd>&rarr;</kbd> Next</span>
+</div>
+
+<!-- SLIDES -->
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: COVER -->
+  <div class="slide active" data-slide="0">
+    <div class="cover-glow"></div>
+    <div class="cover-badge">
+      <span class="dot"></span>
+      Live in production
+    </div>
+    <div class="slide-title" style="font-size:clamp(36px,5.5vw,64px);">
+      <span class="gradient">Shorts Factory</span>
+    </div>
+    <div class="slide-title" style="font-size:clamp(24px,3vw,36px);font-weight:600;letter-spacing:-0.5px;margin-bottom:32px;">
+      Autonomous YouTube Production
+    </div>
+    <div class="cover-tagline">
+      We run your YouTube channel end-to-end. Content research, video production, uploads, engagement, analytics, and optimization. Zero human intervention.
+    </div>
+  </div>
+
+  <!-- SLIDE 2: THE PROBLEM -->
+  <div class="slide" data-slide="1">
+    <div class="slide-label">The Problem</div>
+    <div class="slide-title">Running a YouTube channel is a <span class="gradient">full-time job</span>.</div>
+    <div class="problem-grid">
+      <div class="problem-item">
+        <div class="p-icon">&#128270;</div>
+        <div class="p-title">Research</div>
+        <div class="p-desc">Finding trending topics, analyzing competitors, scoring opportunities</div>
+        <div class="p-time">2h / day</div>
+      </div>
+      <div class="problem-item">
+        <div class="p-icon">&#9997;</div>
+        <div class="p-title">Scripting</div>
+        <div class="p-desc">Writing hooks, narration, calls to action, compliance review</div>
+        <div class="p-time">3h / video</div>
+      </div>
+      <div class="problem-item">
+        <div class="p-icon">&#127909;</div>
+        <div class="p-title">Production</div>
+        <div class="p-desc">Image sourcing, video editing, voiceover, subtitles, sound design</div>
+        <div class="p-time">4h / video</div>
+      </div>
+      <div class="problem-item">
+        <div class="p-icon">&#128640;</div>
+        <div class="p-title">Uploading</div>
+        <div class="p-desc">Metadata, thumbnails, scheduling, playlists, category tagging</div>
+        <div class="p-time">30m / video</div>
+      </div>
+      <div class="problem-item">
+        <div class="p-icon">&#128172;</div>
+        <div class="p-title">Engagement</div>
+        <div class="p-desc">Replying to comments, community posts, building audience</div>
+        <div class="p-time">1h / day</div>
+      </div>
+      <div class="problem-item">
+        <div class="p-icon">&#128202;</div>
+        <div class="p-title">Analytics</div>
+        <div class="p-desc">Tracking performance, adjusting strategy, monitoring algorithm</div>
+        <div class="p-time">1h / day</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: THE SOLUTION -->
+  <div class="slide" data-slide="2">
+    <div class="slide-label">Our Solution</div>
+    <div class="slide-title">A fully autonomous <span class="gradient">AI pipeline</span>.</div>
+    <div class="slide-subtitle" style="margin-bottom:32px;">Every step from trend discovery to viewer engagement, handled by specialized AI agents running 24/7.</div>
+    <div class="flow-visual">
+      <div class="flow-step">
+        <div class="fs-icon">&#128270;</div>
+        <div class="fs-title">Intelligence</div>
+        <div class="fs-desc">Trend scanning, YouTube API research, virality scoring</div>
+        <div class="fs-time">5:00 AM</div>
+      </div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step">
+        <div class="fs-icon">&#128220;</div>
+        <div class="fs-title">Editorial</div>
+        <div class="fs-desc">AI scoring, star power analysis, compliance review</div>
+        <div class="fs-time">5:30 AM</div>
+      </div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step">
+        <div class="fs-icon">&#127916;</div>
+        <div class="fs-title">Production</div>
+        <div class="fs-desc">Images, animation, voiceover, subtitles, mascot overlay</div>
+        <div class="fs-time">6:00 AM</div>
+      </div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step">
+        <div class="fs-icon">&#128640;</div>
+        <div class="fs-title">Distribution</div>
+        <div class="fs-desc">Upload, metadata, engagement, analytics, weekly reports</div>
+        <div class="fs-time">10:00 AM</div>
+      </div>
+    </div>
+    <div class="flow-loop">
+      &#128260; Performance feedback loop: nightly analytics feed back into editorial scoring, automatically killing dead topics and boosting winners
+    </div>
+  </div>
+
+  <!-- SLIDE 4: LIVE RESULTS -->
+  <div class="slide" data-slide="3">
+    <div class="slide-label">Live Results</div>
+    <div class="slide-title">Two channels. <span class="gradient">Real numbers.</span></div>
+    <div class="results-row">
+      <div class="channel-card">
+        <div class="cc-name jv">The Jersey Vault</div>
+        <div class="cc-niche">Football jersey history and memorabilia</div>
+        <div class="cc-stats">
+          <div class="cc-stat">
+            <div class="cc-val">1,280</div>
+            <div class="cc-lbl">Subscribers</div>
+          </div>
+          <div class="cc-stat">
+            <div class="cc-val">7,009</div>
+            <div class="cc-lbl">Views</div>
+          </div>
+          <div class="cc-stat">
+            <div class="cc-val">24</div>
+            <div class="cc-lbl">Videos</div>
+          </div>
+        </div>
+        <div class="cc-highlight">
+          <div class="cc-hl-label">Top Video</div>
+          <div class="cc-hl-val">St. Regis Venice -- <span>1,619 views</span></div>
+        </div>
+      </div>
+      <div class="channel-card">
+        <div class="cc-name cit">Caught It Trending</div>
+        <div class="cc-niche">Breaking news and viral moments</div>
+        <div class="cc-stats">
+          <div class="cc-stat">
+            <div class="cc-val">30</div>
+            <div class="cc-lbl">Subscribers</div>
+          </div>
+          <div class="cc-stat">
+            <div class="cc-val">3,696</div>
+            <div class="cc-lbl">Views</div>
+          </div>
+          <div class="cc-stat">
+            <div class="cc-val">25</div>
+            <div class="cc-lbl">Videos</div>
+          </div>
+        </div>
+        <div class="cc-highlight">
+          <div class="cc-hl-label">Top Video</div>
+          <div class="cc-hl-val">USA Hockey Gold -- <span>907 views</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="results-summary">
+      <div class="rs-item">
+        <div class="rs-big">10,700+</div>
+        <div class="rs-small">Combined Views</div>
+      </div>
+      <div class="rs-item">
+        <div class="rs-big">49</div>
+        <div class="rs-small">Videos Live</div>
+      </div>
+      <div class="rs-item">
+        <div class="rs-big">27</div>
+        <div class="rs-small">In Upload Queue</div>
+      </div>
+      <div class="rs-item">
+        <div class="rs-big">12 days</div>
+        <div class="rs-small">Since Launch</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: THE TECHNOLOGY -->
+  <div class="slide" data-slide="4">
+    <div class="slide-label">The Technology</div>
+    <div class="slide-title"><span class="gradient">19 agents.</span> 29 modules. $0/day.</div>
+    <div class="slide-subtitle" style="margin-bottom:32px;">Engineered for autonomous operation at zero marginal cost per day.</div>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <div class="t-num">19</div>
+        <div class="t-label">Autonomous Agents</div>
+        <div class="t-desc">Scheduled tasks running 24/7: research, editorial, production, upload, engagement, analytics, algorithm intelligence</div>
+      </div>
+      <div class="tech-item">
+        <div class="t-num">29</div>
+        <div class="t-label">Production Modules</div>
+        <div class="t-desc">Image generation, video animation, TTS voiceover, subtitles, sound design, avatar overlay, compliance checking</div>
+      </div>
+      <div class="tech-item">
+        <div class="t-num">$0</div>
+        <div class="t-label">Daily LLM Cost</div>
+        <div class="t-desc">3-tier LLM fallback chain with free primary tier. Paid API only as emergency backup. Runs indefinitely at zero cost.</div>
+      </div>
+      <div class="tech-item">
+        <div class="t-num">3x</div>
+        <div class="t-label">Daily Engagement</div>
+        <div class="t-desc">Comment reply bot runs 3 times daily with on-brand AI responses and thread follow-ups. Community posts when eligible.</div>
+      </div>
+      <div class="tech-item">
+        <div class="t-num">4</div>
+        <div class="t-label">Video Engines</div>
+        <div class="t-desc">Multi-engine animation with automatic fallback: if one engine fails or runs out of credits, the next takes over seamlessly.</div>
+      </div>
+      <div class="tech-item">
+        <div class="t-num">7d</div>
+        <div class="t-label">Algorithm Intel</div>
+        <div class="t-desc">Weekly scraping of algorithm research sources. AI cross-references with channel data. Rules fed back into content pipeline.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: WHAT YOU GET -->
+  <div class="slide" data-slide="5">
+    <div class="slide-label">What You Get</div>
+    <div class="slide-title">Everything. <span class="gradient">Handled.</span></div>
+    <div class="deliverables-grid">
+      <div class="deliverable">
+        <div class="d-icon">&#128250;</div>
+        <div class="d-title">Daily Content Production</div>
+        <div class="d-desc">New videos produced every day. AI-generated images, animated clips, professional voiceover, and broadcast-quality output.</div>
+      </div>
+      <div class="deliverable">
+        <div class="d-icon">&#128640;</div>
+        <div class="d-title">Automated Uploads</div>
+        <div class="d-desc">Videos uploaded on schedule with optimized titles, descriptions, tags, and categories. Anti-detection timing jitter built in.</div>
+      </div>
+      <div class="deliverable">
+        <div class="d-icon">&#128172;</div>
+        <div class="d-title">Smart Engagement</div>
+        <div class="d-desc">Comment replies 3x daily, thread follow-ups, community posts, engagement questions. All on-brand, AI-generated.</div>
+      </div>
+      <div class="deliverable">
+        <div class="d-icon">&#128202;</div>
+        <div class="d-title">Analytics Dashboard</div>
+        <div class="d-desc">Real-time stats, per-video breakdown, traffic source analysis, average view duration, subscriber tracking.</div>
+      </div>
+      <div class="deliverable">
+        <div class="d-icon">&#128680;</div>
+        <div class="d-title">Suppression Detection</div>
+        <div class="d-desc">Automatic anomaly alerts when view duration drops, traffic patterns shift, or the algorithm suppresses your content.</div>
+      </div>
+      <div class="deliverable">
+        <div class="d-icon">&#128209;</div>
+        <div class="d-title">Weekly Reports</div>
+        <div class="d-desc">Automated digest: subscriber growth, top performers, queue health, algorithm intelligence summary, actionable recommendations.</div>
+      </div>
+      <div class="deliverable">
+        <div class="d-icon">&#127911;</div>
+        <div class="d-title">Long-Form Compilations</div>
+        <div class="d-desc">Shorts automatically stitched into themed long-form videos with intro cards, chapter markers, and YouTube chapters.</div>
+      </div>
+      <div class="deliverable">
+        <div class="d-icon">&#128203;</div>
+        <div class="d-title">Playlist Management</div>
+        <div class="d-desc">Videos auto-sorted into playlists by category. Maximizes auto-play watch time stacking.</div>
+      </div>
+      <div class="deliverable">
+        <div class="d-icon">&#128737;</div>
+        <div class="d-title">Compliance Gate</div>
+        <div class="d-desc">Every story reviewed for YouTube policy, advertiser-friendliness, and brand safety before production begins.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: AI MASCOT -->
+  <div class="slide" data-slide="6">
+    <div class="slide-label">Brand Identity</div>
+    <div class="slide-title">Your channel gets an <span class="gradient">AI presenter</span>.</div>
+    <div class="mascot-section">
+      <div class="mascot-visual">
+        <div class="mascot-icon">&#129302;</div>
+        <div class="mascot-label">3D lip-synced AI avatar appears in every video as your channel's consistent on-screen presenter</div>
+      </div>
+      <div class="mascot-features">
+        <h3>Avatar Capabilities</h3>
+        <div class="mascot-feature">
+          <div class="mf-icon">&#127908;</div>
+          <div>
+            <div class="mf-title">Lip-Synced to Voiceover</div>
+            <div class="mf-desc">3D character animation synced to the AI-generated narration. Mouth movements match the audio perfectly.</div>
+          </div>
+        </div>
+        <div class="mascot-feature">
+          <div class="mf-icon">&#127912;</div>
+          <div>
+            <div class="mf-title">Consistent Brand Presence</div>
+            <div class="mf-desc">Same character across every video. Viewers recognize your presenter. Builds trust and channel identity.</div>
+          </div>
+        </div>
+        <div class="mascot-feature">
+          <div class="mf-icon">&#128260;</div>
+          <div>
+            <div class="mf-title">3-Tier Fallback</div>
+            <div class="mf-desc">Premium 3D lip-sync as primary. Local processing as backup. 2D animation as always-available safety net.</div>
+          </div>
+        </div>
+        <div class="mascot-feature">
+          <div class="mf-icon">&#128736;</div>
+          <div>
+            <div class="mf-title">Automatic Overlay</div>
+            <div class="mf-desc">Avatar is composited onto every video before upload. No manual step. No video ever goes live without the presenter.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: PRICING -->
+  <div class="slide" data-slide="7">
+    <div class="slide-label">Pricing</div>
+    <div class="slide-title">Scale your <span class="gradient">YouTube presence</span>.</div>
+    <div class="pricing-row">
+      <div class="price-card">
+        <div class="pc-tier">Starter</div>
+        <div class="pc-price">$997</div>
+        <div class="pc-sub">per month</div>
+        <ul>
+          <li>1 YouTube channel</li>
+          <li>Daily content production</li>
+          <li>Automated uploads</li>
+          <li>Smart comment engagement</li>
+          <li>Weekly performance reports</li>
+          <li>Email support</li>
+        </ul>
+      </div>
+      <div class="price-card featured">
+        <div class="pc-tier">Growth</div>
+        <div class="pc-price">$1,997</div>
+        <div class="pc-sub">per month</div>
+        <ul>
+          <li>2 YouTube channels</li>
+          <li>Daily content production</li>
+          <li>AI mascot avatar</li>
+          <li>Algorithm intelligence</li>
+          <li>Performance feedback loop</li>
+          <li>Suppression detection</li>
+          <li>Community posts</li>
+          <li>Priority support</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <div class="pc-tier">Enterprise</div>
+        <div class="pc-price">Custom</div>
+        <div class="pc-sub">tailored to you</div>
+        <ul>
+          <li>Unlimited channels</li>
+          <li>Custom content strategy</li>
+          <li>Custom AI voice & avatar</li>
+          <li>Long-form compilations</li>
+          <li>Cross-platform distribution</li>
+          <li>Dedicated account manager</li>
+          <li>White-label option</li>
+          <li>SLA guarantee</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: NEXT STEPS -->
+  <div class="slide" data-slide="8">
+    <div class="slide-label">Next Steps</div>
+    <div class="slide-title">Ready to go <span class="gradient">autonomous</span>?</div>
+    <div class="next-steps-card">
+      <div class="ns-title">How to get started</div>
+      <div class="ns-steps">
+        <div class="ns-step">
+          <div class="ns-num">1</div>
+          <div class="ns-text"><strong>Tell us your niche.</strong> What is your channel about? Sports, news, entertainment, education, or something else?</div>
+        </div>
+        <div class="ns-step">
+          <div class="ns-num">2</div>
+          <div class="ns-text"><strong>We configure your pipeline.</strong> Content strategy, voice, visual style, upload cadence, engagement tone.</div>
+        </div>
+        <div class="ns-step">
+          <div class="ns-num">3</div>
+          <div class="ns-text"><strong>Your channel goes live.</strong> Daily content production, automated uploads, smart engagement. From day one.</div>
+        </div>
+      </div>
+      <a href="mailto:hello@shortsfactory.ai?subject=I want an autonomous YouTube channel" class="ns-cta">Get Started</a>
+      <div class="ns-email">hello@shortsfactory.ai</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const TOTAL_SLIDES = 9;
+  let current = 0;
+  let isAnimating = false;
+
+  const deck = document.getElementById('deck');
+  const slides = deck.querySelectorAll('.slide');
+  const progressBar = document.getElementById('progressBar');
+  const counter = document.getElementById('slideCounter');
+  const dotsContainer = document.getElementById('navDots');
+
+  // Create nav dots
+  for (let i = 0; i < TOTAL_SLIDES; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', function() { goTo(i); });
+    dotsContainer.appendChild(dot);
+  }
+
+  function updateUI() {
+    progressBar.style.width = ((current + 1) / TOTAL_SLIDES * 100) + '%';
+    counter.textContent = (current + 1) + ' / ' + TOTAL_SLIDES;
+    const dots = dotsContainer.querySelectorAll('.nav-dot');
+    dots.forEach(function(d, i) {
+      d.className = 'nav-dot' + (i === current ? ' active' : '');
+    });
+  }
+
+  function goTo(index) {
+    if (isAnimating || index === current || index < 0 || index >= TOTAL_SLIDES) return;
+    isAnimating = true;
+
+    const prev = slides[current];
+    const next = slides[index];
+    const goingForward = index > current;
+
+    prev.classList.remove('active');
+    prev.classList.add(goingForward ? 'exit-left' : '');
+    prev.style.transform = goingForward ? 'translateX(-60px)' : 'translateX(60px)';
+    prev.style.opacity = '0';
+
+    next.style.transform = goingForward ? 'translateX(60px)' : 'translateX(-60px)';
+    next.style.opacity = '0';
+    next.classList.remove('exit-left');
+
+    // Force reflow
+    void next.offsetWidth;
+
+    next.classList.add('active');
+
+    current = index;
+    updateUI();
+
+    setTimeout(function() {
+      prev.classList.remove('exit-left');
+      isAnimating = false;
+    }, 500);
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  // Keyboard
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(TOTAL_SLIDES - 1); }
+  });
+
+  // Touch swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', function(e) {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) next(); else prev();
+    }
+  });
+
+  // Click to advance (on slide body, not on links)
+  deck.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a') || e.target.closest('button')) return;
+    const x = e.clientX;
+    if (x > window.innerWidth * 0.6) next();
+    else if (x < window.innerWidth * 0.4) prev();
+  });
+
+  updateUI();
+})();
+</script>
+
+</body>
+</html>
