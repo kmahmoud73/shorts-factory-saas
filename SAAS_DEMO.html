@@ -1,0 +1,2997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shorts Factory — AI Video Production SaaS</title>
+<style>
+/* ===== DESIGN SYSTEM ===== */
+:root {
+  --bg: #0D1117;
+  --surface: #161B22;
+  --surface-elevated: #1C2128;
+  --surface-hover: #21262D;
+  --surface-active: #282E36;
+  --border: #30363D;
+  --border-focus: #58A6FF;
+  --text-primary: #E6EDF3;
+  --text-secondary: #8B949E;
+  --text-muted: #484F58;
+  --text-on-color: #FFFFFF;
+
+  /* Channel Colors */
+  --jersey-vault: #D4AF37;
+  --jersey-vault-bg: rgba(212,175,55,0.1);
+  --caught-trending: #E53E3E;
+  --caught-trending-bg: rgba(229,62,62,0.1);
+  --history-things: #3182CE;
+  --history-things-bg: rgba(49,130,206,0.1);
+
+  /* Status Colors */
+  --success: #38A169;
+  --warning: #D69E2E;
+  --error: #E53E3E;
+  --info: #3182CE;
+  --neutral: #718096;
+  --accent: #805AD5;
+
+  /* Pipeline Colors */
+  --stage-image: #319795;
+  --stage-animation: #3182CE;
+  --stage-tts: #5A67D8;
+  --stage-composition: #805AD5;
+  --stage-export: #38A169;
+
+  /* Spacing */
+  --sidebar-width: 240px;
+  --sidebar-collapsed: 64px;
+  --header-height: 56px;
+
+  /* Shadows */
+  --elevation-1: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --elevation-2: 0 4px 6px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
+  --elevation-3: 0 10px 20px rgba(0,0,0,0.4), 0 6px 6px rgba(0,0,0,0.2);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ===== LAYOUT ===== */
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.sidebar-logo {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--caught-trending), var(--jersey-vault));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+.logo-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.logo-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: var(--accent);
+  color: white;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.nav-section {
+  padding: 16px 20px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  border-left: 3px solid transparent;
+  font-size: 14px;
+}
+
+.nav-item:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border-left-color: var(--info);
+}
+
+.nav-item .nav-icon {
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.nav-item .nav-badge {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 1px 7px;
+  background: var(--surface-active);
+  border-radius: 9999px;
+  color: var(--text-secondary);
+}
+
+.sidebar-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--info), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+}
+
+.user-info { flex: 1; }
+.user-name { font-size: 13px; font-weight: 600; }
+.user-plan { font-size: 11px; color: var(--text-secondary); }
+
+/* ===== MAIN CONTENT ===== */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.page {
+  flex: 1;
+}
+
+.header {
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn:hover { background: var(--surface-hover); }
+
+.btn-primary {
+  background: var(--info);
+  border-color: var(--info);
+  color: white;
+}
+
+.btn-primary:hover { background: #2B6CB0; }
+
+.btn-success {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.btn-warning {
+  background: var(--warning);
+  border-color: var(--warning);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--error);
+  border-color: var(--error);
+  color: white;
+}
+
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+}
+
+.btn-ghost:hover { background: var(--surface-hover); }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--elevation-1);
+}
+
+.card-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-body { padding: 16px; }
+.card-footer { padding: 12px 16px; border-top: 1px solid var(--border); }
+
+/* ===== STAT CARDS ===== */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-trend {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-trend.up { color: var(--success); }
+.stat-trend.down { color: var(--error); }
+
+.sparkline {
+  height: 32px;
+  margin-top: 4px;
+}
+
+.sparkline svg { width: 100%; height: 100%; }
+.sparkline path { fill: none; stroke-width: 2; stroke-linecap: round; }
+
+/* ===== CHANNEL BADGE ===== */
+.channel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.channel-badge.jersey-vault {
+  background: var(--jersey-vault-bg);
+  color: var(--jersey-vault);
+}
+
+.channel-badge.caught-trending {
+  background: var(--caught-trending-bg);
+  color: var(--caught-trending);
+}
+
+.channel-badge.history-things {
+  background: var(--history-things-bg);
+  color: var(--history-things);
+}
+
+/* ===== STATUS PILLS ===== */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-pill.draft { background: rgba(113,128,150,0.15); color: var(--neutral); }
+.status-pill.review { background: rgba(214,158,46,0.15); color: var(--warning); }
+.status-pill.approved { background: rgba(56,161,105,0.15); color: var(--success); }
+.status-pill.building { background: rgba(49,130,206,0.15); color: var(--info); }
+.status-pill.built { background: rgba(128,90,213,0.15); color: var(--accent); }
+.status-pill.uploaded { background: rgba(56,161,105,0.2); color: var(--success); }
+.status-pill.failed { background: rgba(229,62,62,0.15); color: var(--error); }
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--surface-active);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 300ms ease-out;
+}
+
+.progress-multi {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  background: var(--surface-active);
+  border-radius: 9999px;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.progress-multi .segment {
+  height: 100%;
+  transition: width 300ms ease-out;
+}
+
+/* ===== TABLES ===== */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+tr:last-child td { border-bottom: none; }
+
+tr:hover td { background: var(--surface-hover); }
+
+/* ===== TABS ===== */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 10px 16px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 150ms ease-out;
+}
+
+.tab:hover { color: var(--text-primary); }
+.tab.active { color: var(--text-primary); border-bottom-color: var(--info); }
+
+/* ===== INPUTS ===== */
+.input-group { margin-bottom: 16px; }
+
+.input-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 150ms ease-out;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+textarea.input {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+select.input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B949E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.input-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.char-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 2px;
+}
+
+.char-count.warning { color: var(--warning); }
+.char-count.error { color: var(--error); }
+
+/* ===== KANBAN ===== */
+.kanban {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  min-height: 500px;
+}
+
+.kanban-column {
+  min-width: 280px;
+  max-width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.kanban-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.kanban-count {
+  font-size: 11px;
+  padding: 1px 7px;
+  background: var(--surface-active);
+  border-radius: 9999px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.kanban-cards {
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.kanban-card {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  cursor: grab;
+  transition: all 150ms ease-out;
+}
+
+.kanban-card:hover {
+  border-color: var(--border-focus);
+  box-shadow: var(--elevation-2);
+  transform: translateY(-1px);
+}
+
+.kanban-card.dragging {
+  opacity: 0.5;
+  transform: scale(1.02);
+}
+
+.kanban-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.kanban-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.kanban-card-scenes {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== BUILD MONITOR ===== */
+.build-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.build-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.build-title { flex: 1; font-weight: 600; }
+
+.build-stages {
+  display: flex;
+  gap: 2px;
+  padding: 16px;
+}
+
+.build-stage {
+  flex: 1;
+  text-align: center;
+}
+
+.build-stage-bar {
+  height: 6px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+  transition: background 300ms ease-out;
+}
+
+.build-stage-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.build-stage.complete .build-stage-bar { background: var(--success); }
+.build-stage.active .build-stage-bar {
+  background: var(--info);
+  animation: pulse 2s ease-in-out infinite;
+}
+.build-stage.pending .build-stage-bar { background: var(--surface-active); }
+
+.build-scenes {
+  padding: 0 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.scene-thumb {
+  aspect-ratio: 9/16;
+  background: var(--surface-elevated);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  position: relative;
+  overflow: hidden;
+}
+
+.scene-thumb.complete {
+  border-color: var(--success);
+}
+
+.scene-thumb.active {
+  border-color: var(--info);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.scene-thumb .scene-label {
+  position: absolute;
+  bottom: 4px;
+  font-size: 9px;
+  padding: 1px 5px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 3px;
+}
+
+/* ===== ANALYTICS ===== */
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.chart-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.chart-header h3 { font-size: 14px; font-weight: 600; }
+
+.chart-body {
+  padding: 16px;
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.chart-bar {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  min-height: 4px;
+  transition: height 500ms ease-out;
+  position: relative;
+  cursor: pointer;
+}
+
+.chart-bar:hover { opacity: 0.8; }
+
+.chart-bar .tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.chart-bar:hover .tooltip { display: block; }
+
+/* ===== MONETIZATION PROGRESS ===== */
+.monetization-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.monetization-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.monetization-title { font-weight: 600; font-size: 15px; }
+
+.monetization-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--jersey-vault);
+}
+
+.monetization-track {
+  height: 12px;
+  background: var(--surface-active);
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.monetization-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--error), var(--warning), var(--success));
+  border-radius: 9999px;
+  transition: width 1s ease-out;
+}
+
+.monetization-markers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== SCENE EDITOR ===== */
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  height: calc(100vh - var(--header-height) - 48px);
+}
+
+.editor-scenes {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.scene-editor {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.scene-header {
+  padding: 12px 16px;
+  background: var(--surface-elevated);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.scene-number {
+  width: 28px; height: 28px;
+  background: var(--info);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.scene-fields { padding: 16px; }
+
+.editor-preview {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.preview-phone {
+  width: 100%;
+  aspect-ratio: 9/16;
+  max-height: 500px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.preview-screen {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #1a1a2e, #16213e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-play-btn {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+}
+
+.preview-play-btn:hover { background: rgba(255,255,255,0.25); }
+
+/* ===== COMPILATION BUILDER ===== */
+.compilation-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+}
+
+.compilation-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compilation-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: grab;
+  transition: all 150ms ease-out;
+}
+
+.compilation-item:hover {
+  border-color: var(--border-focus);
+  transform: translateX(4px);
+}
+
+.compilation-num {
+  width: 24px; height: 24px;
+  background: var(--surface-active);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.compilation-info { flex: 1; }
+.compilation-title-text { font-size: 13px; font-weight: 500; }
+.compilation-duration { font-size: 11px; color: var(--text-muted); }
+
+/* ===== TREND SCANNER ===== */
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.trend-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+}
+
+.trend-card:hover {
+  border-color: var(--border-focus);
+  box-shadow: var(--elevation-2);
+  transform: translateY(-2px);
+}
+
+.trend-score {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.trend-score-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--surface-active);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.trend-score-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.trend-score-value {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.trend-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.trend-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.trend-signals {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.trend-signal {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--surface-active);
+  color: var(--text-secondary);
+}
+
+/* ===== SETTINGS ===== */
+.settings-grid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+}
+
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-nav-item {
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+  transition: all 150ms ease-out;
+}
+
+.settings-nav-item:hover { background: var(--surface-hover); color: var(--text-primary); }
+.settings-nav-item.active { background: var(--surface-hover); color: var(--text-primary); font-weight: 600; }
+
+.settings-section { max-width: 640px; }
+
+.settings-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.settings-section p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.api-key-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: var(--surface-elevated);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.api-key-name { font-weight: 500; min-width: 100px; font-size: 13px; }
+.api-key-value {
+  flex: 1;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.api-key-status {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+.api-key-status.connected { background: var(--success); }
+.api-key-status.disconnected { background: var(--error); }
+
+/* ===== COMPLIANCE ===== */
+.compliance-result {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.compliance-result-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.compliance-icon {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.compliance-icon.pass { background: rgba(56,161,105,0.2); color: var(--success); }
+.compliance-icon.fail { background: rgba(229,62,62,0.2); color: var(--error); }
+
+.compliance-detail {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-in {
+  animation: slideIn 200ms ease-out;
+}
+
+/* ===== TOAST ===== */
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: var(--elevation-3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  min-width: 280px;
+  animation: slideIn 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.toast.success { border-left: 3px solid var(--success); }
+.toast.error { border-left: 3px solid var(--error); }
+.toast.info { border-left: 3px solid var(--info); }
+
+/* ===== GRID LAYOUTS ===== */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* ===== CHANNEL CARDS ===== */
+.channel-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 150ms ease-out;
+}
+
+.channel-card:hover {
+  border-color: var(--border-focus);
+  box-shadow: var(--elevation-2);
+}
+
+.channel-card-banner {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.channel-card-body { padding: 16px; }
+
+.channel-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.channel-card-type {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.channel-card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  text-align: center;
+}
+
+.channel-stat-value { font-size: 18px; font-weight: 700; }
+.channel-stat-label { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; }
+
+/* ===== COST ESTIMATOR ===== */
+.cost-estimator {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.cost-estimator h4 { font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.cost-row.total {
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  padding-top: 12px;
+  font-weight: 700;
+}
+
+/* ===== JSON TOGGLE ===== */
+.json-view {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+  color: var(--text-secondary);
+}
+
+.json-key { color: var(--info); }
+.json-string { color: var(--success); }
+.json-number { color: var(--warning); }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface-active); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .editor-layout { grid-template-columns: 1fr; }
+  .editor-preview { display: none; }
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-out;
+}
+
+.modal-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--elevation-3);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  transform: scale(0.95);
+  transition: transform 200ms ease-out;
+}
+
+.modal-overlay.visible .modal { transform: scale(1); }
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h2 { font-size: 18px; font-weight: 600; }
+
+.modal-body { padding: 24px; }
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ===== FILTER BAR ===== */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-chip {
+  padding: 5px 12px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  color: var(--text-secondary);
+}
+
+.filter-chip:hover { border-color: var(--text-secondary); }
+.filter-chip.active { background: var(--info); border-color: var(--info); color: white; }
+
+/* ===== SEARCH ===== */
+.search-box {
+  position: relative;
+}
+
+.search-box .input { padding-left: 36px; }
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">&#9654;</div>
+      <div>
+        <div class="logo-text">Shorts Factory</div>
+      </div>
+      <span class="logo-badge">SaaS</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Production</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <span class="nav-icon">&#9632;</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('editor')">
+        <span class="nav-icon">&#9998;</span> Story Editor
+      </div>
+      <div class="nav-item" onclick="showPage('queue')">
+        <span class="nav-icon">&#9783;</span> Story Queue
+        <span class="nav-badge">43</span>
+      </div>
+      <div class="nav-item" onclick="showPage('build')">
+        <span class="nav-icon">&#9881;</span> Build Monitor
+        <span class="nav-badge">0</span>
+      </div>
+
+      <div class="nav-section">Channels</div>
+      <div class="nav-item" onclick="showPage('channels')">
+        <span class="nav-icon">&#128250;</span> Channel Manager
+      </div>
+      <div class="nav-item" onclick="showPage('compliance')">
+        <span class="nav-icon">&#128737;</span> Compliance Center
+      </div>
+
+      <div class="nav-section">Growth</div>
+      <div class="nav-item" onclick="showPage('analytics')">
+        <span class="nav-icon">&#128200;</span> Analytics
+      </div>
+      <div class="nav-item" onclick="showPage('compilation')">
+        <span class="nav-icon">&#127916;</span> Compilation Builder
+      </div>
+      <div class="nav-item" onclick="showPage('trends')">
+        <span class="nav-icon">&#128293;</span> Trend Scanner
+        <span class="nav-badge" style="background:rgba(229,62,62,0.2);color:var(--error)">29</span>
+      </div>
+
+      <div class="nav-section">System</div>
+      <div class="nav-item" onclick="showPage('settings')">
+        <span class="nav-icon">&#9881;</span> Settings
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">SF</div>
+      <div class="user-info">
+        <div class="user-name">Shorts Factory</div>
+        <div class="user-plan">Agency Plan</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toasts"></div>
+
+    <!-- ===== PAGE: DASHBOARD ===== -->
+    <div id="page-dashboard" class="page">
+      <div class="header">
+        <div class="header-title">Dashboard <span style="font-size:11px;padding:3px 10px;background:var(--success);color:white;border-radius:9999px;font-weight:600;margin-left:8px;vertical-align:middle">LIVE PRODUCTION</span></div>
+        <div class="header-actions">
+          <button class="btn btn-primary" onclick="showToast('Build started for Story #31...', 'info')">&#9654; Quick Build</button>
+          <button class="btn" onclick="showPage('editor')">&#43; New Story</button>
+        </div>
+      </div>
+      <div class="content animate-in">
+        <!-- Monetization Progress -->
+        <div class="monetization-bar">
+          <div class="monetization-header">
+            <div>
+              <div class="monetization-title">YouTube Partner Program Progress</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Watch hours toward 4,000 hour requirement</div>
+            </div>
+            <div style="text-align:right">
+              <div class="monetization-value">14.8h</div>
+              <div style="font-size:12px;color:var(--text-secondary)">of 4,000 hours (0.37%)</div>
+            </div>
+          </div>
+          <div class="monetization-track">
+            <div class="monetization-fill" style="width:0.37%"></div>
+          </div>
+          <div class="monetization-markers">
+            <span>0h</span>
+            <span>1,000h</span>
+            <span>2,000h</span>
+            <span>3,000h</span>
+            <span>4,000h</span>
+          </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">&#128250; Total Subscribers</div>
+            <div class="stat-value">1,303</div>
+            <div class="stat-trend up">&#9650; 1,280 JV + 23 CIT</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">&#128065; Total Views</div>
+            <div class="stat-value">6,333</div>
+            <div class="stat-trend up">&#9650; 6,049 JV + 284 CIT</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">&#127916; Videos Built</div>
+            <div class="stat-value">110</div>
+            <div class="stat-trend up">&#9650; MP4s rendered to date</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">&#128176; API Credits</div>
+            <div class="stat-value" style="font-size:22px">$11.30 <span style="font-size:14px;color:var(--text-secondary)">Minimax</span></div>
+            <div class="stat-trend down" style="color:var(--error)">&#9660; Kling depleted &middot; Runway ~$8</div>
+          </div>
+        </div>
+
+        <!-- Channel Overview + Recent Activity -->
+        <div class="grid-2" style="margin-bottom:24px">
+          <!-- Channel Cards -->
+          <div>
+            <h3 style="font-size:15px;margin-bottom:12px;font-weight:600">Channels</h3>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div class="card" style="border-left:3px solid var(--jersey-vault)">
+                <div class="card-body" style="display:flex;align-items:center;gap:16px">
+                  <div style="font-size:28px">&#127941;</div>
+                  <div style="flex:1">
+                    <div style="font-weight:600">The Jersey Vault</div>
+                    <div style="font-size:12px;color:var(--text-secondary)">Shorts &middot; 43 in queue &middot; 2/day</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-size:18px;font-weight:700">1,280</div>
+                    <div style="font-size:10px;color:var(--text-secondary)">SUBS</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-size:18px;font-weight:700">6,049</div>
+                    <div style="font-size:10px;color:var(--text-secondary)">VIEWS</div>
+                  </div>
+                  <span class="status-pill approved" style="font-size:10px">&#9679; LIVE</span>
+                </div>
+              </div>
+
+              <div class="card" style="border-left:3px solid var(--caught-trending)">
+                <div class="card-body" style="display:flex;align-items:center;gap:16px">
+                  <div style="font-size:28px">&#128293;</div>
+                  <div style="flex:1">
+                    <div style="font-weight:600">Caught It Trending</div>
+                    <div style="font-size:12px;color:var(--text-secondary)">Shorts &middot; 50 stories &middot; 29 in upload queue &middot; 1/day</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-size:18px;font-weight:700">23</div>
+                    <div style="font-size:10px;color:var(--text-secondary)">SUBS</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-size:18px;font-weight:700">284</div>
+                    <div style="font-size:10px;color:var(--text-secondary)">VIEWS</div>
+                  </div>
+                  <span class="status-pill approved" style="font-size:10px">&#9679; LIVE</span>
+                </div>
+              </div>
+
+              <div class="card" style="border-left:3px solid var(--history-things)">
+                <div class="card-body" style="display:flex;align-items:center;gap:16px">
+                  <div style="font-size:28px">&#128214;</div>
+                  <div style="flex:1">
+                    <div style="font-weight:600">History of Things</div>
+                    <div style="font-size:12px;color:var(--text-secondary)">Longform &middot; 12 scripts &middot; Paused</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-size:18px;font-weight:700">0</div>
+                    <div style="font-size:10px;color:var(--text-secondary)">SUBS</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="font-size:18px;font-weight:700">0</div>
+                    <div style="font-size:10px;color:var(--text-secondary)">VIEWS</div>
+                  </div>
+                  <span class="status-pill draft" style="font-size:10px">&#9679; PAUSED</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity Feed -->
+          <div>
+            <h3 style="font-size:15px;margin-bottom:12px;font-weight:600">Recent Activity</h3>
+            <div class="card">
+              <div class="card-body" style="padding:0">
+                <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+                  <span style="color:var(--info)">&#128172;</span>
+                  <span style="flex:1;font-size:13px"><b>Comment replier</b> upgraded to 3x/day (9 AM, 2 PM, 7 PM) with <b>thread follow-up support</b> — max 5h response wait vs 23h. ~3,150 API units/day</span>
+                  <span style="font-size:11px;color:var(--text-muted)">engagement</span>
+                </div>
+                <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+                  <span style="color:var(--success)">&#10003;</span>
+                  <span style="flex:1;font-size:13px"><b>Man United 1999</b> built + uploaded to Jersey Vault</span>
+                  <span style="font-size:11px;color:var(--text-muted)">08:44 today</span>
+                </div>
+                <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+                  <span style="color:var(--caught-trending)">&#128293;</span>
+                  <span style="flex:1;font-size:13px"><b>Galatasaray 5-2 Juventus</b> uploaded to Caught It Trending</span>
+                  <span style="font-size:11px;color:var(--text-muted)">latest CIT</span>
+                </div>
+                <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+                  <span style="color:var(--success)">&#10003;</span>
+                  <span style="flex:1;font-size:13px"><b>overlay_mascot.py</b> — Batch overlay <b>COMPLETE &mdash; 24/24</b> CiT videos (10 Hedra 3D + 14 2D fallback). <code>.has_mascot</code> marker system prevents double-overlay</span>
+                  <span style="font-size:11px;color:var(--text-muted)">updated</span>
+                </div>
+                <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+                  <span style="color:var(--error)">&#10007;</span>
+                  <span style="flex:1;font-size:13px"><b>Kling AI</b> — OUT OF CREDITS. Fallback to Minimax/Ken Burns.</span>
+                  <span style="font-size:11px;color:var(--text-muted)">critical</span>
+                </div>
+                <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+                  <span style="color:var(--warning)">&#9888;</span>
+                  <span style="flex:1;font-size:13px">Minimax balance low — <b>$11.30</b> remaining</span>
+                  <span style="font-size:11px;color:var(--text-muted)">warning</span>
+                </div>
+                <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+                  <span style="color:var(--jersey-vault)">&#127941;</span>
+                  <span style="flex:1;font-size:13px"><b>10 Jerseys Compilation</b> live on YouTube (11:48)</span>
+                  <span style="font-size:11px;color:var(--text-muted)">longform</span>
+                </div>
+                <div style="padding:12px 16px;display:flex;align-items:center;gap:10px">
+                  <span style="color:var(--info)">&#9881;</span>
+                  <span style="flex:1;font-size:13px">Queue: <b>35 stories remaining</b> in Jersey Vault pipeline</span>
+                  <span style="font-size:11px;color:var(--text-muted)">08:44</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Builds Schedule -->
+        <h3 style="font-size:15px;margin-bottom:12px;font-weight:600">Build Schedule</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Channel</th>
+                <th>Story</th>
+                <th>Engine</th>
+                <th>Est. Cost</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-family:monospace;font-size:12px">7:15 AM</td>
+                <td><span class="channel-badge jersey-vault">&#127941; Jersey Vault</span></td>
+                <td style="font-weight:500">Italy 2006 — Zidane's Last Dance</td>
+                <td>Minimax</td>
+                <td style="color:var(--warning)">~$1.35</td>
+                <td><span class="status-pill approved">&#9679; Next Build</span></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:12px">10:00 AM</td>
+                <td><span class="channel-badge caught-trending">&#128293; Trending</span></td>
+                <td style="font-weight:500">Oscars 2026 Preview: Can Sinners Break THIS Record?</td>
+                <td>Minimax</td>
+                <td style="color:var(--warning)">~$1.62</td>
+                <td><span class="status-pill approved">&#9679; Queued</span></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:12px">8:30 PM</td>
+                <td><span class="channel-badge jersey-vault">&#127941; Jersey Vault</span></td>
+                <td style="font-weight:500">Ajax 1995 — The Boys Who Conquered Europe</td>
+                <td>Minimax</td>
+                <td style="color:var(--warning)">~$1.35</td>
+                <td><span class="status-pill draft">&#9679; Scheduled</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: STORY EDITOR ===== -->
+    <div id="page-editor" class="page" style="display:none">
+      <div class="header">
+        <div class="header-title">Story Editor</div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="toggleJsonView()">{ } JSON</button>
+          <button class="btn" onclick="showToast('Compliance review submitted', 'info')">&#128737; Review</button>
+          <button class="btn btn-primary" onclick="showToast('Story saved!', 'success')">&#128190; Save</button>
+        </div>
+      </div>
+      <div class="content animate-in">
+        <!-- Story Metadata -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-body">
+            <div class="grid-3">
+              <div class="input-group">
+                <label class="input-label">Channel</label>
+                <select class="input">
+                  <option>The Jersey Vault</option>
+                  <option>Caught It Trending</option>
+                  <option>History of Things</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Voice</label>
+                <select class="input">
+                  <option>Christopher (Dramatic)</option>
+                  <option>Aria (News Anchor)</option>
+                  <option>Andrew (Warm)</option>
+                  <option>Brian (Casual)</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label class="input-label">Animation Engine</label>
+                <select class="input" onchange="updateCost(this.value)">
+                  <option value="minimax">Minimax ($0.27/scene)</option>
+                  <option value="runway">Runway ($0.25/scene)</option>
+                  <option value="kling">Kling ($0.63/scene)</option>
+                  <option value="kenburns">Ken Burns (Free)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- YouTube Metadata -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header">
+            <span style="font-weight:600;font-size:14px">&#127909; YouTube Metadata</span>
+            <span class="status-pill approved">Ready</span>
+          </div>
+          <div class="card-body">
+            <div class="input-group">
+              <label class="input-label">Video Title</label>
+              <input class="input" value="This Jersey Saved Ronaldo's Legacy Forever" maxlength="100" oninput="updateCharCount(this, 'title-count', 100)">
+              <div class="char-count" id="title-count">48/100</div>
+            </div>
+            <div class="input-group">
+              <label class="input-label">Description</label>
+              <textarea class="input" rows="3">In 2002, Ronaldo was written off. Injury. Doubt. Ridicule.&#10;&#10;But at the World Cup in Japan, wearing Brazil's iconic yellow #9, he scored BOTH goals in the final to win it all.&#10;&#10;#TheJerseyVault #Brazil #Ronaldo #WorldCup</textarea>
+            </div>
+            <div class="input-group">
+              <label class="input-label">Tags</label>
+              <input class="input" value="The Jersey Vault, football, jersey, Ronaldo, Brazil, 2002 World Cup, iconic jerseys">
+            </div>
+          </div>
+        </div>
+
+        <!-- JSON View (hidden by default) -->
+        <div id="json-view" style="display:none;margin-bottom:20px">
+          <div class="json-view"><pre>{
+  <span class="json-key">"title"</span>: <span class="json-string">"Brazil 2002 — The Shirt That Won It All"</span>,
+  <span class="json-key">"voice"</span>: <span class="json-string">"en-US-ChristopherNeural"</span>,
+  <span class="json-key">"channel"</span>: <span class="json-string">"jersey_vault"</span>,
+  <span class="json-key">"youtube"</span>: {
+    <span class="json-key">"title"</span>: <span class="json-string">"This Jersey Saved Ronaldo's Legacy Forever"</span>,
+    <span class="json-key">"description"</span>: <span class="json-string">"In 2002, Ronaldo was written off..."</span>,
+    <span class="json-key">"tags"</span>: <span class="json-string">"The Jersey Vault, football, jersey, ..."</span>
+  },
+  <span class="json-key">"scenes"</span>: [
+    {
+      <span class="json-key">"narration"</span>: <span class="json-string">"Yokohama, Japan. June thirtieth..."</span>,
+      <span class="json-key">"image_prompt"</span>: <span class="json-string">"Cinematic 9:16 establishing shot..."</span>,
+      <span class="json-key">"video_prompt"</span>: <span class="json-string">"Slow push-in through rain..."</span>,
+      <span class="json-key">"ken_burns"</span>: <span class="json-string">"zoom_in"</span>,
+      <span class="json-key">"pause_after"</span>: <span class="json-number">1.0</span>
+    }
+  ]
+}</pre></div>
+        </div>
+
+        <!-- Scene Editor Grid -->
+        <div class="editor-layout">
+          <div class="editor-scenes">
+            <!-- Scene 1 -->
+            <div class="scene-editor">
+              <div class="scene-header">
+                <div class="scene-number">1</div>
+                <span>Hook — Opening</span>
+                <span style="flex:1"></span>
+                <span style="font-size:11px;color:var(--text-muted)">~12s</span>
+              </div>
+              <div class="scene-fields">
+                <div class="input-group">
+                  <label class="input-label">Narration</label>
+                  <textarea class="input" rows="3">Yokohama, Japan. June thirtieth, two thousand and two. Sixty-nine thousand fans hold their breath as Ronaldo — written off, mocked, doubted — steps onto the pitch wearing number nine.</textarea>
+                </div>
+                <div class="grid-2">
+                  <div class="input-group">
+                    <label class="input-label">Image Prompt (Leonardo AI)</label>
+                    <textarea class="input" rows="3" style="font-size:12px">Cinematic 9:16 portrait, rain-soaked Yokohama stadium at night, golden floodlights cutting through mist, Brazilian player silhouette in yellow jersey #9, 69000 crowd as bokeh points of light, photorealistic, dramatic atmosphere</textarea>
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">Video Prompt (Animation)</label>
+                    <textarea class="input" rows="3" style="font-size:12px">Slow cinematic push-in through rain droplets toward stadium entrance, camera glides past rain-streaked glass revealing golden floodlights, volumetric fog swirling, crowd noise building crescendo</textarea>
+                  </div>
+                </div>
+                <div class="grid-3">
+                  <div class="input-group">
+                    <label class="input-label">Ken Burns Effect</label>
+                    <select class="input">
+                      <option selected>zoom_in</option>
+                      <option>zoom_out</option>
+                      <option>pan_left</option>
+                      <option>pan_right</option>
+                      <option>pan_up</option>
+                      <option>pan_down</option>
+                      <option>zoom_in_pan_right</option>
+                      <option>zoom_in_pan_left</option>
+                      <option>random</option>
+                    </select>
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">Pause After (s)</label>
+                    <input class="input" type="number" value="1.0" step="0.5" min="0" max="5">
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">SFX</label>
+                    <select class="input">
+                      <option>None</option>
+                      <option selected>ambient</option>
+                      <option>whoosh</option>
+                      <option>boom</option>
+                      <option>riser</option>
+                      <option>stinger</option>
+                      <option>transition</option>
+                      <option>suspense</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scene 2 -->
+            <div class="scene-editor">
+              <div class="scene-header">
+                <div class="scene-number">2</div>
+                <span>Context — The Doubts</span>
+                <span style="flex:1"></span>
+                <span style="font-size:11px;color:var(--text-muted)">~10s</span>
+              </div>
+              <div class="scene-fields">
+                <div class="input-group">
+                  <label class="input-label">Narration</label>
+                  <textarea class="input" rows="3">Four years earlier, he collapsed on the floor of a hotel room. Seizures. The nineteen ninety-eight World Cup final became a nightmare. Everyone said Ronaldo was finished.</textarea>
+                </div>
+                <div class="grid-2">
+                  <div class="input-group">
+                    <label class="input-label">Image Prompt</label>
+                    <textarea class="input" rows="2" style="font-size:12px">Dark moody 9:16, dejected Brazilian footballer sitting alone in dim hotel corridor, head in hands, fluorescent light casting long shadows, photojournalistic style</textarea>
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">Video Prompt</label>
+                    <textarea class="input" rows="2" style="font-size:12px">Slow dolly out from tight close-up of clenched fists to reveal isolated figure, flickering fluorescent light, handheld camera shake</textarea>
+                  </div>
+                </div>
+                <div class="grid-3">
+                  <div class="input-group">
+                    <label class="input-label">Ken Burns</label>
+                    <select class="input"><option selected>zoom_out</option></select>
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">Pause After</label>
+                    <input class="input" type="number" value="0.5" step="0.5">
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">SFX</label>
+                    <select class="input"><option selected>suspense</option></select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scene 3-5 collapsed -->
+            <div class="card" style="text-align:center;padding:20px;color:var(--text-muted);cursor:pointer" onclick="showToast('Scenes 3-5 would expand here', 'info')">
+              + 3 more scenes (click to expand)
+            </div>
+
+            <div style="display:flex;gap:8px;justify-content:center;padding:12px">
+              <button class="btn">&#43; Add Scene</button>
+              <button class="btn" onclick="showToast('AI writing scene...', 'info')">&#9733; AI Generate Scene</button>
+            </div>
+          </div>
+
+          <!-- Preview Panel -->
+          <div class="editor-preview">
+            <div class="preview-phone">
+              <div class="preview-screen">
+                <div class="preview-play-btn" onclick="showToast('Preview would play here with TTS + Ken Burns', 'info')">&#9654;</div>
+                <span>Preview</span>
+                <span style="font-size:11px">9:16 &middot; ~55s estimated</span>
+              </div>
+            </div>
+
+            <div class="cost-estimator">
+              <h4>&#128176; Cost Estimate</h4>
+              <div class="cost-row">
+                <span>Images (Leonardo &rarr; Pollinations &rarr; DALL-E)</span>
+                <span style="color:var(--text-secondary)">$0.10 <span style="font-size:10px;color:var(--success)">(free if Pollinations)</span></span>
+              </div>
+              <div class="cost-row">
+                <span>Minimax Animation (5 clips)</span>
+                <span style="color:var(--text-secondary)">$1.35</span>
+              </div>
+              <div class="cost-row">
+                <span>TTS (edge-tts)</span>
+                <span style="color:var(--success)">Free</span>
+              </div>
+              <div class="cost-row total">
+                <span>Total Estimated</span>
+                <span style="color:var(--jersey-vault)">$1.45</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('Build queued! Check Build Monitor.', 'success')">&#9654; Build This Story</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: STORY QUEUE ===== -->
+    <div id="page-queue" class="page" style="display:none">
+      <div class="header">
+        <div class="header-title">Story Queue</div>
+        <div class="header-actions">
+          <div class="filter-bar" style="margin:0">
+            <div class="filter-chip active">All</div>
+            <div class="filter-chip" style="border-color:var(--jersey-vault);color:var(--jersey-vault)" onclick="this.classList.toggle('active')">Jersey Vault</div>
+            <div class="filter-chip" style="border-color:var(--caught-trending);color:var(--caught-trending)" onclick="this.classList.toggle('active')">Trending</div>
+            <div class="filter-chip" style="border-color:var(--history-things);color:var(--history-things)" onclick="this.classList.toggle('active')">History</div>
+          </div>
+        </div>
+      </div>
+      <div class="content animate-in">
+        <div class="kanban">
+          <!-- Draft -->
+          <div class="kanban-column">
+            <div class="kanban-header">
+              <span style="color:var(--neutral)">&#9679;</span> Pending <span class="kanban-count">7+</span>
+            </div>
+            <div class="kanban-cards">
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Nigeria 1994 — The Super Eagles Take Flight</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="kanban-card-scenes">5 scenes</span>
+                </div>
+              </div>
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Japan 2022 — The Night Japan Shocked the World</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="kanban-card-scenes">5 scenes</span>
+                </div>
+              </div>
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Croatia 2018 — The Checkered Miracle</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="kanban-card-scenes">5 scenes</span>
+                </div>
+              </div>
+              <div class="kanban-card" draggable="true" style="opacity:0.7">
+                <div class="kanban-card-title" style="color:var(--text-muted)">+ Cameroon 1990, Netherlands 1974, AC Milan 1994...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compliance Review -->
+          <div class="kanban-column">
+            <div class="kanban-header">
+              <span style="color:var(--warning)">&#9679;</span> Compliance <span class="kanban-count">1</span>
+            </div>
+            <div class="kanban-cards">
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Chelsea 2012 — Di Matteo's Miracle</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="status-pill review" style="font-size:9px">Reviewing</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Approved -->
+          <div class="kanban-column">
+            <div class="kanban-header">
+              <span style="color:var(--success)">&#9679;</span> Approved <span class="kanban-count">3</span>
+            </div>
+            <div class="kanban-cards">
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Italy 2006 — Zidane's Last Dance</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="status-pill approved" style="font-size:9px">&#10003; Next Build</span>
+                </div>
+              </div>
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Ajax 1995 — Boys Who Conquered Europe</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="status-pill approved" style="font-size:9px">&#10003; Passed</span>
+                </div>
+              </div>
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Germany 2014 — G&#246;tze's Final</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="status-pill approved" style="font-size:9px">&#10003; Passed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Building -->
+          <div class="kanban-column">
+            <div class="kanban-header">
+              <span style="color:var(--success)">&#9679;</span> Last Built <span class="kanban-count">0 active</span>
+            </div>
+            <div class="kanban-cards">
+              <div class="kanban-card" style="border-color:var(--success)">
+                <div class="kanban-card-title">Man United 1999 — Treble &amp; Solskjaer's Goal</div>
+                <div style="margin:8px 0">
+                  <div class="progress-multi">
+                    <div class="segment" style="width:20%;background:var(--success)"></div>
+                    <div class="segment" style="width:20%;background:var(--success)"></div>
+                    <div class="segment" style="width:20%;background:var(--success)"></div>
+                    <div class="segment" style="width:20%;background:var(--success)"></div>
+                    <div class="segment" style="width:20%;background:var(--success)"></div>
+                  </div>
+                </div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span style="font-size:10px;color:var(--success)">&#10003; Built 08:44 today</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Built -->
+          <div class="kanban-column">
+            <div class="kanban-header">
+              <span style="color:var(--accent)">&#9679;</span> Built <span class="kanban-count">8</span>
+            </div>
+            <div class="kanban-cards">
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Man United 1999 — Treble Glory</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="status-pill built" style="font-size:9px">Today</span>
+                </div>
+              </div>
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Real Madrid 2002 — Galacticos</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="status-pill built" style="font-size:9px">Built</span>
+                </div>
+              </div>
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Liverpool 2005 — Istanbul Miracle</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="status-pill built" style="font-size:9px">Built</span>
+                </div>
+              </div>
+              <div class="kanban-card" draggable="true" style="opacity:0.7">
+                <div class="kanban-card-title" style="color:var(--text-muted)">+ Brazil 2002, France 1998, Barcelona 2009, Argentina 2022, Signed Jersey Museum</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Uploaded -->
+          <div class="kanban-column">
+            <div class="kanban-header">
+              <span style="color:var(--success)">&#9679;</span> Uploaded <span class="kanban-count">110</span>
+            </div>
+            <div class="kanban-cards">
+              <div class="kanban-card" style="opacity:0.8">
+                <div class="kanban-card-title">Man United 1999 — Solskjaer's Goal</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge jersey-vault" style="font-size:9px">&#127941; JV</span>
+                  <span class="status-pill uploaded" style="font-size:9px">&#10003; Live today</span>
+                </div>
+              </div>
+              <div class="kanban-card" style="opacity:0.8">
+                <div class="kanban-card-title">Galatasaray 5-2 Juventus</div>
+                <div class="kanban-card-meta">
+                  <span class="channel-badge caught-trending" style="font-size:9px">&#128293; CIT</span>
+                  <span class="status-pill uploaded" style="font-size:9px">&#10003; Live</span>
+                </div>
+              </div>
+              <div class="kanban-card" style="opacity:0.5">
+                <div class="kanban-card-title" style="color:var(--text-muted)">+ 108 more uploaded (110 total MP4s built)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: BUILD MONITOR ===== -->
+    <div id="page-build" class="page" style="display:none">
+      <div class="header">
+        <div class="header-title">Build Monitor</div>
+        <div class="header-actions">
+          <button class="btn">&#128200; Build History</button>
+          <button class="btn btn-primary" onclick="showToast('Batch build queued for 3 stories', 'info')">&#9654; Batch Build</button>
+        </div>
+      </div>
+      <div class="content animate-in">
+        <!-- Completed Build — Man United 1999 (today) -->
+        <div class="build-card" style="border:1px solid var(--success)">
+          <div class="build-header">
+            <span style="color:var(--success);font-size:18px">&#10003;</span>
+            <div class="build-title">Man United 1999 — The Treble and Solskjaer's Goal</div>
+            <span class="channel-badge jersey-vault">&#127941; Jersey Vault</span>
+            <span style="font-size:12px;color:var(--text-secondary)">Built today 08:44 &middot; Compliance: PASS</span>
+            <span style="font-size:12px;color:var(--success)">Uploaded</span>
+          </div>
+
+          <div class="build-stages">
+            <div class="build-stage complete"><div class="build-stage-bar"></div><div class="build-stage-label" style="color:var(--success)">Images &#10003;</div></div>
+            <div class="build-stage complete"><div class="build-stage-bar"></div><div class="build-stage-label" style="color:var(--success)">Animation &#10003;</div></div>
+            <div class="build-stage complete"><div class="build-stage-bar"></div><div class="build-stage-label" style="color:var(--success)">TTS &#10003;</div></div>
+            <div class="build-stage complete"><div class="build-stage-bar"></div><div class="build-stage-label" style="color:var(--success)">Compose &#10003;</div></div>
+            <div class="build-stage complete"><div class="build-stage-bar"></div><div class="build-stage-label" style="color:var(--success)">Export &#10003;</div></div>
+          </div>
+
+          <div class="build-scenes">
+            <div class="scene-thumb complete" style="background:linear-gradient(135deg,#2d0000,#1a1a2e)">
+              <span class="scene-label" style="color:var(--success)">&#10003; Scene 1</span>
+            </div>
+            <div class="scene-thumb complete" style="background:linear-gradient(135deg,#1a1a2e,#0d1117)">
+              <span class="scene-label" style="color:var(--success)">&#10003; Scene 2</span>
+            </div>
+            <div class="scene-thumb complete" style="background:linear-gradient(135deg,#16213e,#1a1a2e)">
+              <span class="scene-label" style="color:var(--success)">&#10003; Scene 3</span>
+            </div>
+            <div class="scene-thumb complete" style="background:linear-gradient(135deg,#1a2e16,#0d1117)">
+              <span class="scene-label" style="color:var(--success)">&#10003; Scene 4</span>
+            </div>
+            <div class="scene-thumb complete" style="background:linear-gradient(135deg,#2e1a16,#1a1a2e)">
+              <span class="scene-label" style="color:var(--success)">&#10003; Scene 5</span>
+            </div>
+          </div>
+
+          <!-- Build Log -->
+          <div style="padding:0 16px 16px">
+            <div style="background:var(--bg);border-radius:6px;padding:12px;font-family:monospace;font-size:11px;color:var(--text-muted);max-height:120px;overflow-y:auto;line-height:1.8">
+              <div><span style="color:var(--text-muted)">[08:34]</span> Selected: 06_manchester_united_1999.json</div>
+              <div><span style="color:var(--text-muted)">[08:34]</span> Title: Manchester United 1999 — The Treble and Solskjaer's Goal</div>
+              <div><span style="color:var(--success)">[08:34]</span> COMPLIANCE: PASS</div>
+              <div><span style="color:var(--success)">[OK]</span> Leonardo: 5/5 images generated (fallback: Pollinations.ai &rarr; DALL-E)</div>
+              <div><span style="color:var(--success)">[OK]</span> edge-tts: 5/5 narrations synthesized</div>
+              <div><span style="color:var(--success)">[OK]</span> Minimax: 5/5 scenes animated</div>
+              <div><span style="color:var(--success)">[08:44]</span> Build complete! Queue: 35 stories remaining</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Queued Build — Italy 2006 -->
+        <div class="build-card">
+          <div class="build-header">
+            <span style="color:var(--text-muted);font-size:18px">&#9679;</span>
+            <div class="build-title">Italy 2006 — Zidane's Last Dance</div>
+            <span class="channel-badge jersey-vault">&#127941; Jersey Vault</span>
+            <span style="font-size:12px;color:var(--text-secondary)">Next morning build &middot; 7:15 AM</span>
+            <span style="font-size:12px;color:var(--warning)">~$1.35 est.</span>
+            <span class="status-pill approved" style="font-size:10px">&#9679; Queued</span>
+          </div>
+        </div>
+
+        <!-- Previous Build — Feb 28 -->
+        <div class="build-card">
+          <div class="build-header">
+            <span style="color:var(--success);font-size:18px">&#10003;</span>
+            <div class="build-title">Previous Build</div>
+            <span class="channel-badge jersey-vault">&#127941; Jersey Vault</span>
+            <span style="font-size:12px;color:var(--text-secondary)">Feb 28, 20:49 &middot; Queue: 36 remaining</span>
+            <span style="font-size:12px;color:var(--success)">Complete</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: CHANNELS ===== -->
+    <div id="page-channels" class="page" style="display:none">
+      <div class="header">
+        <div class="header-title">Channel Manager</div>
+        <div class="header-actions">
+          <button class="btn btn-primary">&#43; Connect Channel</button>
+        </div>
+      </div>
+      <div class="content animate-in">
+        <div class="grid-3" style="margin-bottom:24px">
+          <!-- Jersey Vault -->
+          <div class="channel-card">
+            <div class="channel-card-banner" style="background:linear-gradient(135deg,#2d1f00,#1a1200)">&#127941;</div>
+            <div class="channel-card-body">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <div class="channel-card-name">The Jersey Vault</div>
+                <div class="api-key-status connected"></div>
+              </div>
+              <div class="channel-card-type">Shorts (9:16) &middot; Christopher &middot; 2x/day &middot; 43 in queue</div>
+              <div class="channel-card-stats">
+                <div><div class="channel-stat-value" style="color:var(--jersey-vault)">1,280</div><div class="channel-stat-label">Subs</div></div>
+                <div><div class="channel-stat-value">6,049</div><div class="channel-stat-label">Views</div></div>
+                <div><div class="channel-stat-value">14.8h</div><div class="channel-stat-label">Watch Hrs</div></div>
+              </div>
+            </div>
+            <div class="card-footer" style="display:flex;gap:6px">
+              <button class="btn btn-sm btn-ghost" style="flex:1" onclick="showPage('analytics')">Analytics</button>
+              <button class="btn btn-sm btn-ghost" style="flex:1">Schedule</button>
+              <button class="btn btn-sm btn-ghost" style="flex:1">Settings</button>
+            </div>
+          </div>
+
+          <!-- Caught It Trending -->
+          <div class="channel-card">
+            <div class="channel-card-banner" style="background:linear-gradient(135deg,#2d0000,#1a0000)">&#128293;</div>
+            <div class="channel-card-body">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <div class="channel-card-name">Caught It Trending</div>
+                <div class="api-key-status connected"></div>
+              </div>
+              <div class="channel-card-type">Shorts (9:16) &middot; Aria &middot; 1x/day &middot; 50 stories &middot; 29 in upload queue</div>
+              <div class="channel-card-stats">
+                <div><div class="channel-stat-value" style="color:var(--caught-trending)">23</div><div class="channel-stat-label">Subs</div></div>
+                <div><div class="channel-stat-value">284</div><div class="channel-stat-label">Views</div></div>
+                <div><div class="channel-stat-value">0.7h</div><div class="channel-stat-label">Watch Hrs</div></div>
+              </div>
+            </div>
+            <div class="card-footer" style="display:flex;gap:6px">
+              <button class="btn btn-sm btn-ghost" style="flex:1">Analytics</button>
+              <button class="btn btn-sm btn-ghost" style="flex:1">Schedule</button>
+              <button class="btn btn-sm btn-ghost" style="flex:1">Settings</button>
+            </div>
+          </div>
+
+          <!-- History of Things -->
+          <div class="channel-card" style="opacity:0.7">
+            <div class="channel-card-banner" style="background:linear-gradient(135deg,#001a2d,#000d1a)">&#128214;</div>
+            <div class="channel-card-body">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <div class="channel-card-name">History of Things</div>
+                <div class="api-key-status disconnected"></div>
+              </div>
+              <div class="channel-card-type">Longform (16:9) &middot; Christopher &middot; Paused &middot; 12 scripts</div>
+              <div class="channel-card-stats">
+                <div><div class="channel-stat-value" style="color:var(--history-things)">0</div><div class="channel-stat-label">Subs</div></div>
+                <div><div class="channel-stat-value">0</div><div class="channel-stat-label">Views</div></div>
+                <div><div class="channel-stat-value">0h</div><div class="channel-stat-label">Watch Hrs</div></div>
+              </div>
+            </div>
+            <div class="card-footer" style="display:flex;gap:6px">
+              <button class="btn btn-sm btn-primary" style="flex:1" onclick="showToast('Connecting YouTube OAuth...', 'info')">Connect YouTube</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Videos Table -->
+        <h3 style="font-size:15px;margin-bottom:12px;font-weight:600">Top Performing Videos</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Video</th><th>Channel</th><th>Views</th><th>Likes</th><th>Like %</th><th>Watch Time</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:500">St. Regis Venice — Most Beautiful Hotel View</td>
+                <td><span class="channel-badge jersey-vault" style="font-size:9px">JV</span></td>
+                <td>1,613</td><td>9</td><td>0.6%</td><td>3.2h</td>
+                <td><span class="status-pill uploaded">Live</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">Signed Rijkaard Framed Shirt</td>
+                <td><span class="channel-badge jersey-vault" style="font-size:9px">JV</span></td>
+                <td>1,520</td><td>171</td><td style="color:var(--success)">11.2%</td><td>2.8h</td>
+                <td><span class="status-pill uploaded">Live</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">Inside the Ferrari Store</td>
+                <td><span class="channel-badge jersey-vault" style="font-size:9px">JV</span></td>
+                <td>751</td><td>67</td><td style="color:var(--success)">8.9%</td><td>1.5h</td>
+                <td><span class="status-pill uploaded">Live</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">Driving Through Antalya</td>
+                <td><span class="channel-badge jersey-vault" style="font-size:9px">JV</span></td>
+                <td>621</td><td>7</td><td>1.1%</td><td>1.2h</td>
+                <td><span class="status-pill uploaded">Live</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">Sunset on a Private Yacht in Antalya</td>
+                <td><span class="channel-badge jersey-vault" style="font-size:9px">JV</span></td>
+                <td>417</td><td>7</td><td>1.7%</td><td>0.8h</td>
+                <td><span class="status-pill uploaded">Live</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">Signed Haaland Shirt — The Real Deal</td>
+                <td><span class="channel-badge jersey-vault" style="font-size:9px">JV</span></td>
+                <td>284</td><td>106</td><td style="color:var(--success);font-weight:700">37.3%</td><td>1.1h</td>
+                <td><span class="status-pill uploaded">Live</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: COMPLIANCE ===== -->
+    <div id="page-compliance" class="page" style="display:none">
+      <div class="header">
+        <div class="header-title">Compliance Center</div>
+        <div class="header-actions">
+          <button class="btn">&#128200; Compliance History</button>
+          <button class="btn btn-primary" onclick="showToast('Select stories for batch review...', 'info')">&#128737; Batch Review</button>
+        </div>
+      </div>
+      <div class="content animate-in">
+        <div class="stat-grid" style="margin-bottom:24px">
+          <div class="stat-card">
+            <div class="stat-label">&#128737; Total Reviewed</div>
+            <div class="stat-value">42</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label" style="color:var(--success)">&#10003; Passed</div>
+            <div class="stat-value" style="color:var(--success)">39</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label" style="color:var(--warning)">&#9888; Fixed & Passed</div>
+            <div class="stat-value" style="color:var(--warning)">3</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label" style="color:var(--error)">&#10007; Rejected</div>
+            <div class="stat-value" style="color:var(--error)">0</div>
+          </div>
+        </div>
+
+        <h3 style="font-size:15px;margin-bottom:12px;font-weight:600">Recent Reviews</h3>
+
+        <div class="compliance-result">
+          <div class="compliance-result-header">
+            <div class="compliance-icon pass">&#10003;</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:13px">Ivory Coast 2006 — The Jersey That Stopped a War</div>
+              <div style="font-size:11px;color:var(--text-secondary)">Reviewed 4h ago &middot; Jersey Vault</div>
+            </div>
+            <span class="status-pill approved">PASS</span>
+          </div>
+          <div class="compliance-detail">
+            No issues found. Content handles civil war context respectfully with focus on football as a force for peace. All metadata within guidelines. AI disclosure flag set correctly.
+          </div>
+        </div>
+
+        <div class="compliance-result">
+          <div class="compliance-result-header">
+            <div class="compliance-icon pass" style="background:rgba(214,158,46,0.2);color:var(--warning)">&#9888;</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:13px">Iraq 2007 — Football in a War Zone</div>
+              <div style="font-size:11px;color:var(--text-secondary)">Reviewed 6h ago &middot; Jersey Vault</div>
+            </div>
+            <span class="status-pill review">EDITS NEEDED</span>
+          </div>
+          <div class="compliance-detail">
+            <strong>Issue:</strong> YouTube title contains "at War" which may trigger content warnings.<br>
+            <strong>Fix:</strong> Change "at War" to "in Crisis" in title and description.<br>
+            <strong>Status:</strong> Awaiting resubmission.
+          </div>
+        </div>
+
+        <div class="compliance-result">
+          <div class="compliance-result-header">
+            <div class="compliance-icon pass">&#10003;</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:13px">George Best — The Fifth Beatle</div>
+              <div style="font-size:11px;color:var(--text-secondary)">Reviewed 2d ago &middot; Jersey Vault</div>
+            </div>
+            <span class="status-pill approved">PASS (after fix)</span>
+          </div>
+          <div class="compliance-detail">
+            Originally flagged for alcohol references. Softened language in scenes 3 and 4. Resubmitted and passed.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: ANALYTICS ===== -->
+    <div id="page-analytics" class="page" style="display:none">
+      <div class="header">
+        <div class="header-title">Analytics Dashboard</div>
+        <div class="header-actions">
+          <select class="input" style="width:140px;padding:6px 10px">
+            <option>Last 7 days</option>
+            <option>Last 30 days</option>
+            <option>Last 90 days</option>
+            <option>All time</option>
+          </select>
+          <button class="btn">&#8681; Export CSV</button>
+        </div>
+      </div>
+      <div class="content animate-in">
+        <!-- Key Metrics -->
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">&#128065; Views (7d)</div>
+            <div class="stat-value">2,891</div>
+            <div class="stat-trend up">&#9650; +34% vs prev week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">&#9201; Watch Hours (7d)</div>
+            <div class="stat-value">18.4h</div>
+            <div class="stat-trend up">&#9650; +52% vs prev week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">&#128077; Avg Engagement</div>
+            <div class="stat-value">8.7%</div>
+            <div class="stat-trend up">&#9650; +2.1pts</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">&#128176; Cost/1K Views</div>
+            <div class="stat-value">$4.82</div>
+            <div class="stat-trend down">&#9660; -$1.20 (improving)</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid-2" style="margin-bottom:24px">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Views Over Time</h3>
+              <div style="display:flex;gap:8px">
+                <span style="font-size:11px;display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:var(--jersey-vault);border-radius:2px;display:inline-block"></span> JV</span>
+                <span style="font-size:11px;display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;background:var(--caught-trending);border-radius:2px;display:inline-block"></span> CIT</span>
+              </div>
+            </div>
+            <div class="chart-body" id="views-chart"></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Watch Hours Progress</h3>
+              <span style="font-size:12px;color:var(--text-secondary)">14.8h / 4,000h (0.37%)</span>
+            </div>
+            <div class="chart-body" id="hours-chart"></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Cost Per Video</h3>
+              <span style="font-size:12px;color:var(--success)">Trending down</span>
+            </div>
+            <div class="chart-body" id="cost-chart"></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Subscriber Growth</h3>
+              <span style="font-size:12px;color:var(--text-secondary)">+142 this week</span>
+            </div>
+            <div class="chart-body" id="subs-chart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: COMPILATION BUILDER ===== -->
+    <div id="page-compilation" class="page" style="display:none">
+      <div class="header">
+        <div class="header-title">Compilation Builder</div>
+        <div class="header-actions">
+          <button class="btn">&#128196; Load Config</button>
+          <button class="btn btn-primary" onclick="showToast('Compilation build started...', 'success')">&#9654; Build Compilation</button>
+        </div>
+      </div>
+      <div class="content animate-in">
+        <div class="compilation-layout">
+          <div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-body">
+                <div class="grid-2">
+                  <div class="input-group">
+                    <label class="input-label">Compilation Title</label>
+                    <input class="input" value="10 Jerseys That Changed Football Forever">
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">Channel</label>
+                    <select class="input"><option>The Jersey Vault</option></select>
+                  </div>
+                </div>
+                <div class="grid-3">
+                  <div class="input-group">
+                    <label class="input-label">Intro Card</label>
+                    <select class="input"><option>Default (Title + Channel)</option><option>Custom Image</option><option>None</option></select>
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">Chapter Cards</label>
+                    <select class="input"><option selected>Between Each Short</option><option>None</option></select>
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">Outro</label>
+                    <select class="input"><option selected>Subscribe CTA</option><option>None</option></select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="font-size:15px;margin-bottom:12px;font-weight:600">Timeline — Drag to Reorder</h3>
+            <div class="compilation-timeline">
+              <div class="compilation-item">
+                <div class="compilation-num">1</div>
+                <div class="compilation-info">
+                  <div class="compilation-title-text">Brazil 2002 — Ronaldo's Redemption</div>
+                  <div class="compilation-duration">0:58 &middot; 5 scenes &middot; Uploaded</div>
+                </div>
+                <span class="channel-badge jersey-vault" style="font-size:9px">JV</span>
+              </div>
+              <div class="compilation-item">
+                <div class="compilation-num">2</div>
+                <div class="compilation-info">
+                  <div class="compilation-title-text">France 1998 — Zidane's Moment of Glory</div>
+                  <div class="compilation-duration">1:02 &middot; 5 scenes &middot; Uploaded</div>
+                </div>
+                <span class="channel-badge jersey-vault" style="font-size:9px">JV</span>
+              </div>
+              <div class="compilation-item">
+                <div class="compilation-num">3</div>
+                <div class="compilation-info">
+                  <div class="compilation-title-text">Barcelona 2009 — The Greatest Team</div>
+                  <div class="compilation-duration">0:55 &middot; 5 scenes &middot; Uploaded</div>
+                </div>
+                <span class="channel-badge jersey-vault" style="font-size:9px">JV</span>
+              </div>
+              <div class="compilation-item">
+                <div class="compilation-num">4</div>
+                <div class="compilation-info">
+                  <div class="compilation-title-text">Man United 1999 — Treble Glory</div>
+                  <div class="compilation-duration">0:55 &middot; 5 scenes &middot; Uploaded</div>
+                </div>
+                <span class="channel-badge jersey-vault" style="font-size:9px">JV</span>
+              </div>
+              <div class="compilation-item">
+                <div class="compilation-num">5</div>
+                <div class="compilation-info">
+                  <div class="compilation-title-text">Liverpool 2005 — Istanbul Miracle</div>
+                  <div class="compilation-duration">1:01 &middot; 5 scenes &middot; Uploaded</div>
+                </div>
+                <span class="channel-badge jersey-vault" style="font-size:9px">JV</span>
+              </div>
+              <div class="compilation-item" style="opacity:0.6;border-style:dashed">
+                <div style="font-size:24px;color:var(--text-muted);width:24px;text-align:center">+</div>
+                <div class="compilation-info">
+                  <div class="compilation-title-text" style="color:var(--text-muted)">+ 5 more shorts in compilation (10 total) &middot; UPLOADED to YouTube</div>
+                  <div class="compilation-duration" style="color:var(--success)">Total: 11:48 &middot; Live: youtube.com/watch?v=tNfWVif7ImU</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview Panel -->
+          <div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-header"><span style="font-weight:600">Compilation Preview</span></div>
+              <div class="card-body" style="text-align:center">
+                <div style="background:var(--bg);border-radius:8px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;margin-bottom:12px">
+                  <div class="preview-play-btn" onclick="showToast('Preview compilation', 'info')">&#9654;</div>
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary)">16:9 &middot; 10 shorts + chapter cards &middot; 11:48</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><span style="font-weight:600">Stats</span></div>
+              <div class="card-body">
+                <div class="cost-row"><span>Total Duration</span><span style="font-weight:600">11:48</span></div>
+                <div class="cost-row"><span>Shorts Included</span><span>10 of 43</span></div>
+                <div class="cost-row"><span>Chapter Cards</span><span>11 (intro + 10)</span></div>
+                <div class="cost-row"><span>Outro</span><span>Subscribe CTA</span></div>
+                <div class="cost-row total"><span>Format</span><span style="color:var(--success)">YPP Eligible (>8min)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: TRENDS ===== -->
+    <div id="page-trends" class="page" style="display:none">
+      <div class="header">
+        <div class="header-title">Trend Scanner</div>
+        <div class="header-actions">
+          <button class="btn" onclick="showToast('Scanning for new trends...', 'info')">&#8635; Rescan</button>
+          <select class="input" style="width:140px;padding:6px 10px">
+            <option>All Categories</option>
+            <option>Sports</option>
+            <option>Tech</option>
+            <option>Entertainment</option>
+            <option>Politics</option>
+          </select>
+        </div>
+      </div>
+      <div class="content animate-in">
+        <div style="margin-bottom:20px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:18px">&#128293;</span>
+          <span style="font-size:13px;color:var(--text-secondary)"><b style="color:var(--text-primary)">29 stories</b> in Caught It Trending upload queue &middot; Top 5 shown below &middot; 1/day at 10 AM Amman &middot; <span style="color:var(--success)">Mascot auto-overlay on upload</span> &middot; <span style="color:var(--success)">Comment replies 3x/day</span></span>
+        </div>
+
+        <div class="trend-grid">
+          <div class="trend-card" onclick="showToast('Story scripted and in upload queue', 'success')">
+            <div class="trend-score">
+              <div class="trend-score-bar"><div class="trend-score-fill" style="width:95%;background:var(--success)"></div></div>
+              <span class="trend-score-value" style="color:var(--success)">95</span>
+            </div>
+            <div class="trend-title">Oscars 2026 Preview: Can Sinners Break THIS Record?</div>
+            <div class="trend-desc">Awards season peak. Sinners is the frontrunner — will it break the record for most Oscar wins by a horror film? Massive search volume.</div>
+            <div class="trend-signals">
+              <span class="trend-signal" style="background:rgba(229,62,62,0.15);color:var(--error)">&#128293; Twitter #1</span>
+              <span class="trend-signal" style="background:rgba(56,161,105,0.15);color:var(--success)">Queue #1</span>
+              <span class="trend-signal">Entertainment</span>
+              <span class="trend-signal">Awards</span>
+            </div>
+          </div>
+
+          <div class="trend-card" onclick="showToast('Story scripted and in upload queue', 'success')">
+            <div class="trend-score">
+              <div class="trend-score-bar"><div class="trend-score-fill" style="width:91%;background:var(--success)"></div></div>
+              <span class="trend-score-value" style="color:var(--success)">91</span>
+            </div>
+            <div class="trend-title">They Just Sold EVERY Bitcoin They Had</div>
+            <div class="trend-desc">Major institutional sell-off. Bitcoin dropped sharply as whales dumped holdings. Perfect for dramatic storytelling — numbers, panic, aftermath.</div>
+            <div class="trend-signals">
+              <span class="trend-signal" style="background:rgba(49,130,206,0.15);color:var(--info)">&#128200; Google Trends</span>
+              <span class="trend-signal" style="background:rgba(56,161,105,0.15);color:var(--success)">Queue #2</span>
+              <span class="trend-signal">Finance</span>
+              <span class="trend-signal">Crypto</span>
+            </div>
+          </div>
+
+          <div class="trend-card" onclick="showToast('Story scripted and in upload queue', 'success')">
+            <div class="trend-score">
+              <div class="trend-score-bar"><div class="trend-score-fill" style="width:88%;background:var(--success)"></div></div>
+              <span class="trend-score-value" style="color:var(--success)">88</span>
+            </div>
+            <div class="trend-title">This Indian Film Just Beat Disney at the BAFTAs</div>
+            <div class="trend-desc">Bollywood upset at the BAFTAs. Indian cinema making global waves — underdog story angle is pure gold for Caught It Trending format.</div>
+            <div class="trend-signals">
+              <span class="trend-signal" style="background:rgba(229,62,62,0.15);color:var(--error)">&#128293; Reddit Hot</span>
+              <span class="trend-signal" style="background:rgba(56,161,105,0.15);color:var(--success)">Queue #3</span>
+              <span class="trend-signal">Entertainment</span>
+              <span class="trend-signal">Film</span>
+            </div>
+          </div>
+
+          <div class="trend-card" onclick="showToast('Story scripted and in upload queue', 'success')">
+            <div class="trend-score">
+              <div class="trend-score-bar"><div class="trend-score-fill" style="width:86%;background:var(--success)"></div></div>
+              <span class="trend-score-value" style="color:var(--success)">86</span>
+            </div>
+            <div class="trend-title">Meta Just Made the Biggest AI Deal in History</div>
+            <div class="trend-desc">Meta signs massive NVIDIA deal for AI infrastructure. Biggest single AI hardware purchase ever. The numbers are staggering.</div>
+            <div class="trend-signals">
+              <span class="trend-signal" style="background:rgba(49,130,206,0.15);color:var(--info)">&#128200; Google Trends</span>
+              <span class="trend-signal" style="background:rgba(56,161,105,0.15);color:var(--success)">Queue #4</span>
+              <span class="trend-signal">Tech</span>
+              <span class="trend-signal">AI</span>
+            </div>
+          </div>
+
+          <div class="trend-card" onclick="showToast('Story scripted and in upload queue', 'success')">
+            <div class="trend-score">
+              <div class="trend-score-bar"><div class="trend-score-fill" style="width:82%;background:var(--warning)"></div></div>
+              <span class="trend-score-value" style="color:var(--warning)">82</span>
+            </div>
+            <div class="trend-title">Delete in 48 Hours or Lose Your Entire UK Market</div>
+            <div class="trend-desc">New UK revenge image law takes effect. Platforms must delete flagged content in 48 hours or face market bans. Massive implications for tech companies.</div>
+            <div class="trend-signals">
+              <span class="trend-signal" style="background:rgba(214,158,46,0.15);color:var(--warning)">Medium Saturation</span>
+              <span class="trend-signal" style="background:rgba(56,161,105,0.15);color:var(--success)">Queue #5</span>
+              <span class="trend-signal">Law</span>
+              <span class="trend-signal">Tech</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: SETTINGS ===== -->
+    <div id="page-settings" class="page" style="display:none">
+      <div class="header">
+        <div class="header-title">Settings</div>
+      </div>
+      <div class="content animate-in">
+        <div class="settings-grid">
+          <div class="settings-nav">
+            <div class="settings-nav-item active" onclick="showSettingsTab('api-keys')">API Keys</div>
+            <div class="settings-nav-item" onclick="showSettingsTab('voices')">Voices</div>
+            <div class="settings-nav-item" onclick="showSettingsTab('schedule')">Build Schedule</div>
+            <div class="settings-nav-item" onclick="showSettingsTab('team')">Team</div>
+            <div class="settings-nav-item" onclick="showSettingsTab('billing')">Billing & Usage</div>
+          </div>
+
+          <div class="settings-section" id="settings-api-keys">
+            <h3>API Keys</h3>
+            <p>Manage your AI service connections. Keys are encrypted at rest.</p>
+
+            <div class="api-key-row">
+              <div class="api-key-name">Leonardo AI</div>
+              <div class="api-key-value">sk-leo-****...****x7f2</div>
+              <div class="api-key-status connected" title="Connected"></div>
+              <button class="btn btn-sm btn-ghost">Test</button>
+              <button class="btn btn-sm btn-ghost">Edit</button>
+            </div>
+
+            <div class="api-key-row">
+              <div class="api-key-name">Minimax</div>
+              <div class="api-key-value">mm-****...****p3q1</div>
+              <div class="api-key-status connected" title="Connected"></div>
+              <button class="btn btn-sm btn-ghost">Test</button>
+              <button class="btn btn-sm btn-ghost">Edit</button>
+            </div>
+
+            <div class="api-key-row">
+              <div class="api-key-name">Runway</div>
+              <div class="api-key-value">rw-****...****k9m4</div>
+              <div class="api-key-status connected" title="Connected"></div>
+              <button class="btn btn-sm btn-ghost">Test</button>
+              <button class="btn btn-sm btn-ghost">Edit</button>
+            </div>
+
+            <div class="api-key-row" style="border-style:dashed;background:transparent">
+              <div class="api-key-name" style="color:var(--success)">Pollinations.ai</div>
+              <div class="api-key-value" style="color:var(--success)">pk_****...****H6 <span style="font-weight:600">FREE TIER</span></div>
+              <div class="api-key-status connected" title="Connected — Free"></div>
+              <button class="btn btn-sm btn-ghost">Test</button>
+              <button class="btn btn-sm btn-ghost">Edit</button>
+            </div>
+
+            <div class="api-key-row" style="border-color:var(--error)">
+              <div class="api-key-name">Kling</div>
+              <div class="api-key-value">ak-****...****j2n8 + sk-**** <span style="color:var(--error);font-weight:600">DEPLETED</span></div>
+              <div class="api-key-status disconnected" title="Out of credits"></div>
+              <button class="btn btn-sm btn-ghost">Test</button>
+              <button class="btn btn-sm btn-ghost">Edit</button>
+            </div>
+
+            <div class="api-key-row">
+              <div class="api-key-name">Hedra (Avatar)</div>
+              <div class="api-key-value">sk_hedra_****...****cjdx <span style="font-weight:600;color:var(--error)">DEPLETED (0/5,400)</span> <span style="font-size:10px;color:var(--text-muted)">&middot; 402 Payment Required &mdash; falls back to 2D avatar</span></div>
+              <div class="api-key-status" style="background:var(--error)" title="Depleted"></div>
+              <button class="btn btn-sm btn-ghost">Test</button>
+              <button class="btn btn-sm btn-ghost">Edit</button>
+            </div>
+
+            <div class="api-key-row">
+              <div class="api-key-name">YouTube</div>
+              <div class="api-key-value">OAuth2 — 2 channels connected</div>
+              <div class="api-key-status connected" title="Connected"></div>
+              <button class="btn btn-sm btn-ghost">Reconnect</button>
+            </div>
+
+            <div class="api-key-row" style="border-style:dashed;background:transparent">
+              <div class="api-key-name" style="color:var(--text-muted)">Pexels</div>
+              <div class="api-key-value" style="color:var(--text-muted)">Free tier — no key required</div>
+              <div class="api-key-status connected"></div>
+            </div>
+
+            <div style="margin-top:16px">
+              <h4 style="font-size:14px;margin-bottom:8px">API Credit Balances</h4>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
+                <div class="stat-card">
+                  <div class="stat-label">Minimax</div>
+                  <div class="stat-value" style="font-size:20px;color:var(--warning)">$10.80</div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:45%;background:var(--warning)"></div></div>
+                  <div style="font-size:10px;color:var(--warning);margin-top:4px">Low — primary engine</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Runway</div>
+                  <div class="stat-value" style="font-size:20px">~$8.00</div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:32%;background:var(--warning)"></div></div>
+                </div>
+                <div class="stat-card" style="border-color:var(--error)">
+                  <div class="stat-label" style="color:var(--error)">Kling</div>
+                  <div class="stat-value" style="font-size:20px;color:var(--error)">$0.00</div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--error)"></div></div>
+                  <div style="font-size:10px;color:var(--error);margin-top:4px">OUT OF CREDITS</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Leonardo AI</div>
+                  <div class="stat-value" style="font-size:20px;color:var(--warning)">$7.54</div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:40%;background:var(--warning)"></div></div>
+                  <div style="font-size:10px;color:var(--text-muted);margin-top:4px">Prepaid credits</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .main -->
+</div><!-- end .app -->
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="modal-title">New Story</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">&#10005;</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <div class="input-group">
+        <label class="input-label">Story Title</label>
+        <input class="input" placeholder="e.g., Brazil 2002 — Ronaldo's Redemption">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Channel</label>
+        <select class="input">
+          <option>The Jersey Vault</option>
+          <option>Caught It Trending</option>
+          <option>History of Things</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Number of Scenes</label>
+        <input class="input" type="number" value="5" min="3" max="20">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal();showToast('Story created! Opening editor...','success');showPage('editor')">Create Story</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== PAGE NAVIGATION =====
+function showPage(pageId) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  // Show target
+  const page = document.getElementById('page-' + pageId);
+  if (page) {
+    page.style.display = 'block';
+    // Re-trigger animation
+    const content = page.querySelector('.content');
+    if (content) {
+      content.classList.remove('animate-in');
+      void content.offsetWidth;
+      content.classList.add('animate-in');
+    }
+  }
+  // Update nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  // Render charts if analytics
+  if (pageId === 'analytics') renderCharts();
+}
+
+// ===== TOAST NOTIFICATIONS =====
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toasts');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  const icons = { success: '&#10003;', error: '&#10007;', info: '&#9432;' };
+  toast.innerHTML = '<span style="font-size:16px">' + (icons[type] || icons.info) + '</span><span>' + message + '</span>';
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(-8px)'; setTimeout(() => toast.remove(), 200); }, 3000);
+}
+
+// ===== JSON VIEW TOGGLE =====
+function toggleJsonView() {
+  const jv = document.getElementById('json-view');
+  jv.style.display = jv.style.display === 'none' ? 'block' : 'none';
+}
+
+// ===== CHARACTER COUNTER =====
+function updateCharCount(input, countId, max) {
+  const count = input.value.length;
+  const el = document.getElementById(countId);
+  el.textContent = count + '/' + max;
+  el.className = 'char-count' + (count > max ? ' error' : count > max * 0.9 ? ' warning' : '');
+}
+
+// ===== COST ESTIMATOR =====
+function updateCost(engine) {
+  const costs = { minimax: 1.35, runway: 1.25, kling: 3.15, kenburns: 0 };
+  const labels = { minimax: 'Minimax', runway: 'Runway', kling: 'Kling', kenburns: 'Ken Burns' };
+  // This would update the cost panel — demo only
+  showToast('Engine: ' + labels[engine] + ' — Est. $' + (costs[engine] + 0.10).toFixed(2) + '/video', 'info');
+}
+
+// ===== MODAL =====
+function openModal(title) {
+  document.getElementById('modal-title').textContent = title || 'New Story';
+  document.getElementById('modal-overlay').classList.add('visible');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+}
+
+// ===== SETTINGS TABS =====
+function showSettingsTab(tab) {
+  document.querySelectorAll('.settings-nav-item').forEach(i => i.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  showToast('Settings: ' + tab.replace('-', ' '), 'info');
+}
+
+// ===== CHARTS (Simple bar charts) =====
+function renderCharts() {
+  renderBarChart('views-chart', [
+    { label: 'Mon', jv: 180, cit: 40 },
+    { label: 'Tue', jv: 220, cit: 55 },
+    { label: 'Wed', jv: 340, cit: 80 },
+    { label: 'Thu', jv: 290, cit: 120 },
+    { label: 'Fri', jv: 410, cit: 95 },
+    { label: 'Sat', jv: 520, cit: 140 },
+    { label: 'Sun', jv: 380, cit: 110 },
+  ], ['var(--jersey-vault)', 'var(--caught-trending)']);
+
+  renderSimpleChart('hours-chart', [1.2, 2.4, 4.1, 6.8, 9.2, 12.1, 14.8], 'var(--success)', 'Watch Hours');
+  renderSimpleChart('cost-chart', [2.40, 2.10, 1.80, 1.65, 1.45, 1.30, 1.24], 'var(--warning)', '$/video');
+  renderSimpleChart('subs-chart', [1180, 1200, 1220, 1240, 1255, 1268, 1280], 'var(--info)', 'Subscribers');
+}
+
+function renderBarChart(containerId, data, colors) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  const maxVal = Math.max(...data.map(d => d.jv + d.cit));
+
+  data.forEach(d => {
+    const group = document.createElement('div');
+    group.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;justify-content:flex-end;height:100%';
+
+    const barGroup = document.createElement('div');
+    barGroup.style.cssText = 'display:flex;gap:2px;align-items:flex-end;flex:1;width:100%';
+
+    const bar1 = document.createElement('div');
+    bar1.className = 'chart-bar';
+    bar1.style.cssText = 'flex:1;background:' + colors[0] + ';height:' + (d.jv / maxVal * 100) + '%;border-radius:3px 3px 0 0';
+    bar1.innerHTML = '<div class="tooltip">' + d.label + ': ' + d.jv + ' views (JV)</div>';
+
+    const bar2 = document.createElement('div');
+    bar2.className = 'chart-bar';
+    bar2.style.cssText = 'flex:1;background:' + colors[1] + ';height:' + (d.cit / maxVal * 100) + '%;border-radius:3px 3px 0 0';
+    bar2.innerHTML = '<div class="tooltip">' + d.label + ': ' + d.cit + ' views (CIT)</div>';
+
+    barGroup.appendChild(bar1);
+    barGroup.appendChild(bar2);
+
+    const label = document.createElement('div');
+    label.style.cssText = 'font-size:10px;color:var(--text-muted);margin-top:4px';
+    label.textContent = d.label;
+
+    group.appendChild(barGroup);
+    group.appendChild(label);
+    container.appendChild(group);
+  });
+}
+
+function renderSimpleChart(containerId, data, color, tooltipLabel) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  const maxVal = Math.max(...data);
+  const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  data.forEach((val, i) => {
+    const group = document.createElement('div');
+    group.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%';
+
+    const bar = document.createElement('div');
+    bar.className = 'chart-bar';
+    bar.style.cssText = 'width:70%;background:' + color + ';height:' + (val / maxVal * 100) + '%;border-radius:3px 3px 0 0;opacity:' + (0.5 + (i / data.length) * 0.5);
+    bar.innerHTML = '<div class="tooltip">' + labels[i] + ': ' + (typeof val === 'number' && val < 100 ? val.toFixed(2) : val) + ' ' + tooltipLabel + '</div>';
+
+    const label = document.createElement('div');
+    label.style.cssText = 'font-size:10px;color:var(--text-muted);margin-top:4px';
+    label.textContent = labels[i];
+
+    group.appendChild(bar);
+    group.appendChild(label);
+    container.appendChild(group);
+  });
+}
+
+// ===== LIVE PRODUCTION STATUS =====
+// No active build right now — Man United 1999 was completed at 08:44 today
+// Next build: Italy 2006 at 7:15 AM tomorrow
+
+// Show initial toast
+setTimeout(() => showToast('Shorts Factory — LIVE PRODUCTION. Last build: Man United 1999 (08:44 today). Queue: 35 remaining.', 'info'), 500);
+setTimeout(() => showToast('Warning: Kling AI OUT OF CREDITS. Minimax $11.30 remaining.', 'error'), 2500);
+</script>
+
+</body>
+</html>
