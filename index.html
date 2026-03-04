@@ -79,8 +79,15 @@ nav .container {
   transition: opacity 0.2s;
 }
 .nav-cta:hover { opacity: 0.9; }
-.hamburger { display: none; cursor: pointer; background: none; border: none; }
+.hamburger { display: none; cursor: pointer; background: none; border: none; padding: 8px; z-index: 1001; }
 .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); margin: 5px 0; transition: 0.3s; }
+.hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+.mobile-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,10,0.97); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; gap: 24px; }
+.mobile-menu.active { display: flex; }
+.mobile-menu a { color: var(--text); text-decoration: none; font-size: 20px; font-weight: 500; padding: 12px 24px; transition: color 0.2s; }
+.mobile-menu a:hover { color: var(--accent); }
 
 /* ---- HERO ---- */
 .hero {
@@ -643,11 +650,20 @@ footer p {
       <li><a href="#pricing">Pricing</a></li>
     </ul>
     <a href="#" onclick="openForm('General');return false" class="nav-cta">Get Started</a>
-    <button class="hamburger" onclick="this.classList.toggle('active')">
+    <button class="hamburger" onclick="toggleMobileMenu()">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#how-it-works" onclick="toggleMobileMenu()">How It Works</a>
+  <a href="#features" onclick="toggleMobileMenu()">Features</a>
+  <a href="#results" onclick="toggleMobileMenu()">Results</a>
+  <a href="#pricing" onclick="toggleMobileMenu()">Pricing</a>
+  <a href="#" onclick="toggleMobileMenu();openForm('General');return false" style="padding:12px 32px;background:var(--accent-gradient);border-radius:8px;font-weight:600;">Get Started</a>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -960,6 +976,10 @@ footer p {
 </div>
 
 <script>
+function toggleMobileMenu() {
+  document.querySelector('.hamburger').classList.toggle('active');
+  document.getElementById('mobileMenu').classList.toggle('active');
+}
 function openForm(plan) {
   document.getElementById('formPlan').value = plan;
   document.getElementById('formView').style.display = '';
