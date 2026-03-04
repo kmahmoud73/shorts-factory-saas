@@ -488,6 +488,127 @@ footer p {
   color: var(--text-dim);
 }
 
+/* ---- CONTACT MODAL ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s;
+  margin: 16px;
+}
+.modal-overlay.active .modal-card { transform: translateY(0); }
+.modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+.modal-close:hover { color: var(--text); }
+.modal-card h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.modal-card .modal-sub {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+.modal-card label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.modal-card input,
+.modal-card select,
+.modal-card textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  margin-bottom: 18px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.modal-card input:focus,
+.modal-card select:focus,
+.modal-card textarea:focus {
+  border-color: var(--accent-blue);
+}
+.modal-card select { cursor: pointer; }
+.modal-card select option { background: var(--bg); color: var(--text); }
+.modal-card textarea { resize: vertical; min-height: 80px; }
+.modal-card .form-submit {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: var(--accent-gradient);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.modal-card .form-submit:hover { box-shadow: 0 8px 30px rgba(59,130,246,0.3); }
+.modal-card .form-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.modal-success {
+  text-align: center;
+  padding: 20px 0;
+}
+.modal-success .check-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(34,197,94,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 16px;
+}
+.modal-success h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.modal-success p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 900px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
@@ -505,6 +626,7 @@ footer p {
   .hero p { font-size: 16px; }
   .result-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .result-stat .rs-value { font-size: 22px; }
+  .modal-card { padding: 28px 20px; }
 }
 </style>
 </head>
@@ -520,7 +642,7 @@ footer p {
       <li><a href="#results">Results</a></li>
       <li><a href="#pricing">Pricing</a></li>
     </ul>
-    <a href="mailto:hello@shortsfactory.io" class="nav-cta">Get Started</a>
+    <a href="#" onclick="openForm('General');return false" class="nav-cta">Get Started</a>
     <button class="hamburger" onclick="this.classList.toggle('active')">
       <span></span><span></span><span></span>
     </button>
@@ -537,7 +659,7 @@ footer p {
     <h1>Your YouTube Channel,<br><span class="gradient">Fully Autonomous</span></h1>
     <p>AI-powered content research, video production, uploads, engagement, and analytics. 19 autonomous agents running your channel while you sleep.</p>
     <div class="hero-buttons">
-      <a href="mailto:hello@shortsfactory.io" class="btn-primary">Get Started</a>
+      <a href="#" onclick="openForm('General');return false" class="btn-primary">Get Started</a>
       <a href="#results" class="btn-secondary">See Live Results</a>
     </div>
   </div>
@@ -739,7 +861,7 @@ footer p {
           <li>Weekly performance reports</li>
           <li>Email support</li>
         </ul>
-        <a href="mailto:hello@shortsfactory.io?subject=Starter Plan Inquiry" class="price-cta outline">Get Started</a>
+        <a href="#" onclick="openForm('Starter');return false" class="price-cta outline">Get Started</a>
       </div>
 
       <div class="price-card featured">
@@ -756,7 +878,7 @@ footer p {
           <li>Community posts</li>
           <li>Priority support</li>
         </ul>
-        <a href="mailto:hello@shortsfactory.io?subject=Growth Plan Inquiry" class="price-cta filled">Get Started</a>
+        <a href="#" onclick="openForm('Growth');return false" class="price-cta filled">Get Started</a>
       </div>
 
       <div class="price-card">
@@ -773,7 +895,7 @@ footer p {
           <li>White-label option</li>
           <li>SLA guarantee</li>
         </ul>
-        <a href="mailto:hello@shortsfactory.io?subject=Enterprise Inquiry" class="price-cta outline">Contact Us</a>
+        <a href="#" onclick="openForm('Enterprise');return false" class="price-cta outline">Contact Us</a>
       </div>
     </div>
   </div>
@@ -784,7 +906,7 @@ footer p {
   <div class="container">
     <div class="big-text">Join the first wave of autonomous YouTube channels.</div>
     <div class="sub-text">We built it for ourselves first. Now we are making it available to you.</div>
-    <a href="mailto:hello@shortsfactory.io?subject=I want an autonomous YouTube channel" class="btn-primary">Start Your Channel</a>
+    <a href="#" onclick="openForm('General');return false" class="btn-primary">Start Your Channel</a>
   </div>
 </section>
 
@@ -795,6 +917,96 @@ footer p {
     <p>&copy; 2026 Shorts Factory. All rights reserved.</p>
   </div>
 </footer>
+
+<!-- CONTACT FORM MODAL -->
+<div class="modal-overlay" id="contactModal" onclick="if(event.target===this)closeForm()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeForm()">&times;</button>
+
+    <!-- Form -->
+    <div id="formView">
+      <h2>Get Started</h2>
+      <p class="modal-sub">Tell us about your channel and we'll get back within 24 hours.</p>
+      <form id="contactForm" onsubmit="submitForm(event)">
+        <input type="hidden" name="plan" id="formPlan" value="General">
+        <label for="formName">Name</label>
+        <input type="text" id="formName" name="name" required placeholder="Your name">
+        <label for="formEmail">Email</label>
+        <input type="email" id="formEmail" name="email" required placeholder="you@example.com">
+        <label for="formNiche">Channel Niche</label>
+        <select id="formNiche" name="niche" required>
+          <option value="" disabled selected>Select a niche</option>
+          <option value="Sports">Sports</option>
+          <option value="News">News</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Education">Education</option>
+          <option value="Other">Other</option>
+        </select>
+        <label for="formMessage">Message <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <textarea id="formMessage" name="message" placeholder="Tell us about your goals..."></textarea>
+        <button type="submit" class="form-submit" id="formSubmitBtn">Send Inquiry</button>
+      </form>
+    </div>
+
+    <!-- Success -->
+    <div id="successView" style="display:none">
+      <div class="modal-success">
+        <div class="check-icon">&#10003;</div>
+        <h3>Thanks! We got your message.</h3>
+        <p>We'll be in touch within 24 hours.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openForm(plan) {
+  document.getElementById('formPlan').value = plan;
+  document.getElementById('formView').style.display = '';
+  document.getElementById('successView').style.display = 'none';
+  document.getElementById('contactForm').reset();
+  document.getElementById('contactModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeForm() {
+  document.getElementById('contactModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeForm();
+});
+function submitForm(e) {
+  e.preventDefault();
+  var btn = document.getElementById('formSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  var form = document.getElementById('contactForm');
+  var data = new FormData(form);
+  fetch('https://formspree.io/f/mbdanpdr', {
+    method: 'POST',
+    body: data,
+    headers: { 'Accept': 'application/json' }
+  }).then(function(r) {
+    if (r.ok) {
+      document.getElementById('formView').style.display = 'none';
+      document.getElementById('successView').style.display = '';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Send Inquiry';
+      window.location.href = 'mailto:hello@shortsfactory.io?subject=' +
+        encodeURIComponent(data.get('plan') + ' Plan Inquiry from ' + data.get('name')) +
+        '&body=' + encodeURIComponent('Name: ' + data.get('name') + '\nEmail: ' + data.get('email') +
+        '\nNiche: ' + data.get('niche') + '\nMessage: ' + data.get('message'));
+    }
+  }).catch(function() {
+    btn.disabled = false;
+    btn.textContent = 'Send Inquiry';
+    window.location.href = 'mailto:hello@shortsfactory.io?subject=' +
+      encodeURIComponent(data.get('plan') + ' Plan Inquiry') +
+      '&body=' + encodeURIComponent('Name: ' + data.get('name') + '\nEmail: ' + data.get('email'));
+  });
+}
+</script>
 
 </body>
 </html>
