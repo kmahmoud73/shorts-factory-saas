@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 4, 2026 (v3 -- deck slide transitions fixed, ElevenLabs TTS added to SAAS_DEMO.html, deployed to GitHub Pages at https://kmahmoud73.github.io/shorts-factory-saas/)
+**Last Updated**: March 4, 2026 (v4 -- custom domain shortsfactory.io LIVE with HTTPS, DNS on Namecheap BasicDNS → GitHub Pages)
 
 ---
 
@@ -20,7 +20,7 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 - Pricing: Starter $997/mo (1 channel), Growth $1,997/mo (2 channels), Enterprise (custom)
 - Fully self-contained: inline CSS, no JS frameworks, no build tools
 - Responsive (900px + 640px breakpoints)
-- CTA: mailto:hello@shortsfactory.ai (placeholder)
+- CTA: mailto:hello@shortsfactory.io
 - GitHub Pages ready
 
 ### 2. Client Presentation Deck (`deck.html`) -- BUILT Mar 4
@@ -52,6 +52,7 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | `index.html` | Landing page for GitHub Pages | Yes |
 | `deck.html` | Client presentation slides | Yes |
 | `SAAS_DEMO.html` | Internal tech demo | No |
+| `CNAME` | Custom domain config for GitHub Pages | No |
 | `CLAUDE.md` | Project documentation | No |
 | `client_1/` | Virtual test client sandbox | No |
 
@@ -91,19 +92,39 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 - Always update this CLAUDE.md after changes
 - Update stats quarterly (or when numbers change significantly)
 
-## GitHub Pages
+## Domain & Hosting
 
-**Pending setup.** To deploy:
-```bash
-cd /Users/digisov/Documents/shorts-factory-saas
-git init
-git add index.html deck.html CLAUDE.md
-git commit -m "Landing page + client deck"
-gh repo create shorts-factory-saas --public --source=. --push
-gh api repos/digisov/shorts-factory-saas/pages -X POST -f source.branch=main -f source.path=/
-```
+| Property | Value |
+|----------|-------|
+| **Domain** | `shortsfactory.io` |
+| **Registrar** | Namecheap ($34.98/yr, expires Mar 4, 2027) |
+| **DNS** | Namecheap BasicDNS |
+| **Hosting** | GitHub Pages (free) |
+| **HTTPS** | Enforced (GitHub auto-cert) |
+| **Repo** | `kmahmoud73/shorts-factory-saas` |
+| **Privacy** | WhoisGuard ON (personal info hidden from WHOIS) |
 
-Live URL (after setup): `https://digisov.github.io/shorts-factory-saas/`
+### DNS Records (Namecheap Advanced DNS)
+
+| Type | Host | Value |
+|------|------|-------|
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| CNAME | `www` | `kmahmoud73.github.io` |
+
+### Live URLs
+
+| URL | What |
+|-----|------|
+| `https://shortsfactory.io` | Landing page |
+| `https://shortsfactory.io/deck.html` | Client presentation deck |
+| `https://www.shortsfactory.io` | Redirects to apex |
+| `https://kmahmoud73.github.io/shorts-factory-saas/` | GitHub Pages fallback URL |
+
+### X (Twitter) Handle
+- `@shortsfactory` — inquiry submitted via Namecheap (historyofthings911@gmail.com), pending response
 
 ## Client Directories
 
@@ -114,8 +135,9 @@ Live URL (after setup): `https://digisov.github.io/shorts-factory-saas/`
 Each client gets their own directory with CLAUDE.md, stories, output, and reports. Story JSONs are pipeline-compatible (same format as `shorts-factory/stories/`).
 
 ## Status
-- v3: Deck slide transitions fixed, ElevenLabs added to SAAS_DEMO.html (Mar 4, 2026)
+- v4: Custom domain `shortsfactory.io` LIVE with HTTPS, DNS configured on Namecheap BasicDNS → GitHub Pages (Mar 4, 2026)
+- v3: Deck slide transitions fixed, ElevenLabs added to SAAS_DEMO.html, all references updated from .ai to .io (Mar 4, 2026)
 - v2: Landing page + client deck BUILT (Mar 4, 2026)
 - SAAS_DEMO.html moved here from shorts-factory (Mar 3)
 - `client_1/` created as virtual test client sandbox (Mar 3)
-- **GitHub Pages LIVE**: https://kmahmoud73.github.io/shorts-factory-saas/ (repo: kmahmoud73/shorts-factory-saas)
+- **Custom Domain LIVE**: https://shortsfactory.io (repo: kmahmoud73/shorts-factory-saas)
