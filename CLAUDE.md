@@ -190,10 +190,11 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| 1 | ~~**Switch from Stripe to Paddle**~~ — Paddle signup submitted Mar 5. Sole Trader, Jordan. **Under review** (48h-1wk) | **CRITICAL** | **SUBMITTED** — awaiting Paddle approval |
+| 1 | ~~**Switch from Stripe to Paddle**~~ — Paddle signup submitted Mar 5. Initially rejected (missing legal pages). Resubmitted with all URLs + product description. **Allow 3 working days (by Mar 8)** | **CRITICAL** | **RESUBMITTED** — check by Mar 8 |
 | 2 | Update `index.html` payment links — swap Stripe links to Paddle checkout links once approved | HIGH | BLOCKED by #1 approval |
 | 3 | ~~Add Terms of Service + Privacy Policy pages~~ — `terms.html`, `privacy.html`, `refund.html` BUILT Mar 5. **Need to push to GitHub** so they're live before Paddle verifies | HIGH | **BUILT — needs git push** |
-| 4 | Push all new files to GitHub Pages — terms, privacy, refund, footer links | HIGH | PENDING |
+| 4 | ~~Push all new files to GitHub Pages~~ — terms, privacy, refund, footer links pushed Mar 5 (`d53356c`) | HIGH | **DONE** |
+| 5 | **Git hygiene overhaul** — Set up proper git workflow: feature branches for new components, clean commit history, incremental commits at each milestone. Currently committing everything to `main` directly. | MEDIUM | PENDING |
 
 ### Paddle Migration Plan
 
@@ -221,6 +222,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 **Fallback**: Lemon Squeezy (also supports Jordan, simpler signup, but 7%+ fees)
 
 ## Status
+- v9: Paddle signup submitted (Sole Trader, Jordan, historyofthings911@gmail.com). Initially rejected (missing legal pages). Built `terms.html`, `privacy.html`, `refund.html` — all live on shortsfactory.io. Refund policy: flexible tiered (7d=100%, 14d=75%, 30d=50%) + 30-day performance guarantee. Footer links added to `index.html`. Resubmitted via Typeform with all URLs + product description. Review by Mar 8. Deadline in `deadlines.json`. JV momentum: latest videos hitting 90-219 views organically. (Mar 5, 2026)
 - v8: SaaS Transformation Strategy document (`saas_transformation_strategy.html`) added -- comprehensive internal analysis covering current architecture (29 modules across 6 layers), visual platform blueprint (5 wireframe designs), multi-tenant SaaS transformation strategy (13 abstract components, BYOK model, unit economics), and 3-phase roadmap with risk register. Built from full codebase read of all production Python modules. (Mar 4, 2026)
 - v7: Live Demo teaser section added between Results and Pricing — animated pipeline visualization (Trend Scan → AI Script → Video Build → Live Upload → Results), "Coming Soon" badge, "Request Early Access" CTA opens form with Demo tag. Nav updated. Stripe Tax skipped (revisit when revenue flows) (Mar 4, 2026)
 - v6: Stripe Payment Links for Starter ($997) + Growth ($1,997), Enterprise stays as contact form. Account: Canada, khal.mahmoud+stripe@gmail.com (Mar 4, 2026)
