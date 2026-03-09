@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 5, 2026 (v9 -- Paddle signup submitted, Terms/Privacy/Refund pages built)
+**Last Updated**: March 9, 2026 (v11 -- GoatCounter analytics added to all 5 HTML pages. Auto-update stats system: `update_site_stats.py` + weekly launchd. Stats refreshed to Mar 8 data: 13,300+ combined views, 70 videos)
 
 ---
 
@@ -10,13 +10,10 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 
 ## Deliverables
 
-### 1. Landing Page (`index.html`) -- BUILT Mar 4
+### 1. Landing Page (`index.html`) -- BUILT Mar 4, AUTO-UPDATED weekly
 - Dark theme (#0a0a0a), blue-to-purple gradient accents
 - Sections: hero, stats bar, how it works (4 steps), features (9-card grid), live results (JV + CiT cards), **live demo teaser** (animated pipeline viz + "Request Early Access" CTA), pricing (3 tiers), social proof CTA, footer
-- Real stats hardcoded from production data (Mar 3 snapshots):
-  - JV: 1,280 subs, 7,009 views, 24 videos
-  - CiT: 30 subs, 3,696 views, 25 videos
-  - Combined: 10,700+ views, 49 videos, 19 agents, $0/day LLM
+- Stats auto-updated weekly via `update_site_stats.py` from live channel data
 - Pricing: Starter $997/mo (1 channel), Growth $1,997/mo (2 channels), Enterprise (custom)
 - Fully self-contained: inline CSS, no JS frameworks, no build tools
 - Responsive (900px + 640px breakpoints)
@@ -67,6 +64,19 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 - Internal technical demo page (moved from shorts-factory)
 - NOT client-facing
 
+### 6. Auto-Update Stats System -- BUILT Mar 9
+- `update_site_stats.py` — reads `channel_stats.json` + `cit_channel_stats.json`, regex-patches `index.html` + `deck.html` with current numbers (subs, views, videos, top performers, combined views, queue count, days since launch), then git commit + push to GitHub Pages
+- CLI: `--status` (show current vs site), `--dry-run` (preview without writing)
+- Launchd: `com.shortsfactory.site-stats-update` — runs **every Sunday 11:35 PM** (after channel monitors + weekly report finish)
+- Logs: `/tmp/sf-site-stats-update.log`
+
+### 7. GoatCounter Visitor Analytics -- ADDED Mar 9
+- Privacy-friendly visitor tracking (no cookies, no GDPR banner needed)
+- Script tag added to all 5 client-facing HTML pages (index, deck, terms, privacy, refund)
+- Dashboard: `shortsfactory.goatcounter.com` (**needs account signup at goatcounter.com/signup**)
+- Tracks: page views, referrers, countries, devices, browsers
+- Code: `shortsfactory` (pending account creation)
+
 ## Files
 
 | File | Purpose | Client-Facing? |
@@ -78,6 +88,7 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | `privacy.html` | Privacy Policy | Yes |
 | `refund.html` | Refund Policy | Yes |
 | `SAAS_DEMO.html` | Internal tech demo | No |
+| `update_site_stats.py` | Auto-update site stats from live channel data, commit + push | No |
 | `CNAME` | Custom domain config for GitHub Pages | No |
 | `CLAUDE.md` | Project documentation | No |
 | `client_1/` | Virtual test client sandbox | No |
@@ -93,20 +104,20 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | Performance data | `shorts-factory/.performance_tracker.json` |
 | Pipeline architecture | `shorts-factory/CLAUDE.md` |
 
-## Stats Snapshot (hardcoded in pages, Mar 3 data)
+## Stats Snapshot (auto-updated weekly via `update_site_stats.py`, Mar 8 data)
 
 | Metric | Value |
 |--------|-------|
 | JV Subscribers | 1,280 |
-| JV Total Views | 7,009 |
-| JV Videos | 24 |
-| JV Top Video | St. Regis Venice (1,619 views) |
-| CiT Subscribers | 30 |
-| CiT Total Views | 3,696 |
-| CiT Videos | 25 |
-| CiT Top Video | USA Hockey Gold (907 views) |
-| Combined Views | 10,705 |
-| Upload Queue | 27 videos |
+| JV Total Views | 8,063 |
+| JV Videos | 32 |
+| JV Top Video | St. Regis Venice (1,625 views) |
+| CiT Subscribers | 57 |
+| CiT Total Views | 5,336 |
+| CiT Videos | 38 |
+| CiT Top Video | Bruno Mars Grammys (977 views) |
+| Combined Views | 13,399 |
+| Upload Queue | 15 videos |
 | Autonomous Agents | 19 |
 | Production Modules | 29 |
 | Daily LLM Cost | $0 |
@@ -125,7 +136,7 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 - All output files go in THIS directory
 - Client-facing only -- no internal technical details exposed
 - Always update this CLAUDE.md after changes
-- Update stats quarterly (or when numbers change significantly)
+- Stats auto-update weekly via `update_site_stats.py` + launchd (`com.shortsfactory.site-stats-update`, Sundays 11:35 PM)
 
 ## Domain & Hosting
 
@@ -170,8 +181,30 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | **Growth Product** | $1,997 one-off (prod_U5Tk25nExApVIq) — `https://buy.stripe.com/dRm9AVdjB8DB4YQ9Safbq01` |
 | **Enterprise** | Contact form (Formspree) — no Stripe link |
 | **Bank Account** | RBC USA |
-| **Status** | **BLOCKED** — identity verified, bank connected, all verifications passed, but NOT accepting payments. Issue: Jordan not a Stripe-supported country, Canada setup incomplete. Need to resolve country/tax config OR switch to Paddle/Lemon Squeezy (merchant of record, no country restriction) |
+| **Status** | **WORKING** — identity verified, bank connected, checkout links functional. Needs Canadian tax setup (GST/HST) to fully activate. Paddle rejected (Mar 5) — Stripe is the active payment processor |
 | **Stripe Tax** | SKIPPED for now — $124/mo or $0.50/txn. Canadian GST/HST threshold is $30K/4 quarters. Revisit when revenue flows |
+
+### Visitor Analytics (GoatCounter)
+
+| Property | Value |
+|----------|-------|
+| **Service** | GoatCounter (free, no cookies, GDPR-friendly) |
+| **Dashboard** | `shortsfactory.goatcounter.com` (**needs signup**) |
+| **Signup URL** | https://www.goatcounter.com/signup |
+| **Code** | `shortsfactory` |
+| **Pages tracked** | All 5: index, deck, terms, privacy, refund |
+| **Script** | `<script data-goatcounter="https://shortsfactory.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>` |
+
+### Auto-Update Stats (launchd)
+
+| Property | Value |
+|----------|-------|
+| **Script** | `update_site_stats.py` |
+| **Agent** | `com.shortsfactory.site-stats-update` |
+| **Schedule** | Every Sunday 11:35 PM Amman time |
+| **What it does** | Reads channel JSONs → patches HTML → git commit + push |
+| **Log** | `/tmp/sf-site-stats-update.log` |
+| **CLI** | `--status`, `--dry-run` |
 
 ### X (Twitter) Accounts
 - `@shortsfactoryio` — SaaS business account (khal.mahmoud+shortsfactory@gmail.com). Profile pic: sf_logo_v2.png. Bio set. URL: shortsfactory.io. X Developer app active (API keys in Developer Console)
@@ -190,11 +223,13 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| 1 | ~~**Switch from Stripe to Paddle**~~ — Paddle signup submitted Mar 5. Initially rejected (missing legal pages). Resubmitted with all URLs + product description. **Allow 3 working days (by Mar 8)** | **CRITICAL** | **RESUBMITTED** — check by Mar 8 |
-| 2 | Update `index.html` payment links — swap Stripe links to Paddle checkout links once approved | HIGH | BLOCKED by #1 approval |
-| 3 | ~~Add Terms of Service + Privacy Policy pages~~ — `terms.html`, `privacy.html`, `refund.html` BUILT Mar 5. **Need to push to GitHub** so they're live before Paddle verifies | HIGH | **BUILT — needs git push** |
-| 4 | ~~Push all new files to GitHub Pages~~ — terms, privacy, refund, footer links pushed Mar 5 (`d53356c`) | HIGH | **DONE** |
-| 5 | **Git hygiene overhaul** — Set up proper git workflow: feature branches for new components, clean commit history, incremental commits at each milestone. Currently committing everything to `main` directly. | MEDIUM | PENDING |
+| 1 | ~~**Paddle**~~ — **REJECTED** Mar 5 ("unable to approve domain"). Stripe is working, Paddle no longer needed | ~~CRITICAL~~ | **DEAD** |
+| 2 | **Stripe Canadian tax setup** — Complete GST/HST config to fully activate payments | HIGH | PENDING |
+| 3 | ~~Add Terms of Service + Privacy Policy pages~~ | HIGH | **DONE** (Mar 5) |
+| 4 | ~~Push all new files to GitHub Pages~~ | HIGH | **DONE** (Mar 5) |
+| 5 | ~~**Auto-update site stats**~~ — `update_site_stats.py` + weekly launchd agent | HIGH | **DONE** (Mar 9) |
+| 6 | ~~**GoatCounter visitor analytics**~~ — script tags on all 5 pages | HIGH | **DONE** (Mar 9) — needs account signup at goatcounter.com/signup (code: `shortsfactory`) |
+| 7 | **Git hygiene overhaul** — feature branches, clean commit history | MEDIUM | PENDING |
 
 ### Paddle Migration Plan
 
@@ -222,6 +257,8 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 **Fallback**: Lemon Squeezy (also supports Jordan, simpler signup, but 7%+ fees)
 
 ## Status
+- v11: GoatCounter analytics added to all 5 HTML pages (`index.html`, `deck.html`, `terms.html`, `privacy.html`, `refund.html`). Dashboard at `shortsfactory.goatcounter.com` (pending account signup). No cookies, GDPR-friendly, free tier. (Mar 9, 2026)
+- v10: Auto-update stats system built. `update_site_stats.py` reads live channel JSONs, regex-patches `index.html` + `deck.html`, commits + pushes to GitHub Pages. Weekly launchd `com.shortsfactory.site-stats-update` (Sundays 11:35 PM). Stats refreshed: JV 7,009→8,063 views (+15%), CiT 30→57 subs (+90%), 3,696→5,336 views (+44%), combined 10,700→13,300+. (Mar 9, 2026)
 - v9: Paddle signup submitted (Sole Trader, Jordan, historyofthings911@gmail.com). Initially rejected (missing legal pages). Built `terms.html`, `privacy.html`, `refund.html` — all live on shortsfactory.io. Refund policy: flexible tiered (7d=100%, 14d=75%, 30d=50%) + 30-day performance guarantee. Footer links added to `index.html`. Resubmitted via Typeform with all URLs + product description. Review by Mar 8. Deadline in `deadlines.json`. JV momentum: latest videos hitting 90-219 views organically. (Mar 5, 2026)
 - v8: SaaS Transformation Strategy document (`saas_transformation_strategy.html`) added -- comprehensive internal analysis covering current architecture (29 modules across 6 layers), visual platform blueprint (5 wireframe designs), multi-tenant SaaS transformation strategy (13 abstract components, BYOK model, unit economics), and 3-phase roadmap with risk register. Built from full codebase read of all production Python modules. (Mar 4, 2026)
 - v7: Live Demo teaser section added between Results and Pricing — animated pipeline visualization (Trend Scan → AI Script → Video Build → Live Upload → Results), "Coming Soon" badge, "Request Early Access" CTA opens form with Demo tag. Nav updated. Stripe Tax skipped (revisit when revenue flows) (Mar 4, 2026)

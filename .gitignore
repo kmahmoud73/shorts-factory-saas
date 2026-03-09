@@ -1,0 +1,11 @@
+# System
+.DS_Store
+
+# Leads — private
+leads.json
+
+# Secrets
+.env
+*.secret
+*.pem
+*.key
