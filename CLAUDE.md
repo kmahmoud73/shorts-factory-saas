@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 9, 2026 (v15 -- Updated deck.html + saas_transformation_strategy.html with current pipeline stats: 27 agents, 42 scripts, 15+ video engines via PiAPI unified gateway, autonomous credit monitor, Channel Director brand manager. Previous: v14 Professional email pipeline)
+**Last Updated**: March 9, 2026 (v17 -- `multi_channel_strategy.html` BUILT: comprehensive 11-section multi-channel YouTube compliance & monetization strategy report. Covers: multi-channel ownership rules (100 channels/account via Brand Accounts), AdSense architecture (1 AdSense per person, consolidated payments, per-channel breakdowns), YPP requirements (1K subs + 4K watch hours or 10M Shorts views), content policies (unique content per channel, no cross-posting), AI content rules (July 2025 "Inauthentic Content" policy, mandatory AI disclosure), MCN analysis (don't join — keep 100% revenue), risk factors (cascading termination, content similarity flags), our channel architecture (JV + CiT separation strategy), client onboarding SaaS/Agency model (client owns Brand Account as Primary Owner, we're Manager, client links own AdSense, we bill separately), client intake form design, 10 strategic recommendations. Dark theme matching shortsfactory.io. Responsive + print-friendly. Previous: v16 onboarding.html)
 
 ---
 
@@ -87,6 +87,8 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | `terms.html` | Terms of Service | Yes |
 | `privacy.html` | Privacy Policy | Yes |
 | `refund.html` | Refund Policy | Yes |
+| `onboarding.html` | Client onboarding process (intake form, tech setup, timeline, SLA, advice) | Yes (internal + client-facing) |
+| `multi_channel_strategy.html` | Multi-channel YouTube compliance, monetization, AdSense architecture, client setup | Yes (internal + client-facing) |
 | `SAAS_DEMO.html` | Internal tech demo | No |
 | `update_site_stats.py` | Auto-update site stats from live channel data, commit + push | No |
 | `email_sender.py` | Send emails from hello@shortsfactory.io via SMTP | No |
@@ -287,6 +289,8 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 **Fallback**: Lemon Squeezy (also supports Jordan, simpler signup, but 7%+ fees)
 
 ## Status
+- v17: `multi_channel_strategy.html` — comprehensive multi-channel YouTube compliance & monetization report. 11 sections covering Brand Accounts, AdSense consolidation, YPP, AI content policy, MCN analysis, risk factors, client onboarding SaaS model, intake form, 10 recommendations. (Mar 9, 2026)
+- v16: `onboarding.html` — client onboarding process (47-question intake form, tech setup checklist, 14-day timeline, SLA, 10 recommendations). (Mar 9, 2026)
 - v15: Updated deck.html (27 agents, 42 scripts, 15+ video engines via PiAPI) + saas_transformation_strategy.html (42 scripts across 6 layers). Stats snapshot updated: 27 agents, 42 scripts. (Mar 9, 2026)
 - v11: GoatCounter analytics added to all 5 HTML pages (`index.html`, `deck.html`, `terms.html`, `privacy.html`, `refund.html`). Dashboard at `shortsfactory.goatcounter.com` (pending account signup). No cookies, GDPR-friendly, free tier. (Mar 9, 2026)
 - v10: Auto-update stats system built. `update_site_stats.py` reads live channel JSONs, regex-patches `index.html` + `deck.html`, commits + pushes to GitHub Pages. Weekly launchd `com.shortsfactory.site-stats-update` (Sundays 11:35 PM). Stats refreshed: JV 7,009→8,063 views (+15%), CiT 30→57 subs (+90%), 3,696→5,336 views (+44%), combined 10,700→13,300+. (Mar 9, 2026)
