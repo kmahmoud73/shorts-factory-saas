@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shorts Factory — Client Onboarding</title>
+<meta name="description" content="Complete client onboarding process for Shorts Factory autonomous YouTube production service.">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg-card: #111113;
+  --bg-card-hover: #18181b;
+  --bg-section: #0d0d0f;
+  --border: #1e1e24;
+  --border-focus: #3b82f6;
+  --text: #e4e4e7;
+  --text-muted: #71717a;
+  --text-dim: #52525b;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --accent-gradient-h: linear-gradient(135deg, #60a5fa, #a78bfa);
+  --green: #22c55e;
+  --green-dim: #166534;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --orange-dim: #92400e;
+  --cyan: #06b6d4;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+a { color: var(--accent-blue); text-decoration: none; }
+a:hover { color: #60a5fa; }
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---- NAV ---- */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+nav .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 56px;
+}
+.logo {
+  font-size: 18px;
+  font-weight: 700;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+.nav-links { display: flex; gap: 24px; list-style: none; flex-wrap: wrap; }
+.nav-links a { color: var(--text-muted); font-size: 13px; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+
+/* ---- HEADER ---- */
+.page-header {
+  padding: 120px 0 60px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.page-header h1 {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  margin-bottom: 16px;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.page-header .subtitle {
+  font-size: 18px;
+  color: var(--text-muted);
+  max-width: 700px;
+  margin: 0 auto 24px;
+}
+.version-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.2);
+  color: var(--accent-blue);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ---- SECTIONS ---- */
+.section {
+  padding: 60px 0;
+  border-bottom: 1px solid var(--border);
+}
+.section:last-child { border-bottom: none; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--accent-gradient);
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.section-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 32px 0 16px;
+  padding-left: 16px;
+  border-left: 3px solid var(--accent-blue);
+}
+
+h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 24px 0 12px;
+  color: var(--accent-blue);
+}
+
+p, li {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+p { margin-bottom: 12px; }
+
+ul, ol {
+  margin: 8px 0 16px 24px;
+}
+li { margin-bottom: 6px; }
+
+/* ---- CARDS ---- */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.card:hover { border-color: rgba(59,130,246,0.3); }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ---- BADGES ---- */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-required { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.badge-optional { background: rgba(113,113,122,0.15); color: var(--text-muted); border: 1px solid rgba(113,113,122,0.3); }
+.badge-recommended { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+.badge-internal { background: rgba(139,92,246,0.15); color: var(--accent-purple); border: 1px solid rgba(139,92,246,0.3); }
+.badge-client { background: rgba(59,130,246,0.15); color: var(--accent-blue); border: 1px solid rgba(59,130,246,0.3); }
+.badge-day { background: rgba(245,158,11,0.15); color: var(--orange); border: 1px solid rgba(245,158,11,0.3); }
+
+/* ---- TABLES ---- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 24px;
+  font-size: 14px;
+}
+thead th {
+  text-align: left;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-weight: 700;
+  border-bottom: 2px solid var(--border);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+}
+tr:hover td { background: rgba(59,130,246,0.03); }
+
+/* ---- TIMELINE ---- */
+.timeline {
+  position: relative;
+  padding-left: 48px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent-blue), var(--accent-purple), var(--green));
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 32px;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -37px;
+  top: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--accent-blue);
+}
+.timeline-item.milestone::before {
+  background: var(--green);
+  box-shadow: 0 0 0 2px var(--green);
+  width: 18px;
+  height: 18px;
+  left: -39px;
+  top: 4px;
+}
+.timeline-day {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.timeline-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.timeline-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ---- CHECKLIST ---- */
+.checklist {
+  list-style: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+.checklist li {
+  position: relative;
+  padding: 10px 16px 10px 40px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.checklist li:hover { background: rgba(59,130,246,0.04); }
+.checklist li::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 14px;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+}
+.checklist li.checked::before {
+  background: var(--green);
+  border-color: var(--green);
+}
+.checklist li.checked::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  width: 8px;
+  height: 5px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg);
+}
+
+/* ---- FORM ---- */
+.form-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+}
+.form-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.form-group label .req {
+  color: var(--red);
+  margin-left: 2px;
+}
+.form-group .hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="url"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.checkbox-group label:hover { background: rgba(59,130,246,0.05); }
+.checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-blue);
+}
+
+/* ---- COLLAPSIBLE ---- */
+.collapsible {
+  cursor: pointer;
+  user-select: none;
+}
+.collapsible::after {
+  content: '+';
+  float: right;
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--text-dim);
+  transition: transform 0.2s;
+}
+.collapsible.active::after {
+  content: '-';
+}
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.collapsible-content.show {
+  max-height: 10000px;
+}
+
+/* ---- ADVICE BOX ---- */
+.advice-box {
+  background: rgba(34,197,94,0.05);
+  border: 1px solid rgba(34,197,94,0.2);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 16px 0;
+}
+.advice-box .advice-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.advice-box p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.warning-box {
+  background: rgba(239,68,68,0.05);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 16px 0;
+}
+.warning-box .warning-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--red);
+  margin-bottom: 8px;
+}
+.warning-box p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.info-box {
+  background: rgba(59,130,246,0.05);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 16px 0;
+}
+.info-box .info-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  margin-bottom: 8px;
+}
+.info-box p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ---- PROGRESS TRACKER ---- */
+.progress-bar-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+}
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.progress-step {
+  text-align: center;
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  position: relative;
+}
+.progress-step.active { color: var(--accent-blue); }
+.progress-step.done { color: var(--green); }
+.progress-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent-gradient);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+/* ---- BUTTONS ---- */
+.btn {
+  display: inline-block;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.btn-primary {
+  background: var(--accent-gradient);
+  color: #fff;
+}
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-outline {
+  background: transparent;
+  color: var(--accent-blue);
+  border: 1px solid var(--accent-blue);
+}
+.btn-outline:hover { background: rgba(59,130,246,0.1); }
+.btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+/* ---- TOC ---- */
+.toc {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin: 32px 0;
+}
+.toc-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+.toc ol {
+  list-style: none;
+  counter-reset: toc;
+  margin: 0;
+  padding: 0;
+}
+.toc ol li {
+  counter-increment: toc;
+  margin-bottom: 6px;
+}
+.toc ol li a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.toc ol li a:hover {
+  background: rgba(59,130,246,0.05);
+  color: var(--accent-blue);
+}
+.toc ol li a::before {
+  content: counter(toc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(59,130,246,0.1);
+  color: var(--accent-blue);
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ---- TIER COMPARISON ---- */
+.tier-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+.tier-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+}
+.tier-card.featured {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 24px rgba(59,130,246,0.1);
+}
+.tier-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.tier-price {
+  font-size: 28px;
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.tier-price span {
+  font-size: 14px;
+  font-weight: 400;
+  -webkit-text-fill-color: var(--text-muted);
+}
+.tier-features {
+  list-style: none;
+  margin: 16px 0;
+  padding: 0;
+  text-align: left;
+}
+.tier-features li {
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(30,30,36,0.5);
+}
+.tier-features li::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-right: 8px;
+}
+
+/* ---- FOOTER ---- */
+footer {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+}
+
+/* ---- PRINT ---- */
+@media print {
+  nav { display: none; }
+  .page-header { padding-top: 24px; }
+  body { background: #fff; color: #1a1a1a; }
+  .card, .form-section, .toc, .advice-box, .warning-box, .info-box { border: 1px solid #ddd; }
+  .btn { display: none; }
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+  .page-header h1 { font-size: 28px; }
+  .section-title { font-size: 22px; }
+  .form-row { grid-template-columns: 1fr; }
+  .tier-grid { grid-template-columns: 1fr; }
+  .checkbox-group { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .progress-steps { font-size: 10px; }
+  table { font-size: 12px; }
+  td, th { padding: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container">
+    <a href="index.html" class="logo">Shorts Factory</a>
+    <ul class="nav-links">
+      <li><a href="#intake-form">Intake Form</a></li>
+      <li><a href="#technical-setup">Tech Setup</a></li>
+      <li><a href="#timeline">Timeline</a></li>
+      <li><a href="#sla">SLA</a></li>
+      <li><a href="#recommendations">Advice</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<header class="page-header">
+  <div class="container">
+    <span class="version-badge">Internal Process Document v1.0</span>
+    <h1>Client Onboarding Process</h1>
+    <p class="subtitle">From signed contract to first video live. Everything we need to collect, configure, and deliver for a new Shorts Factory client.</p>
+  </div>
+</header>
+
+<main class="container">
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#intake-form">Client Intake Form &mdash; 47 Questions Across 12 Categories</a></li>
+    <li><a href="#technical-setup">Technical Setup Checklist &mdash; Our Internal Configuration</a></li>
+    <li><a href="#timeline">Onboarding Timeline &mdash; 14-Day Roadmap to First Video</a></li>
+    <li><a href="#sla">Service Level Expectations &mdash; Promises, Policies &amp; Disclaimers</a></li>
+    <li><a href="#recommendations">Practical Recommendations &mdash; From Running Our Own Channels</a></li>
+    <li><a href="#appendix">Appendix &mdash; Tier Comparison, Story JSON Format, Platform Matrix</a></li>
+  </ol>
+</div>
+
+<!-- PROGRESS TRACKER (example) -->
+<div class="progress-bar-container">
+  <div class="progress-steps">
+    <div class="progress-step done">Contract Signed</div>
+    <div class="progress-step active">Intake Form</div>
+    <div class="progress-step">Tech Setup</div>
+    <div class="progress-step">Test Video</div>
+    <div class="progress-step">Go Live</div>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" style="width: 20%;"></div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 1: CLIENT INTAKE FORM -->
+<!-- ============================================================ -->
+<div class="section" id="intake-form">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Client Intake Form</div>
+  </div>
+
+  <p>This is the master intake form. Every question here feeds directly into our pipeline configuration. Fields marked with <span class="badge badge-required">Required</span> must be collected before technical setup begins. Fields marked <span class="badge badge-optional">Optional</span> can be provided later or left to our defaults.</p>
+
+  <!-- 1A: BUSINESS INFO -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1A. Business &amp; Brand Information</div>
+    <div class="collapsible-content show">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Company / Brand Name <span class="req">*</span></label>
+          <input type="text" placeholder="Acme Sports Media">
+          <div class="hint">As it should appear in channel branding and descriptions.</div>
+        </div>
+        <div class="form-group">
+          <label>Primary Contact Name <span class="req">*</span></label>
+          <input type="text" placeholder="John Smith">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Contact Email <span class="req">*</span></label>
+          <input type="email" placeholder="john@acmesports.com">
+          <div class="hint">Used for OAuth setup links, approval reviews, and weekly reports.</div>
+        </div>
+        <div class="form-group">
+          <label>Contact Phone / WhatsApp <span class="req">*</span></label>
+          <input type="text" placeholder="+1 555 123 4567">
+          <div class="hint">For urgent issues (e.g., video needs to be pulled).</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Business Website</label>
+        <input type="url" placeholder="https://acmesports.com">
+        <div class="hint">We reference this for brand voice, visual style, and content alignment.</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Industry / Niche <span class="req">*</span></label>
+          <input type="text" placeholder="Sports Media, Finance, E-commerce, Education...">
+        </div>
+        <div class="form-group">
+          <label>Subscription Tier <span class="req">*</span></label>
+          <select>
+            <option value="">Select tier...</option>
+            <option value="starter">Starter ($997/mo) &mdash; 1 channel, 30 videos</option>
+            <option value="growth">Growth ($1,997/mo) &mdash; 3 channels, 90 videos</option>
+            <option value="enterprise">Enterprise (Custom) &mdash; Unlimited</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Billing Email (if different from primary)</label>
+        <input type="email" placeholder="billing@acmesports.com">
+      </div>
+    </div>
+  </div>
+
+  <!-- 1B: YOUTUBE CHANNEL -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1B. YouTube Channel Details</div>
+    <div class="collapsible-content show">
+      <div class="form-group">
+        <label>Existing YouTube Channel? <span class="req">*</span></label>
+        <select id="existing-channel">
+          <option value="">Select...</option>
+          <option value="yes">Yes &mdash; I have an existing channel</option>
+          <option value="new">No &mdash; I need a new channel created</option>
+          <option value="multiple">I have multiple channels (Growth / Enterprise)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Channel URL(s)</label>
+        <textarea placeholder="https://youtube.com/@YourChannel&#10;https://youtube.com/@SecondChannel (if Growth/Enterprise)"></textarea>
+        <div class="hint">Provide all channel URLs if you have existing channels. Leave blank for new channels.</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Current Subscriber Count</label>
+          <input type="text" placeholder="e.g., 5,200">
+          <div class="hint">Helps us set realistic growth targets.</div>
+        </div>
+        <div class="form-group">
+          <label>Google Account Email (for OAuth) <span class="req">*</span></label>
+          <input type="email" placeholder="your-youtube@gmail.com">
+          <div class="hint">The Google account that owns the YouTube channel. Required for upload authorization.</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Are you currently in the YouTube Partner Program (monetized)?</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="yes">Yes &mdash; Channel is monetized</option>
+          <option value="no">No &mdash; Not yet monetized</option>
+          <option value="pending">Applied but pending</option>
+          <option value="unknown">Not sure</option>
+        </select>
+        <div class="hint">This affects our content strategy: monetized channels have stricter advertiser-friendliness requirements.</div>
+      </div>
+      <div class="form-group">
+        <label>Do you have any existing YouTube API credentials or Google Cloud project?</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="yes">Yes &mdash; I have a Google Cloud project</option>
+          <option value="no">No &mdash; I need you to set this up</option>
+        </select>
+        <div class="hint">If you already have a Google Cloud project with YouTube Data API v3 enabled, we can use it. Otherwise, we will create one under your account.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1C: CONTENT STRATEGY -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1C. Content Strategy &amp; Niche</div>
+    <div class="collapsible-content show">
+      <div class="form-group">
+        <label>Content Niche / Category <span class="req">*</span></label>
+        <textarea placeholder="e.g., 'Trending sports moments and highlights' or 'AI and technology news' or 'Personal finance tips for millennials'"></textarea>
+        <div class="hint">Be as specific as possible. A clear niche performs better than "everything." This directly configures our trend scouting and editorial scoring engines.</div>
+      </div>
+      <div class="form-group">
+        <label>Content Tone / Style <span class="req">*</span></label>
+        <select>
+          <option value="">Select primary tone...</option>
+          <option value="news-anchor">News Anchor &mdash; Professional, authoritative, fast-paced</option>
+          <option value="storyteller">Storyteller &mdash; Cinematic, dramatic, emotional</option>
+          <option value="educator">Educator &mdash; Clear, explanatory, helpful</option>
+          <option value="entertainer">Entertainer &mdash; Fun, energetic, casual</option>
+          <option value="commentator">Commentator &mdash; Opinionated, analytical, sports-talk style</option>
+          <option value="luxury">Luxury / Aspirational &mdash; Premium, sleek, exclusive</option>
+          <option value="custom">Custom &mdash; I will describe below</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Custom Tone Description (if "Custom" selected above)</label>
+        <textarea placeholder="Describe the exact voice and personality you want for your channel..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Story Formula Preference</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="hook-what-why">HOOK &rarr; WHAT &rarr; WHY IT MATTERS &rarr; CLOSER (news style, like CiT)</option>
+          <option value="hook-context-twist">HOOK &rarr; CONTEXT &rarr; STORY &rarr; TWIST &rarr; CLOSER (narrative style, like JV)</option>
+          <option value="problem-solution">PROBLEM &rarr; SOLUTION &rarr; RESULTS &rarr; CTA (educational)</option>
+          <option value="listicle">TOP N &rarr; COUNTDOWN &rarr; REVEAL (listicle)</option>
+          <option value="custom">Custom &mdash; I will provide my own formula</option>
+          <option value="default">Let Shorts Factory decide (recommended for new channels)</option>
+        </select>
+        <div class="hint">Our CiT channel uses HOOK > WHAT > WHY. Our JV channel uses HOOK > CONTEXT > STORY > TWIST. We recommend "Let us decide" if you are unsure.</div>
+      </div>
+      <div class="form-group">
+        <label>Target Video Length <span class="req">*</span></label>
+        <select>
+          <option value="">Select...</option>
+          <option value="15-30">15-30 seconds (highest completion rates)</option>
+          <option value="30-45">30-45 seconds (recommended balance)</option>
+          <option value="45-60">45-60 seconds (best for narrative content)</option>
+          <option value="60-90">60-90 seconds (deep story format)</option>
+          <option value="mixed">Mixed &mdash; let each story dictate its length</option>
+        </select>
+        <div class="hint">Based on our data: 40-60 seconds achieves the best balance of completion rate and engagement. Videos over 40 seconds have 33% higher engagement than shorter clips.</div>
+      </div>
+      <div class="form-group">
+        <label>Trending / Evergreen Mix</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="trending-only">100% Trending &mdash; Only current/breaking news topics</option>
+          <option value="trending-heavy">70% Trending / 30% Evergreen</option>
+          <option value="balanced">50/50 &mdash; Mix of trending and timeless content</option>
+          <option value="evergreen-heavy">30% Trending / 70% Evergreen</option>
+          <option value="evergreen-only">100% Evergreen &mdash; Only timeless, searchable content</option>
+        </select>
+        <div class="hint">Trending content gets early spikes. Evergreen content builds long-term search traffic. Our CiT channel is 100% trending. Our JV channel is 100% evergreen. Most clients benefit from a mix.</div>
+      </div>
+      <div class="form-group">
+        <label>Topic Keywords / Themes (up to 10)</label>
+        <textarea placeholder="e.g., NFL, NBA, transfer rumors, draft picks, player controversies, team records, coaching drama, sports betting, Super Bowl, March Madness"></textarea>
+        <div class="hint">These feed directly into our YouTube Researcher trend scouting engine and auto-scout topic detection.</div>
+      </div>
+      <div class="form-group">
+        <label>Competitor Channels to Study (up to 5)</label>
+        <textarea placeholder="https://youtube.com/@CompetitorOne&#10;https://youtube.com/@CompetitorTwo&#10;https://youtube.com/@CompetitorThree"></textarea>
+        <div class="hint">We analyze their titles, thumbnails, posting frequency, top-performing content, and audience overlap. This directly informs our editorial scoring.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1D: BRANDING ASSETS -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1D. Branding &amp; Visual Identity</div>
+    <div class="collapsible-content show">
+      <div class="form-group">
+        <label>Channel Logo / Profile Picture <span class="badge badge-recommended">Recommended</span></label>
+        <input type="text" placeholder="Upload URL or send via email">
+        <div class="hint">Square format, minimum 800x800px. PNG with transparency preferred. If not provided, we will use your brand name as text-based logo.</div>
+      </div>
+      <div class="form-group">
+        <label>Channel Banner Image <span class="badge badge-recommended">Recommended</span></label>
+        <input type="text" placeholder="Upload URL or send via email">
+        <div class="hint">2560x1440px recommended. We can generate one if needed.</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Primary Brand Color (hex)</label>
+          <input type="text" placeholder="#FF5733">
+          <div class="hint">Used for subtitle highlights, accent elements, and channel branding overlays.</div>
+        </div>
+        <div class="form-group">
+          <label>Secondary Brand Color (hex)</label>
+          <input type="text" placeholder="#1A1A2E">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Brand Font Preference</label>
+        <input type="text" placeholder="e.g., Montserrat, Inter, Playfair Display, or 'use your default'">
+        <div class="hint">Used in subtitles and text overlays. If not specified, we use a clean sans-serif (system default).</div>
+      </div>
+      <div class="form-group">
+        <label>Custom Intro / Outro</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="none">No intro/outro needed</option>
+          <option value="text-only">Text-only branded card (we design)</option>
+          <option value="provide">I will provide video files (MP4, 3-5 seconds each)</option>
+          <option value="design">I want you to design and produce them</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Watermark / Logo Overlay</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="none">No watermark</option>
+          <option value="corner">Small logo in corner (standard)</option>
+          <option value="provide">I will provide a PNG watermark file</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Do you want an AI Mascot / Presenter? <span class="badge badge-recommended">Recommended</span></label>
+        <select>
+          <option value="">Select...</option>
+          <option value="yes-photo">Yes &mdash; Photorealistic AI anchor (like our CiT red dress presenter)</option>
+          <option value="yes-cartoon">Yes &mdash; Cartoon/animated character</option>
+          <option value="yes-custom">Yes &mdash; I will provide a face/character image</option>
+          <option value="no">No &mdash; No on-screen presenter</option>
+        </select>
+        <div class="hint">Our AI mascot system supports lip-synced animation (audio-driven), 2D floating overlay, and studio mode (news desk composite). A consistent on-screen presence increases brand recognition.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1E: VOICE / NARRATION -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1E. Voice &amp; Narration Preferences</div>
+    <div class="collapsible-content show">
+      <div class="form-group">
+        <label>Narrator Voice Gender <span class="req">*</span></label>
+        <select>
+          <option value="">Select...</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="either">No preference / Either</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Voice Character / Tone</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="authoritative">Authoritative &amp; Dramatic (like a documentary narrator)</option>
+          <option value="news-anchor">News Anchor &amp; Professional (sharp, clear, confident)</option>
+          <option value="warm">Warm &amp; Conversational (friendly, relatable)</option>
+          <option value="casual">Casual &amp; Upbeat (YouTuber energy)</option>
+          <option value="premium">Premium &amp; Polished (luxury brand feel)</option>
+          <option value="custom">Custom &mdash; I will describe or provide a sample</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Language</label>
+        <select>
+          <option value="en-US">English (US)</option>
+          <option value="en-GB">English (UK)</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="pt">Portuguese</option>
+          <option value="ar">Arabic</option>
+          <option value="hi">Hindi</option>
+          <option value="ja">Japanese</option>
+          <option value="ko">Korean</option>
+          <option value="zh">Chinese (Mandarin)</option>
+          <option value="other">Other &mdash; specify in notes</option>
+        </select>
+        <div class="hint">Our TTS engines support 90+ languages. English (US) has the widest voice selection.</div>
+      </div>
+      <div class="form-group">
+        <label>Channel Sign-Off Phrase <span class="badge badge-recommended">Recommended</span></label>
+        <input type="text" placeholder='e.g., "That is The Jersey Vault" or "Caught It Trending" or leave blank'>
+        <div class="hint">A consistent closing phrase builds brand identity. Every video ends with this. Our channels use their names as the sign-off.</div>
+      </div>
+      <div class="form-group">
+        <label>TTS Tier Preference</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="premium">Premium (ElevenLabs &mdash; natural, human-like, limited monthly chars)</option>
+          <option value="standard">Standard (edge-tts &mdash; Microsoft, clear, unlimited, included)</option>
+          <option value="auto">Auto &mdash; Premium when available, Standard as fallback (recommended)</option>
+        </select>
+        <div class="hint">Standard TTS is included in all plans. Premium TTS (ElevenLabs) has a monthly character limit; we recommend the Auto fallback approach.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1F: TARGET AUDIENCE -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1F. Target Audience</div>
+    <div class="collapsible-content show">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Primary Age Range</label>
+          <select>
+            <option value="">Select...</option>
+            <option value="13-17">13-17 (Teen)</option>
+            <option value="18-24">18-24 (Young Adult)</option>
+            <option value="25-34">25-34 (Millennial)</option>
+            <option value="35-44">35-44 (Gen X)</option>
+            <option value="45-54">45-54</option>
+            <option value="55+">55+</option>
+            <option value="broad">Broad / All ages</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Primary Gender</label>
+          <select>
+            <option value="">Select...</option>
+            <option value="male">Primarily Male</option>
+            <option value="female">Primarily Female</option>
+            <option value="all">All / No preference</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Geographic Focus</label>
+        <input type="text" placeholder="e.g., United States, UK, Global English-speaking, MENA region">
+        <div class="hint">This configures our YouTube trending region for topic scouting (e.g., US, GB, IN, JP). Default: US.</div>
+      </div>
+      <div class="form-group">
+        <label>Audience Description (free text)</label>
+        <textarea placeholder="Describe your ideal viewer in 2-3 sentences. Who are they? What do they care about? Why would they watch?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1G: CONTENT RESTRICTIONS -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1G. Content Restrictions &amp; Sensitivities</div>
+    <div class="collapsible-content show">
+      <div class="info-box">
+        <div class="info-title">Compliance Gate</div>
+        <p>Every video passes through our automated compliance system (AI-powered review) before it can be built or uploaded. This checks for YouTube Community Guidelines violations, advertiser-friendliness, AI disclosure compliance, and metadata quality. Zero policy violations across 50+ published videos to date. The questions below let us customize the compliance rules for your brand.</p>
+      </div>
+      <div class="form-group">
+        <label>Topics to ALWAYS AVOID (hard blocklist)</label>
+        <textarea placeholder="e.g., Politics, religion, competitors by name, lawsuits, specific people, controversial brands..."></textarea>
+        <div class="hint">These topics will be automatically blocked by our editorial scoring engine. They will never appear in your content.</div>
+      </div>
+      <div class="form-group">
+        <label>Topics to HANDLE WITH CARE (soft restrictions)</label>
+        <textarea placeholder="e.g., Injuries (mention but do not show graphic imagery), legal issues (factual only, no speculation), competitors (mention positively or neutrally)..."></textarea>
+        <div class="hint">These topics can appear but will be flagged for extra compliance review before publishing.</div>
+      </div>
+      <div class="form-group">
+        <label>Industry-Specific Compliance Requirements</label>
+        <textarea placeholder="e.g., FDA disclaimers for health content, financial disclaimers for investment content, COPPA compliance for children's content, FTC disclosure for affiliate content..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Language Restrictions</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox"> No profanity (even mild)</label>
+          <label><input type="checkbox"> No slang / informal language</label>
+          <label><input type="checkbox"> No sensationalist language ("SHOCKING", "INSANE")</label>
+          <label><input type="checkbox"> No clickbait-style titles</label>
+          <label><input type="checkbox"> No references to death/violence</label>
+          <label><input type="checkbox"> No references to drugs/alcohol</label>
+          <label><input type="checkbox"> Keep everything G-rated (children safe)</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Brand Safety Level</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="strict">Strict &mdash; Only fully brand-safe, family-friendly content</option>
+          <option value="standard">Standard &mdash; YouTube advertiser-friendly (default, what we use for our channels)</option>
+          <option value="relaxed">Relaxed &mdash; Edgier content OK, still within YouTube ToS</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>AI Disclosure Preference</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="auto">Auto &mdash; Tag as AI-generated per YouTube policy (required, recommended)</option>
+          <option value="description">Also add text disclosure in video description</option>
+          <option value="narration">Also mention AI generation in video narration</option>
+        </select>
+        <div class="hint">YouTube requires the <code>containsSyntheticMedia: true</code> flag on all AI-generated content. This is non-negotiable and we set it automatically. Additional disclosures are optional.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1H: CROSS-PLATFORM -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1H. Cross-Platform Distribution</div>
+    <div class="collapsible-content show">
+      <div class="info-box">
+        <div class="info-title">Multi-Platform Reach</div>
+        <p>Each video can be automatically distributed to up to 7+ platforms simultaneously after YouTube upload. Each platform is non-blocking (a failure on one never prevents others). We handle all formatting, caption, and metadata adjustments per platform.</p>
+      </div>
+      <div class="form-group">
+        <label>Which platforms do you want videos distributed to? <span class="req">*</span></label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" checked disabled> YouTube (always included)</label>
+          <label><input type="checkbox"> Instagram Reels (@handle)</label>
+          <label><input type="checkbox"> TikTok (@handle)</label>
+          <label><input type="checkbox"> X / Twitter (@handle)</label>
+          <label><input type="checkbox"> Facebook Reels (Page name)</label>
+          <label><input type="checkbox"> Threads (@handle)</label>
+          <label><input type="checkbox"> Bluesky (@handle)</label>
+          <label><input type="checkbox"> Telegram (Channel name)</label>
+          <label><input type="checkbox"> LinkedIn (Company page)</label>
+          <label><input type="checkbox"> Pinterest (Board name)</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Social Media Account Handles (for platforms selected above)</label>
+        <textarea placeholder="Instagram: @yourbrand&#10;TikTok: @yourbrand&#10;X: @yourbrand&#10;Bluesky: yourbrand.bsky.social&#10;Telegram: @YourBrandChannel"></textarea>
+        <div class="hint">We need either existing account handles or authorization to create new accounts. For platforms requiring API keys (X, Instagram, TikTok), we will walk you through the authorization flow.</div>
+      </div>
+      <div class="form-group">
+        <label>Cross-Platform Posting Strategy</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="simultaneous">Post to all platforms simultaneously with YouTube upload</option>
+          <option value="staggered">Stagger posts (e.g., YouTube first, then others 2-4 hours later)</option>
+          <option value="youtube-first">YouTube first, then manually approve cross-posting</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1I: UPLOAD SCHEDULE -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1I. Upload Schedule &amp; Cadence</div>
+    <div class="collapsible-content show">
+      <div class="form-group">
+        <label>How many videos per day / week? <span class="req">*</span></label>
+        <select>
+          <option value="">Select...</option>
+          <option value="1-daily">1 per day (Starter default &mdash; 30/month)</option>
+          <option value="2-daily">2 per day (60/month)</option>
+          <option value="3-daily">3 per day (Growth default &mdash; 90/month)</option>
+          <option value="custom">Custom cadence &mdash; specify below</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Preferred Upload Time (in your timezone) <span class="req">*</span></label>
+        <div class="form-row">
+          <input type="text" placeholder="e.g., 10:00 AM">
+          <select>
+            <option value="">Timezone...</option>
+            <option value="EST">Eastern (EST/EDT)</option>
+            <option value="CST">Central (CST/CDT)</option>
+            <option value="MST">Mountain (MST/MDT)</option>
+            <option value="PST">Pacific (PST/PDT)</option>
+            <option value="GMT">GMT / UTC</option>
+            <option value="CET">Central European (CET)</option>
+            <option value="IST">India (IST)</option>
+            <option value="JST">Japan (JST)</option>
+            <option value="AEST">Australia Eastern (AEST)</option>
+            <option value="other">Other &mdash; specify</option>
+          </select>
+        </div>
+        <div class="hint">Based on our research: best times for US audiences are 9-11 AM and 2-4 PM weekdays, 9-11 AM weekends. We can A/B test optimal times for your specific audience.</div>
+      </div>
+      <div class="form-group">
+        <label>Upload Days</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" checked> Monday</label>
+          <label><input type="checkbox" checked> Tuesday</label>
+          <label><input type="checkbox" checked> Wednesday</label>
+          <label><input type="checkbox" checked> Thursday</label>
+          <label><input type="checkbox" checked> Friday</label>
+          <label><input type="checkbox" checked> Saturday</label>
+          <label><input type="checkbox" checked> Sunday</label>
+        </div>
+        <div class="hint">Default: every day. Consistency matters more than which days. The algorithm rewards daily posting.</div>
+      </div>
+      <div class="form-group">
+        <label>Burst Upload Strategy (for channel launch)</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="steady">Steady &mdash; Start at 1/day from day one (recommended)</option>
+          <option value="burst-10">Burst &mdash; Upload 10 videos in first 3 days, then 1/day</option>
+          <option value="burst-20">Heavy Burst &mdash; Upload 20 videos in first week, then 1/day</option>
+        </select>
+        <div class="hint">A launch burst gives the algorithm more content to test, but risks appearing spammy. We recommend steady cadence with high-quality content.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1J: MONETIZATION -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1J. Monetization Goals</div>
+    <div class="collapsible-content show">
+      <div class="form-group">
+        <label>Primary Goal for This Channel <span class="req">*</span></label>
+        <select>
+          <option value="">Select...</option>
+          <option value="ypp">YouTube Partner Program revenue (ads)</option>
+          <option value="brand">Brand awareness / visibility (no direct monetization)</option>
+          <option value="leads">Lead generation (drive traffic to website/funnel)</option>
+          <option value="affiliate">Affiliate marketing (product links in description)</option>
+          <option value="product">Product sales (e-commerce, courses, services)</option>
+          <option value="community">Community building (grow audience for future monetization)</option>
+          <option value="multiple">Multiple goals (specify below)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>If aiming for YPP: are you aware of the requirements?</label>
+        <div class="info-box">
+          <div class="info-title">YouTube Partner Program Requirements (2026)</div>
+          <p><strong>Option 1:</strong> 1,000 subscribers + 4,000 public watch hours (last 12 months)<br>
+          <strong>Option 2:</strong> 1,000 subscribers + 10 million Shorts views (last 90 days)<br>
+          <strong>Important:</strong> Ad-driven watch hours do NOT count toward YPP. Only organic views qualify.</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description Links / CTAs</label>
+        <textarea placeholder="e.g., Website URL to include in every description, affiliate links, social media links, newsletter signup link..."></textarea>
+        <div class="hint">We include these in the YouTube description of every video, formatted consistently.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1K: APPROVAL WORKFLOW -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1K. Content Approval Workflow</div>
+    <div class="collapsible-content show">
+      <div class="form-group">
+        <label>Content Approval Level <span class="req">*</span></label>
+        <select>
+          <option value="">Select...</option>
+          <option value="full-auto">Full Auto &mdash; Scout, write, build, upload without human review (fastest, recommended for trending content)</option>
+          <option value="title-approval">Title Approval &mdash; We send you the title + brief for approval before building (adds ~12h delay)</option>
+          <option value="script-approval">Script Approval &mdash; We send you the full narration script for approval before building (adds ~24h delay)</option>
+          <option value="video-approval">Video Approval &mdash; We send you the finished video for approval before uploading (adds ~24-48h delay)</option>
+          <option value="full-approval">Full Approval &mdash; Approve at every stage: title, script, AND video (adds ~48-72h delay)</option>
+        </select>
+        <div class="hint">Full Auto is how we run our own channels. It is the only mode that keeps trending content timely. Every approval layer adds delay, which reduces the relevance of time-sensitive content. Our compliance gate catches policy issues automatically.</div>
+      </div>
+      <div class="form-group">
+        <label>Approval Contact Method</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="email">Email (we send, you reply APPROVE or request changes)</option>
+          <option value="slack">Slack (dedicated channel)</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="dashboard">Client Dashboard (future feature)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Maximum Approval Turnaround Time</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="4h">4 hours (trending content demands this)</option>
+          <option value="12h">12 hours</option>
+          <option value="24h">24 hours</option>
+          <option value="48h">48 hours (only for evergreen content)</option>
+        </select>
+        <div class="hint">If approval is not received within this window, we follow the default action (configurable: auto-publish or hold).</div>
+      </div>
+      <div class="form-group">
+        <label>If approval times out, what should we do?</label>
+        <select>
+          <option value="">Select...</option>
+          <option value="publish">Auto-publish (recommended for trending)</option>
+          <option value="hold">Hold until approved (safer for brand-sensitive clients)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1L: ADDITIONAL NOTES -->
+  <div class="form-section">
+    <div class="form-section-title collapsible" onclick="toggleCollapse(this)">1L. Additional Notes &amp; Special Requests</div>
+    <div class="collapsible-content show">
+      <div class="form-group">
+        <label>Anything else we should know?</label>
+        <textarea rows="6" placeholder="Brand guidelines, existing content strategy documents, past YouTube experiences, specific concerns, competitors to outperform, upcoming launches or events to align content with..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Existing Content / Assets to Incorporate</label>
+        <textarea placeholder="e.g., We have 50 blog posts that could be turned into Shorts, we have product photos, we have existing B-roll footage..."></textarea>
+        <div class="hint">If you have existing content assets, we can repurpose them into the pipeline alongside AI-generated content.</div>
+      </div>
+      <div class="form-group">
+        <label>How did you hear about Shorts Factory?</label>
+        <input type="text" placeholder="Referral, search, social media, event...">
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-group" style="justify-content: center;">
+    <button class="btn btn-primary" onclick="alert('Form submission will be connected to Formspree or a backend API. Data is captured and sent to the onboarding team.')">Submit Intake Form</button>
+    <button class="btn btn-outline" onclick="window.print()">Print / Export PDF</button>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 2: TECHNICAL SETUP CHECKLIST -->
+<!-- ============================================================ -->
+<div class="section" id="technical-setup">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Technical Setup Checklist</div>
+  </div>
+
+  <p>Everything WE need to set up on our end for each new client. This is our internal configuration checklist. Items are ordered by dependency &mdash; complete top to bottom.</p>
+
+  <h3>2A. Client Directory &amp; Pipeline Configuration</h3>
+  <ul class="checklist">
+    <li>Create client directory: <code>shorts-factory-saas/client_{id}/</code> with CLAUDE.md, <code>stories/</code>, <code>output/</code>, <code>analytics/</code>, <code>reports/</code></li>
+    <li>Create client configuration JSON: <code>client_{id}/config.json</code> &mdash; all intake form data serialized (niche, tone, voice, brand colors, restrictions, schedule, platforms)</li>
+    <li>Configure story template: story formula, sign-off phrase, voice ID, highlight color, channel name, YouTube metadata defaults (default tags, description footer with links)</li>
+    <li>Configure compliance rules: topic blocklist, soft restrictions, language rules, brand safety level, industry disclaimers</li>
+    <li>Configure editorial scoring: topic keywords, competitor channels, trending region, Star Power / Event Timing weight adjustments per niche</li>
+    <li>Set up content calendar: upload cadence, upload time (converted to server timezone), upload days, burst schedule if applicable</li>
+  </ul>
+
+  <h3>2B. YouTube OAuth &amp; Google Cloud</h3>
+  <ul class="checklist">
+    <li>Create or access client's Google Cloud project</li>
+    <li>Enable YouTube Data API v3</li>
+    <li>Enable YouTube Analytics API v2 (for advanced analytics)</li>
+    <li>Create OAuth 2.0 credentials (Desktop application type)</li>
+    <li>Download <code>client_secret_{client_id}.json</code></li>
+    <li>Run OAuth flow: client clicks authorization link, grants YouTube upload + analytics permissions</li>
+    <li>Store token: <code>.youtube_token_{client_id}.json</code></li>
+    <li>Verify token scopes: <code>youtube.upload</code>, <code>youtube.readonly</code>, <code>yt-analytics.readonly</code></li>
+    <li>Test upload with a private unlisted test video</li>
+    <li>Configure channel ID in client config</li>
+  </ul>
+
+  <div class="warning-box">
+    <div class="warning-title">OAuth Token Security</div>
+    <p>Client OAuth tokens grant full upload access to their YouTube channel. These tokens MUST be stored encrypted, NEVER committed to git, and NEVER shared. Token files are in <code>.gitignore</code>. If a token is compromised, the client must revoke access in their Google Account settings immediately.</p>
+  </div>
+
+  <h3>2C. Cross-Platform API Tokens</h3>
+  <table>
+    <thead>
+      <tr><th>Platform</th><th>Auth Method</th><th>Client Action Required</th><th>Token File</th><th>Refresh</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>YouTube</td><td>OAuth 2.0</td><td>Click auth link, grant permissions</td><td><code>.youtube_token_{id}.json</code></td><td>Auto-refresh</td></tr>
+      <tr><td>Instagram</td><td>Meta OAuth 2.0</td><td>Connect IG Business to FB Page, authorize Meta app</td><td><code>.ig_token_{id}.json</code></td><td>60-day, auto-refresh monthly</td></tr>
+      <tr><td>Facebook</td><td>Meta OAuth 2.0</td><td>Same as Instagram (shared Meta app)</td><td>Same token as IG</td><td>Same as IG</td></tr>
+      <tr><td>Threads</td><td>Meta OAuth 2.0</td><td>Same as Instagram (shared Meta app)</td><td>Same token as IG</td><td>Same as IG</td></tr>
+      <tr><td>X / Twitter</td><td>OAuth 1.0a</td><td>Create X Developer app or authorize ours</td><td><code>.x_token_{id}.json</code></td><td>No expiry</td></tr>
+      <tr><td>TikTok</td><td>OAuth 2.0</td><td>Authorize TikTok app, pass audit</td><td><code>.tiktok_token_{id}.json</code></td><td>Short-lived, auto-refresh</td></tr>
+      <tr><td>Bluesky</td><td>App Password</td><td>Generate app password in Bluesky settings</td><td>Env vars</td><td>No expiry</td></tr>
+      <tr><td>Telegram</td><td>Bot Token</td><td>Create bot via @BotFather, create channel</td><td>Env vars</td><td>No expiry</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2D. Channel Branding Configuration</h3>
+  <ul class="checklist">
+    <li>Upload and process client logo (resize to 800x800 for profile, 98x98 for watermark)</li>
+    <li>Upload and process channel banner (resize to 2560x1440)</li>
+    <li>Configure subtitle highlight color (from brand primary color)</li>
+    <li>Set up mascot/presenter image if requested (generate via Leonardo Phoenix or process client-provided image)</li>
+    <li>Process mascot with rembg for transparent background</li>
+    <li>Configure mascot position, size, and animation style</li>
+    <li>Create or process intro/outro video cards</li>
+    <li>Set up watermark overlay (if requested)</li>
+  </ul>
+
+  <h3>2E. AI Engine Configuration</h3>
+  <ul class="checklist">
+    <li>Assign video animation engine tier per client tier (Starter: Ken Burns + Stock Footage; Growth: PiAPI + Ken Burns; Enterprise: Full chain)</li>
+    <li>Assign TTS voice: select from edge-tts or ElevenLabs voice library, configure voice ID</li>
+    <li>Configure image generation prompts: style keywords, visual mood, aspect ratio consistency</li>
+    <li>Set up LLM prompt templates: story writer system prompt, compliance system prompt, comment replier persona</li>
+    <li>Configure avatar fallback chain (if mascot requested): SadTalker &rarr; 2D Floating &rarr; LivePortrait</li>
+  </ul>
+
+  <h3>2F. Analytics &amp; Monitoring</h3>
+  <ul class="checklist">
+    <li>Create client analytics directory: <code>client_{id}/analytics/</code></li>
+    <li>Configure channel monitor for client channel (YouTube API)</li>
+    <li>Configure performance tracker (auto-discover videos, tag categories)</li>
+    <li>Configure suppression detector (AVD drops, traffic shifts, view cliffs)</li>
+    <li>Set up weekly report generation (auto-email to client contact)</li>
+    <li>Configure client dashboard (HTML or web portal)</li>
+    <li>Set up alert thresholds (email/WhatsApp notification for anomalies)</li>
+  </ul>
+
+  <h3>2G. Engagement Automation</h3>
+  <ul class="checklist">
+    <li>Configure comment replier: brand persona, response tone, max replies/day</li>
+    <li>Configure topic suggestions detector: compliance rules, approved topic criteria</li>
+    <li>Configure community poster (if channel has 500+ subs): post types, frequency</li>
+    <li>Set up auto-playlist creation (category-based playlists)</li>
+    <li>Configure Bluesky/Telegram reply bots (if platforms enabled)</li>
+  </ul>
+
+  <h3>2H. Launchd Agents (per client)</h3>
+  <table>
+    <thead>
+      <tr><th>Agent</th><th>Schedule</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>com.sf.{client_id}.scout</code></td><td>Daily (configurable)</td><td>Trend scouting + editorial scoring</td></tr>
+      <tr><td><code>com.sf.{client_id}.writer</code></td><td>Daily (after scout)</td><td>Story writing + compliance check</td></tr>
+      <tr><td><code>com.sf.{client_id}.builder</code></td><td>Daily (after writer)</td><td>Video build (render MP4)</td></tr>
+      <tr><td><code>com.sf.{client_id}.uploader</code></td><td>Daily (client's preferred time)</td><td>YouTube upload + cross-platform distribution</td></tr>
+      <tr><td><code>com.sf.{client_id}.replier</code></td><td>3x daily</td><td>Comment replies + engagement</td></tr>
+      <tr><td><code>com.sf.{client_id}.monitor</code></td><td>Nightly</td><td>Channel stats + performance tracking</td></tr>
+      <tr><td><code>com.sf.{client_id}.report</code></td><td>Weekly</td><td>Weekly performance report</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <div class="info-title">Scale Consideration</div>
+    <p>Each client requires 7-10 launchd agents. At 10 clients, that is 70-100 agents running on the server. The current M3 Max handles 27 agents for 2 channels. For SaaS scale, we will need to transition to a cloud-based job scheduler (e.g., Celery + Redis, or Temporal) with containerized workers. The launchd architecture is correct for the first 3-5 clients.</p>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 3: ONBOARDING TIMELINE -->
+<!-- ============================================================ -->
+<div class="section" id="timeline">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Onboarding Timeline</div>
+  </div>
+
+  <p>The target is <strong>14 calendar days</strong> from contract signature to first video live on YouTube. Here is the day-by-day breakdown.</p>
+
+  <div class="timeline">
+
+    <div class="timeline-item">
+      <div class="timeline-day"><span class="badge badge-day">Day 0</span> Contract Signed</div>
+      <div class="timeline-title">Welcome &amp; Kickoff</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>Client receives welcome email with intake form link, OAuth instructions, and onboarding timeline</li>
+          <li>Auto-responder sends intro email from <code>hello@shortsfactory.io</code></li>
+          <li>Client added to CRM / leads tracker</li>
+          <li>Internal: Create client directory, assign client ID</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-day"><span class="badge badge-day">Day 1-2</span> Discovery</div>
+      <div class="timeline-title">Intake Call + Form Completion</div>
+      <div class="timeline-desc">
+        <ul>
+          <li><strong>30-minute video call</strong> (Zoom/Google Meet) to walk through the intake form together</li>
+          <li>Discuss niche positioning, content strategy, and competitive landscape</li>
+          <li>Collect all branding assets (logo, banner, colors, fonts, mascot reference)</li>
+          <li>Agree on voice/tone and review sample narrations from our library</li>
+          <li>Confirm upload schedule, approval workflow, and cross-platform distribution preferences</li>
+          <li>Set expectations on timeline and deliverables</li>
+          <li>Client completes remaining form fields after call (deadline: end of Day 2)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-day"><span class="badge badge-day">Day 3</span> Authorization</div>
+      <div class="timeline-title">YouTube OAuth + Platform Authorizations</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>Send client the YouTube OAuth authorization link</li>
+          <li>Client clicks link, logs into their Google account, grants upload + analytics permissions</li>
+          <li>Verify token received and test with a private video upload (immediately deleted)</li>
+          <li>Send cross-platform authorization links (Instagram, X, TikTok, etc.)</li>
+          <li>Client generates Bluesky app password, Telegram bot token if applicable</li>
+          <li>Internal: Store all tokens securely, configure client pipeline</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-day"><span class="badge badge-day">Day 4-5</span> Configuration</div>
+      <div class="timeline-title">Pipeline Setup &amp; Branding</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>Configure story templates, compliance rules, editorial scoring weights</li>
+          <li>Process and integrate branding assets (logo, banner, colors, mascot)</li>
+          <li>Set up AI mascot (if requested): generate or process image, configure animation pipeline</li>
+          <li>Configure TTS voice selection and test sample narrations</li>
+          <li>Set up launchd agents for client pipeline (scout, writer, builder, uploader, replier, monitor)</li>
+          <li>Configure analytics dashboard and monitoring alerts</li>
+          <li>Run trend scout for client's niche (dry run) to validate topic detection</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-day"><span class="badge badge-day">Day 6-7</span> Test Build</div>
+      <div class="timeline-title">First Test Video &mdash; Internal Review</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>Run full pipeline end-to-end: scout &rarr; editor &rarr; writer &rarr; compliance &rarr; builder</li>
+          <li>Build 3 test videos (different topics) to validate quality across variety</li>
+          <li>Internal review: check narration quality, image style, subtitle accuracy, mascot behavior, metadata</li>
+          <li>Fix any issues (common: voice tone mismatch, image style drift, subtitle timing, mascot sizing)</li>
+          <li>Rebuild test videos with corrections</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-day"><span class="badge badge-day">Day 8-9</span> Client Review</div>
+      <div class="timeline-title">Client Reviews Test Videos</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>Send 3 test videos to client for review (unlisted on YouTube or via direct file)</li>
+          <li>Collect feedback on: voice, visuals, pacing, tone, branding, mascot, overall quality</li>
+          <li>Implement revision requests (typically 1-2 rounds)</li>
+          <li>Client signs off on video quality standard &mdash; this becomes the benchmark</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-day"><span class="badge badge-day">Day 10-11</span> Queue Building</div>
+      <div class="timeline-title">Build Initial Content Queue</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>Run pipeline to generate initial content queue (7-14 videos depending on cadence)</li>
+          <li>Quality check each video against approved benchmark</li>
+          <li>Set up upload queue with staggered scheduling</li>
+          <li>Configure cross-platform distribution for each video</li>
+          <li>Activate engagement bots (comment replier, community poster if eligible)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item milestone">
+      <div class="timeline-day"><span class="badge badge-day">Day 12</span> Launch Day</div>
+      <div class="timeline-title">First Video Goes LIVE</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>First video uploaded to YouTube (public)</li>
+          <li>Cross-platform distribution activated</li>
+          <li>Comment replier activated</li>
+          <li>Analytics monitoring begins</li>
+          <li>Client receives confirmation email with video link</li>
+          <li>Internal: Verify all systems green, check first 2 hours of performance</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-day"><span class="badge badge-day">Day 13-14</span> Stabilization</div>
+      <div class="timeline-title">Monitor &amp; Optimize</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>Monitor first 3 videos for performance (views, completion rate, swipe-away rate)</li>
+          <li>Check all launchd agents running without errors</li>
+          <li>Verify cross-platform posts appearing correctly</li>
+          <li>Verify comment replier tone and quality</li>
+          <li>Send first performance mini-report to client</li>
+          <li>Schedule Week 2 check-in call (15 minutes) to review early results</li>
+          <li>Pipeline transitions to full autonomous mode</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-day"><span class="badge badge-day">Ongoing</span> Steady State</div>
+      <div class="timeline-title">Autonomous Operation + Weekly Reports</div>
+      <div class="timeline-desc">
+        <ul>
+          <li>Pipeline runs fully autonomously: daily scout &rarr; write &rarr; build &rarr; upload &rarr; engage</li>
+          <li>Weekly performance report emailed to client every Monday</li>
+          <li>Monthly strategy review call (30 minutes) to adjust niche, topics, or approach</li>
+          <li>Quarterly deep-dive report with channel growth analysis and recommendations</li>
+          <li>Alert notifications for anomalies (AVD drops, view cliffs, suppression detection)</li>
+          <li>Content calendar adjustments based on performance data feedback loop</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 4: SERVICE LEVEL EXPECTATIONS -->
+<!-- ============================================================ -->
+<div class="section" id="sla">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Service Level Expectations</div>
+  </div>
+
+  <h3>4A. Video Quality Standards</h3>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Specification</th><th>Standard</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Resolution</td><td>1080x1920 (9:16 portrait, Full HD)</td></tr>
+        <tr><td>Frame Rate</td><td>30 FPS (25 FPS for avatar studio mode)</td></tr>
+        <tr><td>Duration</td><td>30-90 seconds (configurable per client)</td></tr>
+        <tr><td>Audio</td><td>AI narration (TTS), background SFX, normalized levels</td></tr>
+        <tr><td>Subtitles</td><td>Animated word-by-word subtitles, client's brand color highlight</td></tr>
+        <tr><td>Images</td><td>AI-generated via Leonardo Phoenix (primary) with free fallbacks</td></tr>
+        <tr><td>Animation</td><td>Ken Burns (included) or AI video animation (tier-dependent)</td></tr>
+        <tr><td>Mascot (if enabled)</td><td>Lip-synced or 2D floating overlay, lower-left corner</td></tr>
+        <tr><td>Metadata</td><td>SEO-optimized title (&lt;100 chars), description with hashtags, relevant tags</td></tr>
+        <tr><td>AI Disclosure</td><td>containsSyntheticMedia: true (YouTube-compliant, always set)</td></tr>
+        <tr><td>Compliance</td><td>Every video passes automated compliance review before upload</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>4B. Delivery Commitments</h3>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>Starter</th><th>Growth</th><th>Enterprise</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Videos per month</td><td>30 (1/day)</td><td>90 (3/day across 3 channels)</td><td>Custom</td></tr>
+        <tr><td>Channels</td><td>1</td><td>3</td><td>Unlimited</td></tr>
+        <tr><td>Cross-platform distribution</td><td>YouTube + 2 platforms</td><td>YouTube + all platforms</td><td>YouTube + all platforms</td></tr>
+        <tr><td>Weekly reports</td><td>Yes (email)</td><td>Yes (email + dashboard)</td><td>Yes (custom + dashboard)</td></tr>
+        <tr><td>Comment replies</td><td>Up to 10/day</td><td>Up to 30/day</td><td>Unlimited</td></tr>
+        <tr><td>Monthly strategy call</td><td>15 minutes</td><td>30 minutes</td><td>60 minutes</td></tr>
+        <tr><td>Priority support</td><td>Email (48h response)</td><td>WhatsApp/Slack (4h response)</td><td>Dedicated account manager</td></tr>
+        <tr><td>AI video animation</td><td>Ken Burns (free)</td><td>PiAPI engine (15+ models)</td><td>Full engine access</td></tr>
+        <tr><td>Mascot/Presenter</td><td>2D floating</td><td>Lip-synced (SadTalker)</td><td>Premium lip-sync</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>4C. Revision Policy</h3>
+  <div class="card">
+    <ul>
+      <li><strong>Test videos (onboarding):</strong> Up to 3 rounds of revisions on the first 3 test videos. This is where we lock in the quality standard.</li>
+      <li><strong>Production videos (steady state):</strong> Revisions on individual videos are NOT included in the standard workflow. The compliance gate handles quality control automatically.</li>
+      <li><strong>Style adjustments:</strong> Changes to voice, tone, visual style, or content strategy are handled during monthly strategy calls and applied to ALL future videos (not retroactively).</li>
+      <li><strong>Emergency pulls:</strong> If a video needs to be removed urgently (factual error, legal concern, client request), we remove it within 2 hours during business hours, 12 hours off-hours.</li>
+      <li><strong>Rebuilds:</strong> If the pipeline produces a video that clearly fails the agreed quality benchmark, we rebuild it at no additional cost. This applies to technical failures (audio sync issues, rendering artifacts, subtitle errors), not subjective preferences.</li>
+    </ul>
+  </div>
+
+  <h3>4D. Performance Disclaimers</h3>
+  <div class="warning-box">
+    <div class="warning-title">What We Cannot Guarantee</div>
+    <p>These disclaimers MUST be in the service agreement. They protect both parties and set honest expectations.</p>
+  </div>
+  <div class="card">
+    <ul>
+      <li><strong>No view count guarantees.</strong> YouTube's algorithm determines reach. We optimize for the algorithm's known preferences (completion rate, hook quality, metadata), but we cannot guarantee specific view counts, subscriber growth, or revenue.</li>
+      <li><strong>No monetization timeline guarantees.</strong> Reaching YouTube Partner Program requirements (1,000 subs + 4,000 watch hours OR 10M Shorts views) depends on content-market fit, niche competition, and algorithm behavior. Typical timeline: 3-12 months for new channels.</li>
+      <li><strong>No trending guarantees.</strong> We cannot guarantee a video will "go viral" or appear on YouTube's trending tab. We can maximize the probability by picking high-scoring topics and optimizing metadata.</li>
+      <li><strong>AI content has inherent limitations.</strong> AI-generated images may occasionally have artifacts (extra fingers, text distortion, face inconsistencies). AI narration is high quality but distinguishable from human narration by attentive listeners. We disclose all content as AI-generated per YouTube policy.</li>
+      <li><strong>Algorithm changes are outside our control.</strong> YouTube's recommendation algorithm changes without notice. Our algo_intel system monitors for changes weekly, but we cannot prevent or predict algorithm shifts.</li>
+      <li><strong>Third-party API availability.</strong> Our pipeline depends on YouTube API, TTS services, image generation APIs, and social media APIs. If any third-party service experiences downtime, delivery may be delayed (our multi-tier fallback chains minimize this risk).</li>
+      <li><strong>Trending content has a shelf life.</strong> If the client uses approval workflows that add 24-48 hour delays, trending content may become stale before publishing. We strongly recommend Full Auto mode for trending-focused channels.</li>
+    </ul>
+  </div>
+
+  <h3>4E. Content Approval SLA</h3>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Approval Mode</th><th>Our Turnaround</th><th>Client Turnaround</th><th>Total Delay</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Full Auto</td><td>Automated (0h)</td><td>None required</td><td>0 hours</td></tr>
+        <tr><td>Title Approval</td><td>Title delivered within 2h of scouting</td><td>Client: 4-12h to approve</td><td>6-14 hours</td></tr>
+        <tr><td>Script Approval</td><td>Script delivered within 4h of scouting</td><td>Client: 12-24h to approve</td><td>16-28 hours</td></tr>
+        <tr><td>Video Approval</td><td>Video delivered within 8h of scouting</td><td>Client: 24-48h to approve</td><td>32-56 hours</td></tr>
+        <tr><td>Full Approval</td><td>Each stage: 2-8h</td><td>Each stage: 4-24h</td><td>48-72 hours</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>4F. Refund Policy (Summary)</h3>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Timeframe</th><th>Refund</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>First 7 days</td><td>100% refund, no questions asked</td></tr>
+        <tr><td>8-14 days</td><td>75% refund</td></tr>
+        <tr><td>15-30 days</td><td>50% refund</td></tr>
+        <tr><td>30+ days</td><td>No refund (cancel anytime, service runs through billing period)</td></tr>
+        <tr><td>Performance guarantee</td><td>If pipeline fails to deliver agreed videos within 30 days due to our fault: full refund</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 12px;">Full refund policy: <a href="refund.html">shortsfactory.io/refund</a></p>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 5: RECOMMENDATIONS -->
+<!-- ============================================================ -->
+<div class="section" id="recommendations">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Practical Recommendations</div>
+  </div>
+
+  <p>Lessons from running Jersey Vault (1,280 subs, 8K+ views, 32 videos) and Caught It Trending (61 subs, 5K+ views, 29 videos) since February 2026. These are hard-won insights, not theoretical advice.</p>
+
+  <div class="advice-box">
+    <div class="advice-title">1. Pick ONE Niche and Stay in It</div>
+    <p>Our two channels never cross content types. Jersey Vault does ONLY football jersey stories. Caught It Trending does ONLY breaking news and pop culture. When CiT accidentally published too many "dead" topics (old geopolitics, stale crypto news), engagement cratered. When we stuck to high Star Power topics (celebrities, sports moments, viral events), performance recovered. The algorithm rewards niche consistency. A channel about "everything" is a channel about nothing.</p>
+  </div>
+
+  <div class="advice-box">
+    <div class="advice-title">2. The First 3 Seconds Decide Everything</div>
+    <p>YouTube Shorts live or die on the "Viewed vs. Swiped Away" metric. You need 70%+ view rate (meaning fewer than 30% of people swipe past your video). The hook must be a shocking statement, a compelling visual, or an irresistible question -- delivered in the first 3 seconds. Our best-performing CiT videos all start with a bold claim: "They were LOSING with 2 minutes left..." or "This 21-mile gap controls YOUR gas prices." Generic intros get swiped.</p>
+  </div>
+
+  <div class="advice-box">
+    <div class="advice-title">3. Consistency Beats Quality (Within Reason)</div>
+    <p>A channel posting 1 video every day with Ken Burns animation (free, simple zoom/pan) will outperform a channel posting 1 premium video per week with Runway Gen-3 animation. The algorithm rewards upload frequency and consistency. Our Jersey Vault hit 1,280 subscribers by posting 2 shorts per day -- simple Ken Burns videos with strong narration. Do not wait for "perfect" videos. Ship daily.</p>
+  </div>
+
+  <div class="advice-box">
+    <div class="advice-title">4. Real Content is Your Unfair Advantage</div>
+    <p>Jersey Vault's top-performing content by engagement rate is not AI-generated stories. It is real, filmed walkthroughs of signed shirts (Haaland: 37.3% like rate vs. 0.6-11% for AI content). If the client has ANY real assets -- product photos, behind-the-scenes footage, customer testimonials -- mix them into the pipeline. AI content fills the daily cadence. Real content drives the exceptional spikes.</p>
+  </div>
+
+  <div class="advice-box">
+    <div class="advice-title">5. Kill Dead Categories Fast</div>
+    <p>Our performance tracker auto-tags every video with a category and tracks views over time. Categories that consistently underperform (geopolitics, crypto, generic tech news) get labeled "DEAD" and the editor auto-rejects future topics in those categories. This feedback loop took CiT from publishing duds (12 views) to consistently hitting 100-900+ views per video. Tell clients: not every topic works. Let the data kill the losers quickly.</p>
+  </div>
+
+  <div class="advice-box">
+    <div class="advice-title">6. 40-60 Seconds is the Sweet Spot</div>
+    <p>Based on our data and industry research: videos over 40 seconds have 33% higher engagement than shorter clips, while videos under 30 seconds have the highest completion rates. The sweet spot is 40-60 seconds -- long enough for a complete story, short enough for high completion. Our CiT videos that run 60-90 seconds often have lower completion rates. Tell clients to resist the urge to "add more" -- tighter is better.</p>
+  </div>
+
+  <div class="advice-box">
+    <div class="advice-title">7. The Compliance Gate Pays for Itself</div>
+    <p>Every video passes through an automated compliance review before building. This catches policy violations (violence, drugs, hate speech), advertiser-unfriendly language, and metadata issues. The cost is ~$0.01 per review (Claude Haiku). The value is avoiding channel strikes, which can kill a channel permanently. We have ZERO policy violations across 50+ published videos. The compliance gate is not optional -- it is the foundation of sustainable growth.</p>
+  </div>
+
+  <div class="advice-box">
+    <div class="advice-title">8. Cross-Platform is Free Growth</div>
+    <p>The same 9:16 video works on YouTube, Instagram Reels, TikTok, X, Bluesky, Facebook Reels, and Threads. After building one video, distributing it to 6+ platforms costs $0 and takes 30 seconds of API calls. CiT currently posts to 4 platforms automatically. Each platform brings incremental views and potential subscribers back to YouTube. There is no reason not to cross-post everywhere.</p>
+  </div>
+
+  <div class="advice-box">
+    <div class="advice-title">9. Do Not Buy Subscribers or Views</div>
+    <p>Paid subscribers and views do NOT count toward YouTube Partner Program eligibility. YouTube specifically excludes ad-driven watch hours from the 4,000-hour requirement. Additionally, purchased subscribers have low engagement rates, which actually hurts your channel's algorithm performance (YouTube sees a high sub count with low view counts and deprioritizes your content). Build organically or not at all.</p>
+  </div>
+
+  <div class="advice-box">
+    <div class="advice-title">10. Expect Month 1 to Be Slow -- That Is Normal</div>
+    <p>New channels with zero subscribers typically get 10-50 views per video in the first month. This is not a failure -- it is the algorithm testing your content with small audiences. If the content performs well (high completion rate, low swipe-away), the algorithm progressively widens distribution. CiT went from 11 subscribers to 61 in its first 2 weeks. Growth compounds. Set client expectations that Month 1 is about establishing consistency and letting the algorithm learn, not about viral hits.</p>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SECTION 6: APPENDIX -->
+<!-- ============================================================ -->
+<div class="section" id="appendix">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Appendix</div>
+  </div>
+
+  <h3>6A. Tier Feature Comparison</h3>
+  <div class="tier-grid">
+    <div class="tier-card">
+      <div class="tier-name">Starter</div>
+      <div class="tier-price">$997<span>/mo</span></div>
+      <ul class="tier-features">
+        <li>1 YouTube channel</li>
+        <li>30 videos/month (1/day)</li>
+        <li>YouTube + 2 cross-platform</li>
+        <li>Ken Burns animation (free)</li>
+        <li>2D floating mascot</li>
+        <li>Standard TTS (edge-tts)</li>
+        <li>Weekly email reports</li>
+        <li>10 comment replies/day</li>
+        <li>15-min monthly call</li>
+        <li>Email support (48h response)</li>
+        <li>Automated compliance gate</li>
+      </ul>
+    </div>
+    <div class="tier-card featured">
+      <div class="tier-name">Growth</div>
+      <div class="tier-price">$1,997<span>/mo</span></div>
+      <ul class="tier-features">
+        <li>3 YouTube channels</li>
+        <li>90 videos/month (1/day/channel)</li>
+        <li>YouTube + ALL platforms</li>
+        <li>PiAPI engine (15+ AI models)</li>
+        <li>Lip-synced mascot (SadTalker)</li>
+        <li>Premium TTS (ElevenLabs)</li>
+        <li>Weekly email + dashboard</li>
+        <li>30 comment replies/day</li>
+        <li>30-min monthly call</li>
+        <li>WhatsApp/Slack (4h response)</li>
+        <li>Automated compliance gate</li>
+        <li>Algorithm intelligence brief</li>
+        <li>Suppression detection alerts</li>
+      </ul>
+    </div>
+    <div class="tier-card">
+      <div class="tier-name">Enterprise</div>
+      <div class="tier-price">Custom</div>
+      <ul class="tier-features">
+        <li>Unlimited channels</li>
+        <li>Custom video volume</li>
+        <li>All platforms + custom</li>
+        <li>Full video engine access</li>
+        <li>Premium lip-sync mascot</li>
+        <li>Premium TTS + custom voices</li>
+        <li>Custom dashboard</li>
+        <li>Unlimited comment replies</li>
+        <li>60-min monthly call</li>
+        <li>Dedicated account manager</li>
+        <li>Custom compliance rules</li>
+        <li>Custom integrations</li>
+        <li>White-label option</li>
+        <li>API access</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>6B. Story JSON Format (Client Reference)</h3>
+  <div class="card">
+    <p>Every video is defined as a JSON file. Clients do not need to write JSON directly (our AI writer handles this), but understanding the structure helps during review.</p>
+    <pre style="background: var(--bg); padding: 16px; border-radius: 8px; font-size: 13px; overflow-x: auto; color: var(--text-muted); border: 1px solid var(--border); margin-top: 12px; line-height: 1.5;">
+{
+  "title": "Story Internal Title",
+  "voice": "en-US-AriaNeural",
+  "channel": "client_channel_name",
+  "youtube": {
+    "title": "The YouTube Title (under 100 chars)",
+    "description": "Full description with #hashtags and links...",
+    "tags": "keyword1, keyword2, keyword3, ..."
+  },
+  "scenes": [
+    {
+      "narration": "The script for this scene...",
+      "image_prompt": "Cinematic 9:16 prompt for AI image generation...",
+      "video_prompt": "Motion prompt for video animation...",
+      "ken_burns": "zoom_in",
+      "pause_after": 1.0
+    }
+  ]
+}</pre>
+  </div>
+
+  <h3>6C. Cross-Platform Distribution Matrix</h3>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Platform</th><th>Video Format</th><th>Max Duration</th><th>API Cost</th><th>Auth Type</th><th>Daily Limit</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>YouTube Shorts</td><td>9:16 MP4</td><td>3 min</td><td>Free</td><td>OAuth 2.0</td><td>No hard limit</td></tr>
+        <tr><td>Instagram Reels</td><td>9:16 MP4</td><td>90 sec</td><td>Free</td><td>Meta OAuth</td><td>25 posts/day</td></tr>
+        <tr><td>TikTok</td><td>9:16 MP4</td><td>10 min</td><td>Free</td><td>OAuth 2.0</td><td>6 req/min</td></tr>
+        <tr><td>X / Twitter</td><td>Any MP4</td><td>140 sec</td><td>Free</td><td>OAuth 1.0a</td><td>85 uploads/day</td></tr>
+        <tr><td>Facebook Reels</td><td>9:16 MP4</td><td>90 sec</td><td>Free</td><td>Meta OAuth</td><td>Not documented</td></tr>
+        <tr><td>Threads</td><td>Any MP4</td><td>5 min</td><td>Free</td><td>Meta OAuth</td><td>250 posts/day</td></tr>
+        <tr><td>Bluesky</td><td>Any MP4</td><td>3 min</td><td>Free</td><td>App Password</td><td>25 videos/day</td></tr>
+        <tr><td>Telegram</td><td>MP4 (50MB max)</td><td>Any</td><td>Free</td><td>Bot Token</td><td>~30 msg/sec</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>6D. Pipeline Architecture (Simplified Client View)</h3>
+  <div class="card">
+    <pre style="background: var(--bg); padding: 20px; border-radius: 8px; font-size: 13px; overflow-x: auto; color: var(--text-muted); border: 1px solid var(--border); line-height: 1.8; font-family: 'SF Mono', 'Fira Code', monospace;">
+DAILY AUTONOMOUS PIPELINE
+==========================
+
+  Trend Scanner          AI Story Writer         Video Builder
+  +-----------+          +-------------+         +-----------+
+  | YouTube   |          | Narration   |         | AI Images |
+  | Trending  +--------->| Script      +-------->| Animation |
+  | Keywords  |   edit   | Metadata    |  build  | TTS Voice |
+  | Competitor|   score  | Compliance  |         | Subtitles |
+  +-----------+          +-------------+         | Mascot    |
+                                                 +-----------+
+                                                      |
+                                                      | upload
+                                                      v
+                                    +----------------------------------+
+                                    |           DISTRIBUTOR            |
+                                    |                                  |
+                                    |  YouTube ---- Instagram ---- X   |
+                                    |  TikTok ---- Bluesky ---- FB    |
+                                    |  Threads ---- Telegram           |
+                                    +----------------------------------+
+                                                      |
+                                                      | engage
+                                                      v
+                                    +----------------------------------+
+                                    |        ENGAGEMENT LAYER          |
+                                    |                                  |
+                                    |  Comment Replies --- Topic Scan  |
+                                    |  Community Posts --- Playlists   |
+                                    +----------------------------------+
+                                                      |
+                                                      | analyze
+                                                      v
+                                    +----------------------------------+
+                                    |         ANALYTICS LAYER          |
+                                    |                                  |
+                                    |  Performance --- Suppression     |
+                                    |  Weekly Report --- Algo Intel    |
+                                    |  Dashboard --- Alert System      |
+                                    +----------------------------------+
+                                                      |
+                                              feedback loop
+                                                      |
+                                                      v
+                                          (feeds back into
+                                           Trend Scanner
+                                           scoring next day)
+</pre>
+  </div>
+
+  <h3>6E. Key Metrics We Track</h3>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>What It Measures</th><th>Target</th><th>How We Use It</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Viewed vs. Swiped Away</td><td>% of people who watch vs. swipe past</td><td>&gt;70% viewed</td><td>Hook quality validation</td></tr>
+        <tr><td>Average % Viewed (APV)</td><td>How much of the video people watch</td><td>&gt;80% completion</td><td>Story pacing optimization</td></tr>
+        <tr><td>Average View Duration (AVD)</td><td>Average seconds watched</td><td>Varies by length</td><td>Content length tuning</td></tr>
+        <tr><td>Subscriber Growth</td><td>Net new subscribers per week</td><td>Positive trend</td><td>Channel health indicator</td></tr>
+        <tr><td>Like Rate</td><td>Likes / Views</td><td>&gt;5%</td><td>Content resonance</td></tr>
+        <tr><td>Traffic Sources</td><td>Where views come from (Shorts shelf, search, etc.)</td><td>High Shorts shelf %</td><td>Algorithm distribution health</td></tr>
+        <tr><td>Category Performance</td><td>Average views per content category</td><td>Varies</td><td>Feed into editorial scoring (kill DEAD, boost HOT)</td></tr>
+        <tr><td>Cross-Platform Reach</td><td>Views across all platforms combined</td><td>Growing trend</td><td>Platform prioritization</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>6F. Onboarding Checklist (Printable)</h3>
+  <div class="card">
+    <p style="margin-bottom: 16px; font-weight: 700; color: var(--text);">Client-side checklist to complete before Day 3:</p>
+    <ul class="checklist">
+      <li>Complete intake form (all required fields)</li>
+      <li>Provide branding assets (logo, banner, colors) or approve our defaults</li>
+      <li>Confirm YouTube channel URL (or approve new channel creation)</li>
+      <li>Click YouTube OAuth authorization link and grant permissions</li>
+      <li>Provide social media handles for cross-platform distribution</li>
+      <li>Authorize social media platform access (Instagram, X, TikTok, etc.)</li>
+      <li>Review and approve voice/narration sample</li>
+      <li>Confirm content niche, topic keywords, and competitor channels</li>
+      <li>Confirm upload schedule and approval workflow preference</li>
+      <li>Sign service agreement (terms, privacy, refund policy acknowledged)</li>
+      <li>Process first payment via Stripe</li>
+    </ul>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>Shorts Factory &mdash; Autonomous YouTube Production &mdash; <a href="https://shortsfactory.io">shortsfactory.io</a></p>
+    <p style="margin-top: 4px;">Internal Process Document v1.0 &mdash; March 2026</p>
+  </div>
+</footer>
+
+<script>
+function toggleCollapse(el) {
+  el.classList.toggle('active');
+  const content = el.nextElementSibling;
+  content.classList.toggle('show');
+}
+</script>
+
+</body>
+</html>
