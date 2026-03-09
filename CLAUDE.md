@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 9, 2026 (v11 -- GoatCounter analytics added to all 5 HTML pages. Auto-update stats system: `update_site_stats.py` + weekly launchd. Stats refreshed to Mar 8 data: 13,300+ combined views, 70 videos)
+**Last Updated**: March 9, 2026 (v14 -- Professional email `hello@shortsfactory.io` via Namecheap Private Email (Titan/Starter, $11.88/yr). Full programmatic email pipeline: `email_sender.py` (SMTP send), `inbox_reader.py` (IMAP read), `lead_responder.py` (auto-reply to Formspree leads). Launchd agent `com.shortsfactory.lead-responder` checks inbox every 30 min, auto-replies to new leads, logs to `leads.json`. Servers: `smtp.privateemail.com:465` / `imap.privateemail.com:993`. 2 leads processed (Madara + Matvey Levchenko). Previous: cross-platform distribution)
 
 ---
 
@@ -89,6 +89,11 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | `refund.html` | Refund Policy | Yes |
 | `SAAS_DEMO.html` | Internal tech demo | No |
 | `update_site_stats.py` | Auto-update site stats from live channel data, commit + push | No |
+| `email_sender.py` | Send emails from hello@shortsfactory.io via SMTP | No |
+| `inbox_reader.py` | Read inbox via IMAP (unread, search, Formspree filter) | No |
+| `lead_responder.py` | Auto-check inbox, reply to new Formspree leads, log to leads.json | No |
+| `leads.json` | Lead tracker (gitignored) | No |
+| `sent_log.json` | Sent email log (gitignored) | No |
 | `CNAME` | Custom domain config for GitHub Pages | No |
 | `CLAUDE.md` | Project documentation | No |
 | `client_1/` | Virtual test client sandbox | No |
@@ -205,6 +210,31 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | **What it does** | Reads channel JSONs → patches HTML → git commit + push |
 | **Log** | `/tmp/sf-site-stats-update.log` |
 | **CLI** | `--status`, `--dry-run` |
+
+### Professional Email (Titan/Namecheap)
+
+| Property | Value |
+|----------|-------|
+| **Email** | `hello@shortsfactory.io` |
+| **Provider** | Namecheap Private Email (Titan) — Starter |
+| **Cost** | $11.88/yr (promo MAILDEAL) → renews $14.88/yr |
+| **SMTP** | `smtp.privateemail.com:465` (SSL) |
+| **IMAP** | `imap.privateemail.com:993` (SSL) |
+| **Storage** | 5 GB |
+| **Aliases** | 10 available (0 used) |
+| **Creds** | `SF_EMAIL` + `SF_EMAIL_PASS` in `~/.zshrc` |
+| **Webmail** | Login via Namecheap → Private Email → LOGIN |
+
+### Lead Auto-Responder (launchd)
+
+| Property | Value |
+|----------|-------|
+| **Script** | `lead_responder.py` |
+| **Agent** | `com.shortsfactory.lead-responder` |
+| **Schedule** | Every 30 minutes + on load |
+| **What it does** | IMAP check → parse Formspree leads → auto-reply → log to leads.json |
+| **Log** | `/tmp/sf-lead-responder.log` |
+| **CLI** | `--dry-run`, `--status` |
 
 ### X (Twitter) Accounts
 - `@shortsfactoryio` — SaaS business account (khal.mahmoud+shortsfactory@gmail.com). Profile pic: sf_logo_v2.png. Bio set. URL: shortsfactory.io. X Developer app active (API keys in Developer Console)
