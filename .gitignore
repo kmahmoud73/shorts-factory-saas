@@ -3,6 +3,7 @@
 
 # Leads — private
 leads.json
+sent_log.json
 
 # Secrets
 .env

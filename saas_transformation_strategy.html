@@ -430,7 +430,7 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
                   <td>Story JSON, voice setting, feature flags (animated subs, gen images, SFX, AI music, avatar, engine selection)</td>
                   <td>MP4 file (1080x1920, 9:16) + metadata .txt</td>
                   <td>Leonardo AI (images), Pollinations.ai (images), DALL-E 3 (images), Runway (video), Minimax/Hailuo (video), Kling (video), ElevenLabs (TTS), edge-tts (TTS), Hedra (avatar)</td>
-                  <td><strong>Images:</strong> Leonardo &rarr; Pollinations &rarr; DALL-E &rarr; black frame<br><strong>Animation:</strong> Runway &rarr; Minimax &rarr; Kling &rarr; Ken Burns<br><strong>TTS:</strong> ElevenLabs &rarr; edge-tts<br><strong>Avatar:</strong> Hedra 3D &rarr; SadTalker &rarr; 2D floating</td>
+                  <td><strong>Images:</strong> Leonardo &rarr; Pollinations &rarr; DALL-E &rarr; black frame<br><strong>Animation:</strong> Runway &rarr; Minimax &rarr; Kling &rarr; Ken Burns<br><strong>TTS:</strong> ElevenLabs &rarr; edge-tts<br><strong>Avatar:</strong> Hedra 3D &rarr; SadTalker (audio-synced) &rarr; Mascot Pipeline &rarr; 2D &rarr; LivePortrait</td>
                   <td><span class="layer-tag layer-fixed">FIXED</span> Core rendering pipeline. <span class="layer-tag layer-config">CONFIGURABLE</span> Output resolution, FPS, subtitle style, highlight palette, watermark text/position, font, voice. <span class="layer-tag layer-tenant">PER-TENANT</span> API keys for image/video/TTS, avatar assets, brand colors</td>
                 </tr>
                 <tr>
@@ -474,11 +474,11 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
                   <td><span class="layer-tag layer-tenant">PER-TENANT</span> Mascot PNG, avatar position/size, Hedra API key</td>
                 </tr>
                 <tr>
-                  <td><code>hedra_avatar.py</code> / <code>sadtalker_avatar.py</code> / <code>avatar_animator.py</code></td>
+                  <td><code>hedra_avatar.py</code> / <code>sadtalker_avatar.py</code> / <code>avatar_animator.py</code> / <code>liveportrait_mascot.py</code></td>
                   <td>Portrait PNG, audio file, scene duration</td>
-                  <td>Transparent video clip with animated character</td>
-                  <td>Hedra Character-3 API (hedra), SadTalker (local), none (2D)</td>
-                  <td>Hedra &rarr; SadTalker &rarr; 2D</td>
+                  <td>Transparent video clip with animated character (avatar mode) or full 1080x1920 RGB scene (studio mode)</td>
+                  <td>Hedra Character-3 API (hedra), SadTalker (local), LivePortrait (local), none (2D)</td>
+                  <td>Hedra &rarr; SadTalker &rarr; Mascot Pipeline &rarr; 2D &rarr; LivePortrait</td>
                   <td><span class="layer-tag layer-tenant">PER-TENANT</span> Character image, animation params, API key</td>
                 </tr>
               </tbody>
@@ -488,7 +488,7 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
       </details>
 
       <details>
-        <summary><span class="badge badge-green">Distribution Layer</span> 3 Modules &mdash; Upload, playlist, scheduling</summary>
+        <summary><span class="badge badge-green">Distribution Layer</span> 7 Modules &mdash; Upload, playlist, cross-platform (X, IG, Bluesky, Telegram)</summary>
         <div class="details-content">
           <div class="table-wrap">
             <table>
@@ -517,6 +517,38 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
                   <td>YouTube Data API (playlists.list, playlistItems.insert)</td>
                   <td>JV classification: keyword-based (shorts, long-form, memorabilia, moments). CiT: all videos go to "Every Trending Story" (auto-created on first run, ID cached). Handles duplicates silently.</td>
                   <td><span class="layer-tag layer-config">CONFIGURABLE</span> Playlist names, classification rules. <span class="layer-tag layer-tenant">PER-TENANT</span> Playlist IDs, channel playlists</td>
+                </tr>
+                <tr>
+                  <td><code>x_poster.py</code></td>
+                  <td>Video title, YouTube URL, tracker file</td>
+                  <td>Tweet posted to X/Twitter with video preview card</td>
+                  <td>X/Twitter API (tweepy) or Safari automation fallback</td>
+                  <td><strong>API-first:</strong> tries tweepy (requires Basic tier $100/mo). <strong>Fallback:</strong> Safari browser automation (zero cost). 10 tweet templates, 280-char limit, dupe tracking. Wired into <code>trending_uploader.py</code> — auto-fires after each YouTube upload.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Templates, hashtags. <span class="layer-tag layer-tenant">PER-TENANT</span> X API keys or browser session, account handle</td>
+                </tr>
+                <tr>
+                  <td><code>ig_poster.py</code></td>
+                  <td>Video file (MP4), title, YouTube URL, tracker file</td>
+                  <td>Instagram Reel published with caption + YouTube link</td>
+                  <td>Instagram Graph API (primary) or Safari automation fallback</td>
+                  <td><strong>API-first:</strong> uploads video to Catbox.moe hosting, creates REELS container via Graph API. <strong>Fallback:</strong> Safari + cliclick automation. 6 caption templates. 100MB file size limit. Dupe tracking. Wired into <code>trending_uploader.py</code>.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Caption templates, hashtags. <span class="layer-tag layer-tenant">PER-TENANT</span> IG User ID, access token, Meta developer app</td>
+                </tr>
+                <tr>
+                  <td><code>bluesky_poster.py</code></td>
+                  <td>Video title, YouTube URL, tracker file</td>
+                  <td>Bluesky post with clickable URL facet + auto-boost from engagement account</td>
+                  <td>AT Protocol (atproto library, free, no rate limits)</td>
+                  <td><strong>Zero cost, no approval needed.</strong> 10 post templates, 300-char limit. Auto-boost: every post auto-liked + reposted from a secondary engagement account. Dupe tracking. Wired into <code>trending_uploader.py</code>.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> AT Protocol integration. <span class="layer-tag layer-tenant">PER-TENANT</span> Bluesky handle, app password, boost account</td>
+                </tr>
+                <tr>
+                  <td><code>telegram_poster.py</code></td>
+                  <td>Video title, YouTube URL, thumbnail, tracker file</td>
+                  <td>Telegram channel message with HTML formatting + thumbnail preview</td>
+                  <td>Telegram Bot API (free, no rate limits)</td>
+                  <td><strong>Zero cost.</strong> 10 message templates. HTML formatting. YouTube thumbnail auto-embedded. Dupe tracking. Wired into <code>trending_uploader.py</code>.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> Bot API integration. <span class="layer-tag layer-tenant">PER-TENANT</span> Bot token, channel ID</td>
                 </tr>
               </tbody>
             </table>
@@ -676,7 +708,7 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
             <tr><td>Kling v1.5</td><td>Image-to-video animation</td><td>shorts_maker.py, video_enhancer.py</td><td>JWT (access_key + secret_key)</td><td>~$0.42-0.84/clip</td><td><span class="badge badge-purple">Per-tenant API key</span></td></tr>
             <tr><td>ElevenLabs</td><td>TTS (natural voices)</td><td>shorts_maker.py</td><td>xi-api-key header</td><td>Free tier 10K chars/mo</td><td><span class="badge badge-purple">Per-tenant API key</span></td></tr>
             <tr><td>Edge TTS (Microsoft)</td><td>TTS fallback (free)</td><td>shorts_maker.py</td><td>None (free endpoint)</td><td>Free</td><td><span class="badge badge-green">Platform-shared</span></td></tr>
-            <tr><td>Hedra Character-3</td><td>3D lip-synced avatar</td><td>hedra_avatar.py</td><td>Bearer token (API key)</td><td>$24/mo (5,400 credits)</td><td><span class="badge badge-purple">Per-tenant API key</span></td></tr>
+            <tr><td>Hedra Character-3</td><td>3D lip-synced avatar</td><td>hedra_avatar.py</td><td>Bearer token (API key)</td><td>$75/mo Professional (5,400 credits)</td><td><span class="badge badge-purple">Per-tenant API key</span></td></tr>
             <tr><td>Anthropic / Groq</td><td>LLM for all AI decisions</td><td>llm_client.py (used by 8+ modules)</td><td>API key</td><td>Anthropic: per-token. Groq: free</td><td><span class="badge badge-purple">Platform key or per-tenant</span></td></tr>
           </tbody>
         </table>
@@ -1200,10 +1232,15 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
           <h3><span class="badge badge-green">Extension Model</span></h3>
           <p style="font-size:13px;margin-top:8px;">Platform capabilities that can be added as modules.</p>
           <ul style="color:var(--text-muted);font-size:13px;list-style:disc;padding-left:16px;margin-top:10px;">
-            <li>Reddit Seeder (cross-posting)</li>
-            <li>TikTok Distributor</li>
-            <li>Instagram Reels Distributor</li>
-            <li>Google Ads Auto-Promote</li>
+            <li>&#10003; X/Twitter Cross-Poster (LIVE &mdash; API + browser fallback)</li>
+            <li>&#10003; Instagram Reels Distributor (LIVE &mdash; Graph API + browser fallback)</li>
+            <li>&#10003; Bluesky Cross-Poster (LIVE &mdash; AT Protocol, free)</li>
+            <li>&#10003; Telegram Channel Poster (LIVE &mdash; Bot API, free)</li>
+            <li>&#10003; Bluesky Reply Bot (LIVE &mdash; auto-engage followers)</li>
+            <li>TikTok Distributor (planned)</li>
+            <li>Facebook Reels Distributor (planned &mdash; needs Meta app)</li>
+            <li>Threads Cross-Poster (planned &mdash; needs Meta app)</li>
+            <li>Google Ads Auto-Promote (built, awaiting verification)</li>
             <li>Thumbnail A/B Tester</li>
             <li>Multi-Language Translator</li>
             <li>Custom Webhook Integrations</li>
@@ -1315,7 +1352,7 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
             <li>Build template library: pre-built niche configurations users can start from</li>
             <li>Build engine marketplace: BYOK panel for each AI engine</li>
             <li>Implement Stripe billing: metered (per video) or flat (per plan tier)</li>
-            <li>Add multi-platform distribution (TikTok, Instagram Reels)</li>
+            <li><s>Add multi-platform distribution</s> &mdash; <strong>DONE</strong> (X, Instagram Reels, Bluesky, Telegram all live). Remaining: TikTok, Facebook Reels, Threads</li>
             <li>Build extension SDK for third-party integrations</li>
             <li>SOC 2 / security audit for enterprise readiness</li>
           </ul>
@@ -1445,7 +1482,7 @@ def load_config(tenant_id="default"):
             <tr><td>Image generation</td><td>~$5 (Leonardo)</td><td>BYOK or ~$5</td><td>BYOK or ~$10</td><td>Pollinations free fallback available</td></tr>
             <tr><td>Video animation</td><td>~$10-20 (Minimax)</td><td>BYOK or ~$15</td><td>BYOK or ~$30</td><td>Ken Burns free fallback always available</td></tr>
             <tr><td>TTS</td><td>$0 (ElevenLabs free + edge-tts)</td><td>$0</td><td>$0-5</td><td>ElevenLabs free tier covers ~12 videos/mo</td></tr>
-            <tr><td>Avatar (Hedra)</td><td>$24/mo</td><td>BYOK or $0 (2D)</td><td>BYOK or $24</td><td>2D free fallback always available</td></tr>
+            <tr><td>Avatar (Hedra + SadTalker)</td><td>$75/mo (or $0 SadTalker)</td><td>BYOK or $0 (SadTalker/2D)</td><td>BYOK or $75</td><td>SadTalker (free audio-synced) + 2D fallback always available</td></tr>
             <tr><td>Compute (server)</td><td>$0 (local Mac)</td><td>~$30-50</td><td>~$50-80</td><td>DigitalOcean / Railway shared workers</td></tr>
             <tr><td>Storage (S3)</td><td>$0 (local)</td><td>~$2-5</td><td>~$5-10</td><td>Videos + images + analytics</td></tr>
             <tr><td><strong>Total COGS</strong></td><td><strong>~$35-50</strong></td><td><strong>~$55-90</strong></td><td><strong>~$115-190</strong></td><td></td></tr>
