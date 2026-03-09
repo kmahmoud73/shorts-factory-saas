@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 9, 2026 (v14 -- Professional email `hello@shortsfactory.io` via Namecheap Private Email (Titan/Starter, $11.88/yr). Full programmatic email pipeline: `email_sender.py` (SMTP send), `inbox_reader.py` (IMAP read), `lead_responder.py` (auto-reply to Formspree leads). Launchd agent `com.shortsfactory.lead-responder` checks inbox every 30 min, auto-replies to new leads, logs to `leads.json`. Servers: `smtp.privateemail.com:465` / `imap.privateemail.com:993`. 2 leads processed (Madara + Matvey Levchenko). Previous: cross-platform distribution)
+**Last Updated**: March 9, 2026 (v15 -- Updated deck.html + saas_transformation_strategy.html with current pipeline stats: 27 agents, 42 scripts, 15+ video engines via PiAPI unified gateway, autonomous credit monitor, Channel Director brand manager. Previous: v14 Professional email pipeline)
 
 ---
 
@@ -123,8 +123,8 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | CiT Top Video | Bruno Mars Grammys (977 views) |
 | Combined Views | 13,399 |
 | Upload Queue | 15 videos |
-| Autonomous Agents | 19 |
-| Production Modules | 29 |
+| Autonomous Agents | 27 |
+| Production Scripts | 42 |
 | Daily LLM Cost | $0 |
 
 ## Team
@@ -287,6 +287,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 **Fallback**: Lemon Squeezy (also supports Jordan, simpler signup, but 7%+ fees)
 
 ## Status
+- v15: Updated deck.html (27 agents, 42 scripts, 15+ video engines via PiAPI) + saas_transformation_strategy.html (42 scripts across 6 layers). Stats snapshot updated: 27 agents, 42 scripts. (Mar 9, 2026)
 - v11: GoatCounter analytics added to all 5 HTML pages (`index.html`, `deck.html`, `terms.html`, `privacy.html`, `refund.html`). Dashboard at `shortsfactory.goatcounter.com` (pending account signup). No cookies, GDPR-friendly, free tier. (Mar 9, 2026)
 - v10: Auto-update stats system built. `update_site_stats.py` reads live channel JSONs, regex-patches `index.html` + `deck.html`, commits + pushes to GitHub Pages. Weekly launchd `com.shortsfactory.site-stats-update` (Sundays 11:35 PM). Stats refreshed: JV 7,009→8,063 views (+15%), CiT 30→57 subs (+90%), 3,696→5,336 views (+44%), combined 10,700→13,300+. (Mar 9, 2026)
 - v9: Paddle signup submitted (Sole Trader, Jordan, historyofthings911@gmail.com). Initially rejected (missing legal pages). Built `terms.html`, `privacy.html`, `refund.html` — all live on shortsfactory.io. Refund policy: flexible tiered (7d=100%, 14d=75%, 30d=50%) + 30-day performance guarantee. Footer links added to `index.html`. Resubmitted via Typeform with all URLs + product description. Review by Mar 8. Deadline in `deadlines.json`. JV momentum: latest videos hitting 90-219 views organically. (Mar 5, 2026)
