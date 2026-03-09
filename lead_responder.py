@@ -103,9 +103,45 @@ def parse_formspree_lead(body):
     return lead if lead.get("email") else None
 
 
-def build_reply(lead):
-    """Generate qualifying reply based on lead data."""
-    name = lead.get("name", "there")
+def parse_camera_submission(body):
+    """Extract camera submission fields from WorldMonitor Formspree notification."""
+    fields = {}
+    for field in ["city", "country", "youtube_url", "email"]:
+        match = re.search(rf"{field}\s*[:\n]\s*(.+?)(?:\n|$)", body, re.IGNORECASE)
+        if match:
+            val = match.group(1).strip()
+            if val and val.lower() not in ["n/a", "none", ""]:
+                fields[field] = val
+    # Camera submissions must have city + youtube_url to be valid
+    if fields.get("city") and fields.get("youtube_url"):
+        return fields
+    return None
+
+
+def build_camera_reply(submission):
+    """Generate thank-you reply for WorldView camera submissions."""
+    city = submission.get("city", "your city")
+    country = submission.get("country", "")
+    location = f"{city}, {country}" if country else city
+
+    subject = "Thanks for your WorldView camera submission!"
+
+    body = f"""Hey there,
+
+Thanks for submitting a live camera feed for {location} to WorldView!
+
+We've received your submission and will review it shortly. Once verified, your camera will be added to the WorldView dashboard so people around the world can tune into {city}.
+
+WorldView is a free, open-source global intelligence dashboard — community contributions like yours are what make it special.
+
+You can check out the live dashboard at https://worldview.ink
+
+Thanks for being part of the community!"""
+
+    return subject, body
+
+
+
     niche = lead.get("niche", "")
     message = lead.get("message", "")
 
@@ -203,7 +239,51 @@ def check_for_new_leads(dry_run=False):
 
         msg = email.message_from_bytes(data[0][1])
         body = get_body(msg)
+
+        # Try camera submission first (has city + youtube_url)
+        cam_sub = parse_camera_submission(body)
         lead = parse_formspree_lead(body)
+
+        if cam_sub:
+            cam_email = cam_sub.get("email", "").lower()
+            if cam_email and cam_email in known_emails:
+                continue
+            log(f"NEW CAM SUBMISSION: {cam_sub.get('city', '?')} — {cam_sub.get('youtube_url', '?')}")
+            subject, reply_body = build_camera_reply(cam_sub)
+            entry_email = cam_email or "anonymous"
+            source = "worldview.ink"
+            entry = {
+                "id": next_id,
+                "date": datetime.now().isoformat(),
+                "name": "",
+                "email": entry_email,
+                "plan": "",
+                "niche": "camera-submission",
+                "message": f"City: {cam_sub.get('city', '')} | Country: {cam_sub.get('country', '')} | URL: {cam_sub.get('youtube_url', '')}",
+                "source": source,
+                "status": "new",
+                "notes": "",
+            }
+            if cam_email:
+                if dry_run:
+                    log(f"[DRY RUN] Would send cam thank-you to {cam_email}")
+                else:
+                    try:
+                        send_email(cam_email, subject, reply_body)
+                        log(f"Cam thank-you sent to {cam_email}")
+                        entry["status"] = "auto-replied"
+                        entry["notes"] = "Camera submission — auto-reply sent."
+                    except Exception as e:
+                        log(f"SEND FAILED to {cam_email}: {e}")
+                        entry["status"] = "reply-failed"
+                        entry["notes"] = f"Camera submission — reply failed: {e}"
+                known_emails.add(cam_email)
+            else:
+                entry["notes"] = "Camera submission — no email provided."
+            leads.append(entry)
+            next_id += 1
+            new_count += 1
+            continue
 
         if not lead:
             continue
