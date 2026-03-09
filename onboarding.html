@@ -744,11 +744,11 @@ footer {
   <div class="toc-title">Contents</div>
   <ol>
     <li><a href="#intake-form">Client Intake Form &mdash; 47 Questions Across 12 Categories</a></li>
-    <li><a href="#technical-setup">Technical Setup Checklist &mdash; Our Internal Configuration</a></li>
+    <li><a href="#technical-setup">What We Handle &mdash; Setup, Connections &amp; Automation</a></li>
     <li><a href="#timeline">Onboarding Timeline &mdash; 14-Day Roadmap to First Video</a></li>
-    <li><a href="#sla">Service Level Expectations &mdash; Promises, Policies &amp; Disclaimers</a></li>
-    <li><a href="#recommendations">Practical Recommendations &mdash; From Running Our Own Channels</a></li>
-    <li><a href="#appendix">Appendix &mdash; Tier Comparison, Story JSON Format, Platform Matrix</a></li>
+    <li><a href="#sla">Service Level Expectations &mdash; Quality, Delivery &amp; Support</a></li>
+    <li><a href="#recommendations">Tips for Success &mdash; What Drives Results</a></li>
+    <li><a href="#appendix">Appendix &mdash; Tier Comparison, Platform Matrix, Metrics</a></li>
   </ol>
 </div>
 
@@ -1391,122 +1391,57 @@ footer {
 
 
 <!-- ============================================================ -->
-<!-- SECTION 2: TECHNICAL SETUP CHECKLIST -->
+<!-- SECTION 2: WHAT WE HANDLE -->
 <!-- ============================================================ -->
 <div class="section" id="technical-setup">
   <div class="section-header">
     <div class="section-number">2</div>
-    <div class="section-title">Technical Setup Checklist</div>
+    <div class="section-title">What We Handle</div>
   </div>
 
-  <p>Everything WE need to set up on our end for each new client. This is our internal configuration checklist. Items are ordered by dependency &mdash; complete top to bottom.</p>
+  <p>Once you complete the intake form, our team configures everything on our end. Here's what we take care of so you don't have to.</p>
 
-  <h3>2A. Client Directory &amp; Pipeline Configuration</h3>
-  <ul class="checklist">
-    <li>Create client directory: <code>shorts-factory-saas/client_{id}/</code> with CLAUDE.md, <code>stories/</code>, <code>output/</code>, <code>analytics/</code>, <code>reports/</code></li>
-    <li>Create client configuration JSON: <code>client_{id}/config.json</code> &mdash; all intake form data serialized (niche, tone, voice, brand colors, restrictions, schedule, platforms)</li>
-    <li>Configure story template: story formula, sign-off phrase, voice ID, highlight color, channel name, YouTube metadata defaults (default tags, description footer with links)</li>
-    <li>Configure compliance rules: topic blocklist, soft restrictions, language rules, brand safety level, industry disclaimers</li>
-    <li>Configure editorial scoring: topic keywords, competitor channels, trending region, Star Power / Event Timing weight adjustments per niche</li>
-    <li>Set up content calendar: upload cadence, upload time (converted to server timezone), upload days, burst schedule if applicable</li>
-  </ul>
+  <h3>Channel &amp; Brand Setup</h3>
+  <div class="card">
+    <ul class="checklist">
+      <li><strong>Channel configuration</strong> &mdash; Your niche, tone, voice, brand colors, and content restrictions are loaded into our pipeline</li>
+      <li><strong>Branding assets</strong> &mdash; We process your logo (profile pic + watermark), channel banner, and subtitle colors to match your brand</li>
+      <li><strong>AI presenter</strong> &mdash; If you want a mascot/presenter, we generate or process your provided image with lip-sync animation</li>
+      <li><strong>Voice selection</strong> &mdash; We assign a TTS voice that matches your brand personality (50+ voices available)</li>
+    </ul>
+  </div>
 
-  <h3>2B. YouTube OAuth &amp; Google Cloud</h3>
-  <ul class="checklist">
-    <li>Create or access client's Google Cloud project</li>
-    <li>Enable YouTube Data API v3</li>
-    <li>Enable YouTube Analytics API v2 (for advanced analytics)</li>
-    <li>Create OAuth 2.0 credentials (Desktop application type)</li>
-    <li>Download <code>client_secret_{client_id}.json</code></li>
-    <li>Run OAuth flow: client clicks authorization link, grants YouTube upload + analytics permissions</li>
-    <li>Store token: <code>.youtube_token_{client_id}.json</code></li>
-    <li>Verify token scopes: <code>youtube.upload</code>, <code>youtube.readonly</code>, <code>yt-analytics.readonly</code></li>
-    <li>Test upload with a private unlisted test video</li>
-    <li>Configure channel ID in client config</li>
-  </ul>
+  <h3>Platform Connections</h3>
+  <div class="card">
+    <p>We'll send you authorization links for each platform you want. All you need to do is click and approve.</p>
+    <table>
+      <thead>
+        <tr><th>Platform</th><th>What You Do</th><th>Time Required</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>YouTube</td><td>Click authorization link, grant permissions</td><td>2 minutes</td></tr>
+        <tr><td>Instagram</td><td>Connect IG Business to FB Page, authorize our app</td><td>5 minutes</td></tr>
+        <tr><td>TikTok</td><td>Authorize our app in TikTok settings</td><td>2 minutes</td></tr>
+        <tr><td>X / Twitter</td><td>Authorize our app or create a Developer app</td><td>5 minutes</td></tr>
+        <tr><td>Bluesky</td><td>Generate an app password in settings</td><td>1 minute</td></tr>
+        <tr><td>Telegram</td><td>Create a bot via @BotFather + create a channel</td><td>5 minutes</td></tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="warning-box">
-    <div class="warning-title">OAuth Token Security</div>
-    <p>Client OAuth tokens grant full upload access to their YouTube channel. These tokens MUST be stored encrypted, NEVER committed to git, and NEVER shared. Token files are in <code>.gitignore</code>. If a token is compromised, the client must revoke access in their Google Account settings immediately.</p>
+    <div class="warning-title">Your Credentials Are Secure</div>
+    <p>Your authorization tokens are stored encrypted and never shared. You retain full ownership of all accounts. You can revoke our access at any time from your platform settings.</p>
   </div>
 
-  <h3>2C. Cross-Platform API Tokens</h3>
-  <table>
-    <thead>
-      <tr><th>Platform</th><th>Auth Method</th><th>Client Action Required</th><th>Token File</th><th>Refresh</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>YouTube</td><td>OAuth 2.0</td><td>Click auth link, grant permissions</td><td><code>.youtube_token_{id}.json</code></td><td>Auto-refresh</td></tr>
-      <tr><td>Instagram</td><td>Meta OAuth 2.0</td><td>Connect IG Business to FB Page, authorize Meta app</td><td><code>.ig_token_{id}.json</code></td><td>60-day, auto-refresh monthly</td></tr>
-      <tr><td>Facebook</td><td>Meta OAuth 2.0</td><td>Same as Instagram (shared Meta app)</td><td>Same token as IG</td><td>Same as IG</td></tr>
-      <tr><td>Threads</td><td>Meta OAuth 2.0</td><td>Same as Instagram (shared Meta app)</td><td>Same token as IG</td><td>Same as IG</td></tr>
-      <tr><td>X / Twitter</td><td>OAuth 1.0a</td><td>Create X Developer app or authorize ours</td><td><code>.x_token_{id}.json</code></td><td>No expiry</td></tr>
-      <tr><td>TikTok</td><td>OAuth 2.0</td><td>Authorize TikTok app, pass audit</td><td><code>.tiktok_token_{id}.json</code></td><td>Short-lived, auto-refresh</td></tr>
-      <tr><td>Bluesky</td><td>App Password</td><td>Generate app password in Bluesky settings</td><td>Env vars</td><td>No expiry</td></tr>
-      <tr><td>Telegram</td><td>Bot Token</td><td>Create bot via @BotFather, create channel</td><td>Env vars</td><td>No expiry</td></tr>
-    </tbody>
-  </table>
-
-  <h3>2D. Channel Branding Configuration</h3>
-  <ul class="checklist">
-    <li>Upload and process client logo (resize to 800x800 for profile, 98x98 for watermark)</li>
-    <li>Upload and process channel banner (resize to 2560x1440)</li>
-    <li>Configure subtitle highlight color (from brand primary color)</li>
-    <li>Set up mascot/presenter image if requested (generate via Leonardo Phoenix or process client-provided image)</li>
-    <li>Process mascot with rembg for transparent background</li>
-    <li>Configure mascot position, size, and animation style</li>
-    <li>Create or process intro/outro video cards</li>
-    <li>Set up watermark overlay (if requested)</li>
-  </ul>
-
-  <h3>2E. AI Engine Configuration</h3>
-  <ul class="checklist">
-    <li>Assign video animation engine tier per client tier (Starter: Ken Burns + Stock Footage; Growth: PiAPI + Ken Burns; Enterprise: Full chain)</li>
-    <li>Assign TTS voice: select from edge-tts or ElevenLabs voice library, configure voice ID</li>
-    <li>Configure image generation prompts: style keywords, visual mood, aspect ratio consistency</li>
-    <li>Set up LLM prompt templates: story writer system prompt, compliance system prompt, comment replier persona</li>
-    <li>Configure avatar fallback chain (if mascot requested): SadTalker &rarr; 2D Floating &rarr; LivePortrait</li>
-  </ul>
-
-  <h3>2F. Analytics &amp; Monitoring</h3>
-  <ul class="checklist">
-    <li>Create client analytics directory: <code>client_{id}/analytics/</code></li>
-    <li>Configure channel monitor for client channel (YouTube API)</li>
-    <li>Configure performance tracker (auto-discover videos, tag categories)</li>
-    <li>Configure suppression detector (AVD drops, traffic shifts, view cliffs)</li>
-    <li>Set up weekly report generation (auto-email to client contact)</li>
-    <li>Configure client dashboard (HTML or web portal)</li>
-    <li>Set up alert thresholds (email/WhatsApp notification for anomalies)</li>
-  </ul>
-
-  <h3>2G. Engagement Automation</h3>
-  <ul class="checklist">
-    <li>Configure comment replier: brand persona, response tone, max replies/day</li>
-    <li>Configure topic suggestions detector: compliance rules, approved topic criteria</li>
-    <li>Configure community poster (if channel has 500+ subs): post types, frequency</li>
-    <li>Set up auto-playlist creation (category-based playlists)</li>
-    <li>Configure Bluesky/Telegram reply bots (if platforms enabled)</li>
-  </ul>
-
-  <h3>2H. Launchd Agents (per client)</h3>
-  <table>
-    <thead>
-      <tr><th>Agent</th><th>Schedule</th><th>Purpose</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>com.sf.{client_id}.scout</code></td><td>Daily (configurable)</td><td>Trend scouting + editorial scoring</td></tr>
-      <tr><td><code>com.sf.{client_id}.writer</code></td><td>Daily (after scout)</td><td>Story writing + compliance check</td></tr>
-      <tr><td><code>com.sf.{client_id}.builder</code></td><td>Daily (after writer)</td><td>Video build (render MP4)</td></tr>
-      <tr><td><code>com.sf.{client_id}.uploader</code></td><td>Daily (client's preferred time)</td><td>YouTube upload + cross-platform distribution</td></tr>
-      <tr><td><code>com.sf.{client_id}.replier</code></td><td>3x daily</td><td>Comment replies + engagement</td></tr>
-      <tr><td><code>com.sf.{client_id}.monitor</code></td><td>Nightly</td><td>Channel stats + performance tracking</td></tr>
-      <tr><td><code>com.sf.{client_id}.report</code></td><td>Weekly</td><td>Weekly performance report</td></tr>
-    </tbody>
-  </table>
-
-  <div class="info-box">
-    <div class="info-title">Scale Consideration</div>
-    <p>Each client requires 7-10 launchd agents. At 10 clients, that is 70-100 agents running on the server. The current M3 Max handles 27 agents for 2 channels. For SaaS scale, we will need to transition to a cloud-based job scheduler (e.g., Celery + Redis, or Temporal) with containerized workers. The launchd architecture is correct for the first 3-5 clients.</p>
+  <h3>Automation &amp; Analytics</h3>
+  <div class="card">
+    <ul class="checklist">
+      <li><strong>Daily pipeline</strong> &mdash; Trend scouting, story writing, compliance review, video building, and uploading &mdash; all automated to your schedule</li>
+      <li><strong>Engagement</strong> &mdash; AI-powered comment replies matching your brand persona, community posts, and playlist management</li>
+      <li><strong>Analytics</strong> &mdash; Performance tracking, suppression detection, and weekly reports delivered to your inbox</li>
+      <li><strong>Alerts</strong> &mdash; Real-time notifications for anomalies (sudden view drops, policy flags, etc.)</li>
+    </ul>
   </div>
 </div>
 
@@ -1532,7 +1467,7 @@ footer {
           <li>Client receives welcome email with intake form link, OAuth instructions, and onboarding timeline</li>
           <li>Auto-responder sends intro email from <code>hello@shortsfactory.io</code></li>
           <li>Client added to CRM / leads tracker</li>
-          <li>Internal: Create client directory, assign client ID</li>
+          <li>We create your project workspace and assign your account</li>
         </ul>
       </div>
     </div>
@@ -1563,7 +1498,7 @@ footer {
           <li>Verify token received and test with a private video upload (immediately deleted)</li>
           <li>Send cross-platform authorization links (Instagram, X, TikTok, etc.)</li>
           <li>Client generates Bluesky app password, Telegram bot token if applicable</li>
-          <li>Internal: Store all tokens securely, configure client pipeline</li>
+          <li>We securely store all tokens and configure your pipeline</li>
         </ul>
       </div>
     </div>
@@ -1577,7 +1512,7 @@ footer {
           <li>Process and integrate branding assets (logo, banner, colors, mascot)</li>
           <li>Set up AI mascot (if requested): generate or process image, configure animation pipeline</li>
           <li>Configure TTS voice selection and test sample narrations</li>
-          <li>Set up launchd agents for client pipeline (scout, writer, builder, uploader, replier, monitor)</li>
+          <li>Activate your full automation pipeline (scouting, writing, building, uploading, engagement, monitoring)</li>
           <li>Configure analytics dashboard and monitoring alerts</li>
           <li>Run trend scout for client's niche (dry run) to validate topic detection</li>
         </ul>
@@ -1635,7 +1570,7 @@ footer {
           <li>Comment replier activated</li>
           <li>Analytics monitoring begins</li>
           <li>Client receives confirmation email with video link</li>
-          <li>Internal: Verify all systems green, check first 2 hours of performance</li>
+          <li>We verify all systems are running and monitor your first video's performance</li>
         </ul>
       </div>
     </div>
@@ -1646,7 +1581,7 @@ footer {
       <div class="timeline-desc">
         <ul>
           <li>Monitor first 3 videos for performance (views, completion rate, swipe-away rate)</li>
-          <li>Check all launchd agents running without errors</li>
+          <li>Verify all automation running without errors</li>
           <li>Verify cross-platform posts appearing correctly</li>
           <li>Verify comment replier tone and quality</li>
           <li>Send first performance mini-report to client</li>
@@ -1795,59 +1730,59 @@ footer {
 <div class="section" id="recommendations">
   <div class="section-header">
     <div class="section-number">5</div>
-    <div class="section-title">Practical Recommendations</div>
+    <div class="section-title">Tips for Success</div>
   </div>
 
-  <p>Lessons from running Jersey Vault (1,280 subs, 8K+ views, 32 videos) and Caught It Trending (61 subs, 5K+ views, 29 videos) since February 2026. These are hard-won insights, not theoretical advice.</p>
+  <p>Based on our experience running autonomous YouTube channels, here are the key principles that drive results.</p>
 
   <div class="advice-box">
     <div class="advice-title">1. Pick ONE Niche and Stay in It</div>
-    <p>Our two channels never cross content types. Jersey Vault does ONLY football jersey stories. Caught It Trending does ONLY breaking news and pop culture. When CiT accidentally published too many "dead" topics (old geopolitics, stale crypto news), engagement cratered. When we stuck to high Star Power topics (celebrities, sports moments, viral events), performance recovered. The algorithm rewards niche consistency. A channel about "everything" is a channel about nothing.</p>
+    <p>The algorithm rewards niche consistency. A channel about "everything" is a channel about nothing. We configure your pipeline to stay laser-focused on your chosen niche &mdash; every trending topic is scored for relevance before it's written.</p>
   </div>
 
   <div class="advice-box">
     <div class="advice-title">2. The First 3 Seconds Decide Everything</div>
-    <p>YouTube Shorts live or die on the "Viewed vs. Swiped Away" metric. You need 70%+ view rate (meaning fewer than 30% of people swipe past your video). The hook must be a shocking statement, a compelling visual, or an irresistible question -- delivered in the first 3 seconds. Our best-performing CiT videos all start with a bold claim: "They were LOSING with 2 minutes left..." or "This 21-mile gap controls YOUR gas prices." Generic intros get swiped.</p>
+    <p>YouTube Shorts live or die on the "Viewed vs. Swiped Away" metric. You need 70%+ view rate. Our AI story writer is trained to open every video with a hook &mdash; a shocking statement, a compelling visual, or an irresistible question &mdash; in the first 3 seconds.</p>
   </div>
 
   <div class="advice-box">
-    <div class="advice-title">3. Consistency Beats Quality (Within Reason)</div>
-    <p>A channel posting 1 video every day with Ken Burns animation (free, simple zoom/pan) will outperform a channel posting 1 premium video per week with Runway Gen-3 animation. The algorithm rewards upload frequency and consistency. Our Jersey Vault hit 1,280 subscribers by posting 2 shorts per day -- simple Ken Burns videos with strong narration. Do not wait for "perfect" videos. Ship daily.</p>
+    <div class="advice-title">3. Consistency Beats Perfection</div>
+    <p>A channel posting daily with clean animation will outperform a channel posting weekly with premium effects. The algorithm rewards upload frequency and consistency. Our pipeline is designed for daily output &mdash; so you never miss a day.</p>
   </div>
 
   <div class="advice-box">
-    <div class="advice-title">4. Real Content is Your Unfair Advantage</div>
-    <p>Jersey Vault's top-performing content by engagement rate is not AI-generated stories. It is real, filmed walkthroughs of signed shirts (Haaland: 37.3% like rate vs. 0.6-11% for AI content). If the client has ANY real assets -- product photos, behind-the-scenes footage, customer testimonials -- mix them into the pipeline. AI content fills the daily cadence. Real content drives the exceptional spikes.</p>
+    <div class="advice-title">4. Mix in Real Content</div>
+    <p>If you have real assets &mdash; product photos, behind-the-scenes footage, customer testimonials &mdash; we can mix them into your pipeline. AI content fills the daily cadence. Real content drives exceptional engagement spikes.</p>
   </div>
 
   <div class="advice-box">
-    <div class="advice-title">5. Kill Dead Categories Fast</div>
-    <p>Our performance tracker auto-tags every video with a category and tracks views over time. Categories that consistently underperform (geopolitics, crypto, generic tech news) get labeled "DEAD" and the editor auto-rejects future topics in those categories. This feedback loop took CiT from publishing duds (12 views) to consistently hitting 100-900+ views per video. Tell clients: not every topic works. Let the data kill the losers quickly.</p>
+    <div class="advice-title">5. Our System Kills Underperformers Automatically</div>
+    <p>Our performance tracker auto-tags every video by category and tracks views over time. Categories that consistently underperform are automatically deprioritized, while high-performing topics get more attention. Your channel gets smarter every week.</p>
   </div>
 
   <div class="advice-box">
     <div class="advice-title">6. 40-60 Seconds is the Sweet Spot</div>
-    <p>Based on our data and industry research: videos over 40 seconds have 33% higher engagement than shorter clips, while videos under 30 seconds have the highest completion rates. The sweet spot is 40-60 seconds -- long enough for a complete story, short enough for high completion. Our CiT videos that run 60-90 seconds often have lower completion rates. Tell clients to resist the urge to "add more" -- tighter is better.</p>
+    <p>Videos over 40 seconds have 33% higher engagement than shorter clips, while videos under 30 seconds have the highest completion rates. We target the 40-60 second range &mdash; long enough for a complete story, short enough for high completion.</p>
   </div>
 
   <div class="advice-box">
-    <div class="advice-title">7. The Compliance Gate Pays for Itself</div>
-    <p>Every video passes through an automated compliance review before building. This catches policy violations (violence, drugs, hate speech), advertiser-unfriendly language, and metadata issues. The cost is ~$0.01 per review (Claude Haiku). The value is avoiding channel strikes, which can kill a channel permanently. We have ZERO policy violations across 50+ published videos. The compliance gate is not optional -- it is the foundation of sustainable growth.</p>
+    <div class="advice-title">7. Every Video Passes Compliance Review</div>
+    <p>Every video goes through an automated compliance gate before building. This catches policy violations, advertiser-unfriendly language, and metadata issues &mdash; protecting your channel from strikes. We maintain a zero-violation track record.</p>
   </div>
 
   <div class="advice-box">
-    <div class="advice-title">8. Cross-Platform is Free Growth</div>
-    <p>The same 9:16 video works on YouTube, Instagram Reels, TikTok, X, Bluesky, Facebook Reels, and Threads. After building one video, distributing it to 6+ platforms costs $0 and takes 30 seconds of API calls. CiT currently posts to 4 platforms automatically. Each platform brings incremental views and potential subscribers back to YouTube. There is no reason not to cross-post everywhere.</p>
+    <div class="advice-title">8. Cross-Platform = Free Growth</div>
+    <p>The same video works on YouTube, Instagram Reels, TikTok, X, Bluesky, Facebook Reels, and Threads. We distribute to every platform you enable &mdash; each one brings incremental views and potential subscribers back to YouTube.</p>
   </div>
 
   <div class="advice-box">
-    <div class="advice-title">9. Do Not Buy Subscribers or Views</div>
-    <p>Paid subscribers and views do NOT count toward YouTube Partner Program eligibility. YouTube specifically excludes ad-driven watch hours from the 4,000-hour requirement. Additionally, purchased subscribers have low engagement rates, which actually hurts your channel's algorithm performance (YouTube sees a high sub count with low view counts and deprioritizes your content). Build organically or not at all.</p>
+    <div class="advice-title">9. Never Buy Subscribers or Views</div>
+    <p>Paid subscribers and views do NOT count toward YouTube Partner Program eligibility. Purchased subscribers also hurt your algorithm performance (YouTube sees a high sub count with low view counts and deprioritizes your content). We build organic growth only.</p>
   </div>
 
   <div class="advice-box">
-    <div class="advice-title">10. Expect Month 1 to Be Slow -- That Is Normal</div>
-    <p>New channels with zero subscribers typically get 10-50 views per video in the first month. This is not a failure -- it is the algorithm testing your content with small audiences. If the content performs well (high completion rate, low swipe-away), the algorithm progressively widens distribution. CiT went from 11 subscribers to 61 in its first 2 weeks. Growth compounds. Set client expectations that Month 1 is about establishing consistency and letting the algorithm learn, not about viral hits.</p>
+    <div class="advice-title">10. Month 1 Will Be Slow &mdash; That's Normal</div>
+    <p>New channels typically get 10-50 views per video in the first month. This is the algorithm testing your content with small audiences. If the content performs well, distribution widens progressively. Growth compounds. Month 1 is about establishing consistency and letting the algorithm learn.</p>
   </div>
 </div>
 
@@ -1921,32 +1856,7 @@ footer {
     </div>
   </div>
 
-  <h3>6B. Story JSON Format (Client Reference)</h3>
-  <div class="card">
-    <p>Every video is defined as a JSON file. Clients do not need to write JSON directly (our AI writer handles this), but understanding the structure helps during review.</p>
-    <pre style="background: var(--bg); padding: 16px; border-radius: 8px; font-size: 13px; overflow-x: auto; color: var(--text-muted); border: 1px solid var(--border); margin-top: 12px; line-height: 1.5;">
-{
-  "title": "Story Internal Title",
-  "voice": "en-US-AriaNeural",
-  "channel": "client_channel_name",
-  "youtube": {
-    "title": "The YouTube Title (under 100 chars)",
-    "description": "Full description with #hashtags and links...",
-    "tags": "keyword1, keyword2, keyword3, ..."
-  },
-  "scenes": [
-    {
-      "narration": "The script for this scene...",
-      "image_prompt": "Cinematic 9:16 prompt for AI image generation...",
-      "video_prompt": "Motion prompt for video animation...",
-      "ken_burns": "zoom_in",
-      "pause_after": 1.0
-    }
-  ]
-}</pre>
-  </div>
-
-  <h3>6C. Cross-Platform Distribution Matrix</h3>
+  <h3>6B. Cross-Platform Distribution Matrix</h3>
   <div class="card">
     <table>
       <thead>
@@ -1965,60 +1875,7 @@ footer {
     </table>
   </div>
 
-  <h3>6D. Pipeline Architecture (Simplified Client View)</h3>
-  <div class="card">
-    <pre style="background: var(--bg); padding: 20px; border-radius: 8px; font-size: 13px; overflow-x: auto; color: var(--text-muted); border: 1px solid var(--border); line-height: 1.8; font-family: 'SF Mono', 'Fira Code', monospace;">
-DAILY AUTONOMOUS PIPELINE
-==========================
-
-  Trend Scanner          AI Story Writer         Video Builder
-  +-----------+          +-------------+         +-----------+
-  | YouTube   |          | Narration   |         | AI Images |
-  | Trending  +--------->| Script      +-------->| Animation |
-  | Keywords  |   edit   | Metadata    |  build  | TTS Voice |
-  | Competitor|   score  | Compliance  |         | Subtitles |
-  +-----------+          +-------------+         | Mascot    |
-                                                 +-----------+
-                                                      |
-                                                      | upload
-                                                      v
-                                    +----------------------------------+
-                                    |           DISTRIBUTOR            |
-                                    |                                  |
-                                    |  YouTube ---- Instagram ---- X   |
-                                    |  TikTok ---- Bluesky ---- FB    |
-                                    |  Threads ---- Telegram           |
-                                    +----------------------------------+
-                                                      |
-                                                      | engage
-                                                      v
-                                    +----------------------------------+
-                                    |        ENGAGEMENT LAYER          |
-                                    |                                  |
-                                    |  Comment Replies --- Topic Scan  |
-                                    |  Community Posts --- Playlists   |
-                                    +----------------------------------+
-                                                      |
-                                                      | analyze
-                                                      v
-                                    +----------------------------------+
-                                    |         ANALYTICS LAYER          |
-                                    |                                  |
-                                    |  Performance --- Suppression     |
-                                    |  Weekly Report --- Algo Intel    |
-                                    |  Dashboard --- Alert System      |
-                                    +----------------------------------+
-                                                      |
-                                              feedback loop
-                                                      |
-                                                      v
-                                          (feeds back into
-                                           Trend Scanner
-                                           scoring next day)
-</pre>
-  </div>
-
-  <h3>6E. Key Metrics We Track</h3>
+  <h3>6C. Key Metrics We Track</h3>
   <div class="card">
     <table>
       <thead>
@@ -2037,7 +1894,7 @@ DAILY AUTONOMOUS PIPELINE
     </table>
   </div>
 
-  <h3>6F. Onboarding Checklist (Printable)</h3>
+  <h3>6D. Onboarding Checklist (Printable)</h3>
   <div class="card">
     <p style="margin-bottom: 16px; font-weight: 700; color: var(--text);">Client-side checklist to complete before Day 3:</p>
     <ul class="checklist">
@@ -2061,7 +1918,7 @@ DAILY AUTONOMOUS PIPELINE
 <footer>
   <div class="container">
     <p>Shorts Factory &mdash; Autonomous YouTube Production &mdash; <a href="https://shortsfactory.io">shortsfactory.io</a></p>
-    <p style="margin-top: 4px;">Internal Process Document v1.0 &mdash; March 2026</p>
+    <p style="margin-top: 4px;">Client Onboarding Guide &mdash; March 2026</p>
   </div>
 </footer>
 
