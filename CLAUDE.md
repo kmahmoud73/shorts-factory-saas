@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 9, 2026 (v17 -- `multi_channel_strategy.html` BUILT: comprehensive 11-section multi-channel YouTube compliance & monetization strategy report. Covers: multi-channel ownership rules (100 channels/account via Brand Accounts), AdSense architecture (1 AdSense per person, consolidated payments, per-channel breakdowns), YPP requirements (1K subs + 4K watch hours or 10M Shorts views), content policies (unique content per channel, no cross-posting), AI content rules (July 2025 "Inauthentic Content" policy, mandatory AI disclosure), MCN analysis (don't join — keep 100% revenue), risk factors (cascading termination, content similarity flags), our channel architecture (JV + CiT separation strategy), client onboarding SaaS/Agency model (client owns Brand Account as Primary Owner, we're Manager, client links own AdSense, we bill separately), client intake form design, 10 strategic recommendations. Dark theme matching shortsfactory.io. Responsive + print-friendly. Previous: v16 onboarding.html)
+**Last Updated**: March 10, 2026 (v19 -- `lead_responder.py` now handles **WorldView camera submissions** alongside Shorts Factory leads. Camera submissions (city + youtube_url fields from Formspree `xreyewqz`) get auto-reply thank-you email + logged to leads.json with `niche: camera-submission`, `source: worldview.ink`. Previous: v18 Onboarding split public/internal)
 
 ---
 
@@ -72,8 +72,8 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 
 ### 7. GoatCounter Visitor Analytics -- ADDED Mar 9
 - Privacy-friendly visitor tracking (no cookies, no GDPR banner needed)
-- Script tag added to all 5 client-facing HTML pages (index, deck, terms, privacy, refund)
-- Dashboard: `shortsfactory.goatcounter.com` (**needs account signup at goatcounter.com/signup**)
+- Script tag added to all 6 client-facing HTML pages (index, deck, terms, privacy, refund, onboarding)
+- Dashboard: `shortsfactory.goatcounter.com` (**ACTIVE** — login: khal.mahmoud@gmail.com)
 - Tracks: page views, referrers, countries, devices, browsers
 - Code: `shortsfactory` (pending account creation)
 
@@ -87,13 +87,14 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | `terms.html` | Terms of Service | Yes |
 | `privacy.html` | Privacy Policy | Yes |
 | `refund.html` | Refund Policy | Yes |
-| `onboarding.html` | Client onboarding process (intake form, tech setup, timeline, SLA, advice) | Yes (internal + client-facing) |
-| `multi_channel_strategy.html` | Multi-channel YouTube compliance, monetization, AdSense architecture, client setup | Yes (internal + client-facing) |
+| `onboarding.html` | **Free Channel Strategy** lead magnet — intake form, timeline, SLA, tips. Submits to Formspree → hello@shortsfactory.io | Yes (LIVE) |
+| `onboarding_internal.html` | Full onboarding with internal tech setup, file paths, launchd agents, JV/CiT stats | No (gitignored) |
+| `multi_channel_strategy.html` | Multi-channel YouTube compliance, monetization, AdSense architecture, client setup | No (gitignored) |
 | `SAAS_DEMO.html` | Internal tech demo | No |
 | `update_site_stats.py` | Auto-update site stats from live channel data, commit + push | No |
 | `email_sender.py` | Send emails from hello@shortsfactory.io via SMTP | No |
 | `inbox_reader.py` | Read inbox via IMAP (unread, search, Formspree filter) | No |
-| `lead_responder.py` | Auto-check inbox, reply to new Formspree leads, log to leads.json | No |
+| `lead_responder.py` | Auto-check inbox, reply to new Formspree leads + WorldView camera submissions, log to leads.json | No |
 | `leads.json` | Lead tracker (gitignored) | No |
 | `sent_log.json` | Sent email log (gitignored) | No |
 | `CNAME` | Custom domain config for GitHub Pages | No |
@@ -196,10 +197,12 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | Property | Value |
 |----------|-------|
 | **Service** | GoatCounter (free, no cookies, GDPR-friendly) |
-| **Dashboard** | `shortsfactory.goatcounter.com` (**needs signup**) |
-| **Signup URL** | https://www.goatcounter.com/signup |
+| **Dashboard** | `shortsfactory.goatcounter.com` (**ACTIVE**) |
+| **Password** | `ShFactory2026x` |
+| **API Token** | In `shorts-factory/api_keys.json` → `goatcounter.shortsfactory_token` |
 | **Code** | `shortsfactory` |
-| **Pages tracked** | All 5: index, deck, terms, privacy, refund |
+| **Pages tracked** | All 6: index, deck, terms, privacy, refund, onboarding |
+| **Traffic** | 8 visitors as of Mar 10 (tracking since Mar 9) |
 | **Script** | `<script data-goatcounter="https://shortsfactory.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>` |
 
 ### Auto-Update Stats (launchd)
@@ -260,7 +263,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 | 3 | ~~Add Terms of Service + Privacy Policy pages~~ | HIGH | **DONE** (Mar 5) |
 | 4 | ~~Push all new files to GitHub Pages~~ | HIGH | **DONE** (Mar 5) |
 | 5 | ~~**Auto-update site stats**~~ — `update_site_stats.py` + weekly launchd agent | HIGH | **DONE** (Mar 9) |
-| 6 | ~~**GoatCounter visitor analytics**~~ — script tags on all 5 pages | HIGH | **DONE** (Mar 9) — needs account signup at goatcounter.com/signup (code: `shortsfactory`) |
+| 6 | ~~**GoatCounter visitor analytics**~~ — script tags on all 6 pages, account ACTIVE | HIGH | **DONE** (Mar 10) — dashboard at shortsfactory.goatcounter.com |
 | 7 | **Git hygiene overhaul** — feature branches, clean commit history | MEDIUM | PENDING |
 
 ### Paddle Migration Plan
@@ -289,6 +292,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 **Fallback**: Lemon Squeezy (also supports Jordan, simpler signup, but 7%+ fees)
 
 ## Status
+- v18: Onboarding split public/internal. Public reframed as free channel strategy lead magnet (hero, value props, "Get My Free Strategy Report" CTA, Formspree submit). Internal version gitignored (`onboarding_internal.html`). `multi_channel_strategy.html` also gitignored. Main site nav → "Free Strategy". (Mar 10, 2026)
 - v17: `multi_channel_strategy.html` — comprehensive multi-channel YouTube compliance & monetization report. 11 sections covering Brand Accounts, AdSense consolidation, YPP, AI content policy, MCN analysis, risk factors, client onboarding SaaS model, intake form, 10 recommendations. (Mar 9, 2026)
 - v16: `onboarding.html` — client onboarding process (47-question intake form, tech setup checklist, 14-day timeline, SLA, 10 recommendations). (Mar 9, 2026)
 - v15: Updated deck.html (27 agents, 42 scripts, 15+ video engines via PiAPI) + saas_transformation_strategy.html (42 scripts across 6 layers). Stats snapshot updated: 27 agents, 42 scripts. (Mar 9, 2026)
