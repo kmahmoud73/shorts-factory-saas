@@ -5,8 +5,9 @@
 leads.json
 sent_log.json
 
-# Internal strategy docs — NOT for GitHub Pages
+# Internal docs — NOT for GitHub Pages
 multi_channel_strategy.html
+onboarding_internal.html
 
 # Secrets
 .env
