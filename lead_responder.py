@@ -95,23 +95,37 @@ def parse_formspree_lead(body):
     """Extract lead fields from Formspree notification."""
     lead = {}
     for field in ["name", "email", "plan", "niche", "message"]:
-        match = re.search(rf"{field}\s*[:\n]\s*(.+?)(?:\n|$)", body, re.IGNORECASE)
-        if match:
-            val = match.group(1).strip()
-            if val and val.lower() not in ["n/a", "none", ""]:
-                lead[field] = val
+        val = _extract_field(body, field)
+        if val:
+            lead[field] = val
     return lead if lead.get("email") else None
 
 
+def _extract_field(body, field):
+    """Extract a field value from Formspree email body (handles both formats)."""
+    # Format 1: "field: value" on same line
+    match = re.search(rf"{field}\s*:\s*(.+?)(?:\n|$)", body, re.IGNORECASE)
+    if match:
+        val = match.group(1).strip()
+        if val and val.lower() not in ["n/a", "none", ""] and ":" not in val.split()[0] if val.split() else True:
+            return val
+    # Format 2: "field:\nvalue" on next line (Formspree default)
+    match = re.search(rf"{field}\s*:\s*\n+\s*(\S[^\n]*)", body, re.IGNORECASE)
+    if match:
+        val = match.group(1).strip()
+        # Skip if the "value" is actually another field label (contains colon at end of first word)
+        if val and not re.match(r'^[a-z_]+\s*:', val, re.IGNORECASE) and val.lower() not in ["n/a", "none", ""]:
+            return val
+    return None
+
+
 def parse_camera_submission(body):
-    """Extract camera submission fields from WorldMonitor Formspree notification."""
+    """Extract camera submission fields from WorldView Formspree notification."""
     fields = {}
-    for field in ["city", "country", "youtube_url", "email"]:
-        match = re.search(rf"{field}\s*[:\n]\s*(.+?)(?:\n|$)", body, re.IGNORECASE)
-        if match:
-            val = match.group(1).strip()
-            if val and val.lower() not in ["n/a", "none", ""]:
-                fields[field] = val
+    for field in ["city", "country", "youtube_url", "email", "source"]:
+        val = _extract_field(body, field)
+        if val:
+            fields[field] = val
     # Camera submissions must have city + youtube_url to be valid
     if fields.get("city") and fields.get("youtube_url"):
         return fields
