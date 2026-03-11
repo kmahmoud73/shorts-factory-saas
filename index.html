@@ -349,6 +349,21 @@ nav .container {
   letter-spacing: 0.5px;
   margin-top: 2px;
 }
+.result-stat .rs-delta {
+  font-size: 11px;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.rs-delta .wow, .rs-delta .at {
+  display: inline;
+}
+.rs-delta .sep {
+  color: var(--text-dim);
+  margin: 0 3px;
+}
+.delta-up { color: #22c55e; }
+.delta-down { color: #ef4444; }
+.delta-flat { color: var(--text-dim); }
 .result-card .top-video {
   margin-top: 24px;
   padding-top: 20px;
@@ -919,14 +934,7 @@ footer p {
         <div class="result-stats">
           <div class="result-stat">
             <div class="rs-value">1,280</div>
-            <div class="rs-label">Subscribers</div>
-          </div>
-          <div class="result-stat">
-            <div class="rs-value">8,063</div>
-            <div class="rs-label">Total Views</div>
-          </div>
-          <div class="result-stat">
-            <div class="rs-value">32</div>
+            <div class="rs-delta"><span class="wow delta-up">+100% wk</span><span class="sep">&middot;</span><span class="at delta-up">31x total</span></div>
             <div class="rs-label">Videos</div>
           </div>
         </div>
@@ -943,14 +951,7 @@ footer p {
         <div class="result-stats">
           <div class="result-stat">
             <div class="rs-value">63</div>
-            <div class="rs-label">Subscribers</div>
-          </div>
-          <div class="result-stat">
-            <div class="rs-value">5,519</div>
-            <div class="rs-label">Total Views</div>
-          </div>
-          <div class="result-stat">
-            <div class="rs-value">43</div>
+            <div class="rs-delta"><span class="wow delta-up">+79.2% wk</span><span class="sep">&middot;</span><span class="at delta-up">+126% total</span></div>
             <div class="rs-label">Videos</div>
           </div>
         </div>
