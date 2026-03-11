@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 10, 2026 (v19 -- `lead_responder.py` now handles **WorldView camera submissions** alongside Shorts Factory leads. Camera submissions (city + youtube_url fields from Formspree `xreyewqz`) get auto-reply thank-you email + logged to leads.json with `niche: camera-submission`, `source: worldview.ink`. Previous: v18 Onboarding split public/internal)
+**Last Updated**: March 11, 2026 (v22 -- **Koko spam dedup fix**: (1) Anonymous camera submission dedup was broken — empty email bypassed `known_emails` check, same koko spam re-ingested every 30min (64 entries). (2) Added `get_known_cam_fingerprints()` — content-based dedup using message text (city+country+url). (3) Cleaned leads.json: 71→8 entries (6 real leads + 1 Cairo cam + 1 koko fingerprint for dedup). All 6 real leads confirmed replied to. Previous: v21 WoW delta indicators)
 
 ---
 
@@ -292,6 +292,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 **Fallback**: Lemon Squeezy (also supports Jordan, simpler signup, but 7%+ fees)
 
 ## Status
+- v21: WoW + all-time % delta indicators on all stat numbers (green for growth, red for decline, muted for flat). Channel age "Live for X days" badge on both channel cards. `update_site_stats.py` delta regex rewritten (single-pass-per-channel, fixes HTML destruction bug). CiT social footer in `trending_uploader.py`. (Mar 11, 2026)
 - v18: Onboarding split public/internal. Public reframed as free channel strategy lead magnet (hero, value props, "Get My Free Strategy Report" CTA, Formspree submit). Internal version gitignored (`onboarding_internal.html`). `multi_channel_strategy.html` also gitignored. Main site nav → "Free Strategy". (Mar 10, 2026)
 - v17: `multi_channel_strategy.html` — comprehensive multi-channel YouTube compliance & monetization report. 11 sections covering Brand Accounts, AdSense consolidation, YPP, AI content policy, MCN analysis, risk factors, client onboarding SaaS model, intake form, 10 recommendations. (Mar 9, 2026)
 - v16: `onboarding.html` — client onboarding process (47-question intake form, tech setup checklist, 14-day timeline, SLA, 10 recommendations). (Mar 9, 2026)

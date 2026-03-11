@@ -25,7 +25,9 @@ CIT_STATS = os.path.join(SF_DIR, "analytics", "cit_channel_stats.json")
 UPLOAD_QUEUE = os.path.join(SF_DIR, ".trending_upload_queue.json")
 INDEX_HTML = os.path.join(SCRIPT_DIR, "index.html")
 DECK_HTML = os.path.join(SCRIPT_DIR, "deck.html")
-LAUNCH_DATE = datetime(2026, 2, 19)
+LAUNCH_DATE = datetime(2026, 2, 19)  # overall pipeline launch
+JV_LAUNCH = datetime(2026, 2, 20)
+CIT_LAUNCH = datetime(2026, 2, 27)
 
 
 def _get_snap_views(snap):
@@ -85,14 +87,14 @@ def fmt_pct(pct):
 
 
 def build_delta_html(wow_pct, at_pct):
-    """Build the inner HTML for a delta div: weekly + all-time indicators."""
+    """Build the inner HTML for a delta div: weekly + all-time on separate lines."""
     wow_text, wow_cls = fmt_pct(wow_pct)
     at_text, at_cls = fmt_pct(at_pct)
     wow_label = f"{wow_text} wk" if wow_text != "--" else "--"
-    at_label = f"{at_text} total" if at_text != "--" else "--"
+    at_label = f"{at_text} ALL TIME" if at_text != "--" else "--"
     return (
         f'<span class="wow {wow_cls}">{wow_label}</span>'
-        f'<span class="sep">&middot;</span>'
+        f'<br>'
         f'<span class="at {at_cls}">{at_label}</span>'
     )
 
@@ -118,6 +120,8 @@ def load_stats():
             queue_count = len(json.load(f))
 
     days_since = (datetime.now() - LAUNCH_DATE).days
+    jv_age = (datetime.now() - JV_LAUNCH).days
+    cit_age = (datetime.now() - CIT_LAUNCH).days
 
     # Current values
     jv_subs = jv_data["channel"]["subscribers"]
@@ -166,6 +170,8 @@ def load_stats():
         "total_videos": jv_videos + cit_videos,
         "queue_count": queue_count,
         "days_since": days_since,
+        "jv_age": jv_age,
+        "cit_age": cit_age,
         "jv_date": jv_latest["date"],
         "cit_date": cit_latest["date"],
         # Delta HTML strings (pre-built for injection)
@@ -286,15 +292,23 @@ def patch_html(filepath, stats):
     if n:
         changes.append("CiT deltas updated (subs/views/videos)")
 
-    # --- Channel age badges (index.html: channel-age, deck.html: cc-age) ---
-    age_text = f'Live for {stats["days_since"]} days'
+    # --- Channel age badges (per-channel, anchored to channel name) ---
+    jv_age = f'Live for {stats["jv_age"]} days'
+    cit_age = f'Live for {stats["cit_age"]} days'
+    # JV age (index.html channel-age OR deck.html cc-age)
     content, n = re.subn(
-        r'(<div class="(?:channel-age|cc-age)">)Live for \d+ days(</div>)',
-        rf'\g<1>{age_text}\2',
-        content,
+        r'((?:channel-name|cc-name) jv">.*?<div class="(?:channel-age|cc-age)">)Live for \d+ days(</div>)',
+        rf'\g<1>{jv_age}\2',
+        content, flags=re.DOTALL,
     )
-    if n:
-        changes.append(f"Channel age -> {age_text}")
+    # CiT age
+    content, n2 = re.subn(
+        r'((?:channel-name|cc-name) cit">.*?<div class="(?:channel-age|cc-age)">)Live for \d+ days(</div>)',
+        rf'\g<1>{cit_age}\2',
+        content, flags=re.DOTALL,
+    )
+    if n or n2:
+        changes.append(f"Channel age -> JV {jv_age}, CiT {cit_age}")
 
     # --- DECK.HTML patterns ---
 

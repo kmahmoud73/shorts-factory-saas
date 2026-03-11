@@ -62,6 +62,16 @@ def get_known_emails(leads):
     return {l.get("email", "").lower() for l in leads}
 
 
+def get_known_cam_fingerprints(leads):
+    """Build set of content fingerprints for anonymous camera submissions.
+    Prevents the same city+country+url from being added repeatedly."""
+    fps = set()
+    for l in leads:
+        if l.get("niche") == "camera-submission" and l.get("email") == "anonymous":
+            fps.add(l.get("message", "").lower().strip())
+    return fps
+
+
 def decode_str(s):
     if s is None:
         return ""
@@ -91,8 +101,59 @@ def get_body(msg):
     return ""
 
 
+def parse_strategy_intake(body):
+    """Extract fields from Free Strategy onboarding form submissions.
+    These have structured sections like '=== 1A. Business & Brand Information ==='
+    and field names like 'Contact Email *: value'."""
+    if "=== 1A." not in body and "Free Strategy" not in body:
+        return None
+
+    lead = {"source_type": "strategy-intake"}
+
+    # _replyto is the most reliable email (Formspree special field)
+    replyto = re.search(r"_replyto\s*:\s*\n?\s*(\S+@\S+)", body, re.IGNORECASE)
+    if replyto:
+        lead["email"] = replyto.group(1).strip()
+
+    # Fallback: Contact Email *: value
+    if not lead.get("email"):
+        ce = re.search(r"Contact Email\s*\*?\s*:\s*(\S+@\S+)", body, re.IGNORECASE)
+        if ce:
+            lead["email"] = ce.group(1).strip()
+
+    # Name
+    name = re.search(r"Primary Contact Name\s*\*?\s*:\s*(.+?)(?:\n|$)", body, re.IGNORECASE)
+    if name:
+        lead["name"] = name.group(1).strip()
+
+    # Company
+    company = re.search(r"Company / Brand Name\s*\*?\s*:\s*(.+?)(?:\n|$)", body, re.IGNORECASE)
+    if company:
+        lead["company"] = company.group(1).strip()
+
+    # Niche / Industry
+    niche = re.search(r"Industry / Niche\s*\*?\s*:\s*(.+?)(?:\n|$)", body, re.IGNORECASE)
+    if niche:
+        lead["niche"] = niche.group(1).strip()
+
+    # Tier
+    tier = re.search(r"Subscription Tier\s*\*?\s*:\s*(.+?)(?:\n|$)", body, re.IGNORECASE)
+    if tier:
+        lead["plan"] = tier.group(1).strip()
+
+    # Phone
+    phone = re.search(r"Contact Phone[^:]*:\s*(\+?\d[\d\s\-]+)", body, re.IGNORECASE)
+    if phone:
+        lead["phone"] = phone.group(1).strip()
+
+    # Store full form text as message
+    lead["message"] = body
+
+    return lead if lead.get("email") else None
+
+
 def parse_formspree_lead(body):
-    """Extract lead fields from Formspree notification."""
+    """Extract lead fields from Formspree notification (simple contact form)."""
     lead = {}
     for field in ["name", "email", "plan", "niche", "message"]:
         val = _extract_field(body, field)
@@ -155,7 +216,43 @@ Thanks for being part of the community!"""
     return subject, body
 
 
+def build_strategy_reply(lead):
+    """Generate reply for a Free Strategy intake form submission."""
+    name = lead.get("name", "there").strip() or "there"
+    company = lead.get("company", "")
+    niche = lead.get("niche", "")
+    plan = lead.get("plan", "")
 
+    company_line = f" for {company}" if company else ""
+    niche_line = f" in the {niche} space" if niche and niche.lower() not in ["general", "other", ""] else ""
+    plan_line = f"\n\nYou selected the {plan.split('—')[0].strip()} tier" if plan else ""
+
+    subject = "We received your Channel Strategy Request"
+
+    body = f"""Hey {name},
+
+Thanks for filling out the full Channel Strategy form{company_line}{niche_line}. We've received every detail.{plan_line} — great choice.
+
+Here's what happens next:
+
+1. I'll personally review your intake within 24 hours
+2. You'll receive a custom Channel Strategy Report tailored to your niche, audience, and goals
+3. We'll schedule a quick call to walk through the strategy and answer any questions
+
+In the meantime, here are our two live channels — both fully autonomous, zero manual editing:
+- Jersey Vault: https://youtube.com/@JerseyVault (1,280 subs, 8K+ views)
+- Caught It Trending: https://youtube.com/@CaughtItTrending (57 subs, 5,300+ views)
+
+If you have any questions before the report arrives, just reply to this email.
+
+Talk soon."""
+
+    return subject, body
+
+
+def build_reply(lead):
+    """Generate personalized reply for a new Shorts Factory lead (simple contact form)."""
+    name = lead.get("name", "there").strip() or "there"
     niche = lead.get("niche", "")
     message = lead.get("message", "")
 
@@ -229,6 +326,7 @@ def check_for_new_leads(dry_run=False):
     """Main loop: check inbox, find new leads, reply, log."""
     leads = load_leads()
     known_emails = get_known_emails(leads)
+    known_cam_fps = get_known_cam_fingerprints(leads)
     next_id = max((l.get("id", 0) for l in leads), default=0) + 1
 
     # Connect to inbox
@@ -254,13 +352,18 @@ def check_for_new_leads(dry_run=False):
         msg = email.message_from_bytes(data[0][1])
         body = get_body(msg)
 
-        # Try camera submission first (has city + youtube_url)
+        # Try parsers in priority order: camera → strategy intake → simple lead
         cam_sub = parse_camera_submission(body)
-        lead = parse_formspree_lead(body)
+        strategy = parse_strategy_intake(body)
+        lead = parse_formspree_lead(body) if not strategy else None
 
         if cam_sub:
             cam_email = cam_sub.get("email", "").lower()
             if cam_email and cam_email in known_emails:
+                continue
+            # Content-based dedup for anonymous submissions (no email)
+            cam_fingerprint = f"City: {cam_sub.get('city', '')} | Country: {cam_sub.get('country', '')} | URL: {cam_sub.get('youtube_url', '')}".lower().strip()
+            if not cam_email and cam_fingerprint in known_cam_fps:
                 continue
             log(f"NEW CAM SUBMISSION: {cam_sub.get('city', '?')} — {cam_sub.get('youtube_url', '?')}")
             subject, reply_body = build_camera_reply(cam_sub)
@@ -294,7 +397,50 @@ def check_for_new_leads(dry_run=False):
                 known_emails.add(cam_email)
             else:
                 entry["notes"] = "Camera submission — no email provided."
+                known_cam_fps.add(cam_fingerprint)
             leads.append(entry)
+            next_id += 1
+            new_count += 1
+            continue
+
+        # Strategy intake (full onboarding form)
+        if strategy:
+            s_email = strategy["email"].lower()
+            if s_email in known_emails:
+                continue
+            s_name = strategy.get("name", "?")
+            s_company = strategy.get("company", "")
+            log(f"NEW STRATEGY INTAKE: {s_name} <{s_email}> — {s_company} / {strategy.get('niche', '?')}")
+
+            subject, reply_body = build_strategy_reply(strategy)
+            status_val = "new"
+
+            if dry_run:
+                log(f"[DRY RUN] Would send strategy reply to {s_email}:")
+                log(f"  Subject: {subject}")
+                log(f"  Body preview: {reply_body[:100]}...")
+            else:
+                try:
+                    send_email(s_email, subject, reply_body)
+                    log(f"Strategy reply sent to {s_email}")
+                    status_val = "auto-replied"
+                except Exception as e:
+                    log(f"SEND FAILED to {s_email}: {e}")
+                    status_val = "reply-failed"
+
+            leads.append({
+                "id": next_id,
+                "date": datetime.now().isoformat(),
+                "name": strategy.get("name", ""),
+                "email": s_email,
+                "plan": strategy.get("plan", ""),
+                "niche": strategy.get("niche", ""),
+                "message": f"STRATEGY INTAKE | Company: {s_company} | Phone: {strategy.get('phone', '')}",
+                "source": "shortsfactory.io",
+                "status": status_val if not dry_run else "new",
+                "notes": f"Full strategy form submission. {'[DRY RUN]' if dry_run else 'Strategy reply sent.'}"
+            })
+            known_emails.add(s_email)
             next_id += 1
             new_count += 1
             continue
@@ -344,7 +490,7 @@ def check_for_new_leads(dry_run=False):
 
     mail.logout()
 
-    if new_count > 0 or not dry_run:
+    if not dry_run and new_count > 0:
         save_leads(leads)
 
     log(f"Done. {new_count} new lead(s) processed.")
