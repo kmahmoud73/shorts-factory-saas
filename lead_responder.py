@@ -292,8 +292,8 @@ def send_email(to_addr, subject, body_text):
     """Send email via SMTP."""
     signature = """
 --
-Khal Mahmoud
-Shorts Factory — Autonomous YouTube Production
+Shorts Factory
+Autonomous YouTube Production
 https://shortsfactory.io
 """
     msg = MIMEMultipart("alternative")
@@ -317,7 +317,7 @@ https://shortsfactory.io
         "date": datetime.now().isoformat(),
         "to": to_addr,
         "subject": subject,
-        "body_preview": body_text[:200],
+        "body_preview": body_text,
     })
     SENT_LOG.write_text(json.dumps(sent_log, indent=2))
 

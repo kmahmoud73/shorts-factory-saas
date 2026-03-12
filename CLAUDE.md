@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 11, 2026 (v22 -- **Koko spam dedup fix**: (1) Anonymous camera submission dedup was broken — empty email bypassed `known_emails` check, same koko spam re-ingested every 30min (64 entries). (2) Added `get_known_cam_fingerprints()` — content-based dedup using message text (city+country+url). (3) Cleaned leads.json: 71→8 entries (6 real leads + 1 Cairo cam + 1 koko fingerprint for dedup). All 6 real leads confirmed replied to. Previous: v21 WoW delta indicators)
+**Last Updated**: March 12, 2026 (v25 -- **Lead Command Center auto-flow**: (1) Formspree background poller integrated into dashboard server — polls every 3 min, auto-ingests new leads + auto-replies via `lead_responder.py`. (2) Reply cache dropped from 5 min to 60s — lead replies appear within 1 refresh cycle. (3) UI auto-refresh dropped from 60s to 30s. (4) New lead detection with toast notification + tab title flash. (5) "Poll Formspree" button for manual trigger. (6) `/api/formspree/poll` + `/api/formspree/status` endpoints. Previous: v24 Lead Command Center polish)
 
 ---
 
@@ -95,8 +95,11 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | `email_sender.py` | Send emails from hello@shortsfactory.io via SMTP | No |
 | `inbox_reader.py` | Read inbox via IMAP (unread, search, Formspree filter) | No |
 | `lead_responder.py` | Auto-check inbox, reply to new Formspree leads + WorldView camera submissions, log to leads.json | No |
+| `lead_dashboard.py` | **Lead Command Center** — FastAPI server (port 8009). Lead scoring, IMAP reply detection, stage management, email sending | No |
+| `lead_dashboard.html` | Lead Command Center UI — pipeline view, YOUR TURN alerts, conversation threads, score breakdown, actions | No |
 | `leads.json` | Lead tracker (gitignored) | No |
 | `sent_log.json` | Sent email log (gitignored) | No |
+| `.reply_cache.json` | IMAP reply scan cache, 60s TTL (gitignored) | No |
 | `CNAME` | Custom domain config for GitHub Pages | No |
 | `CLAUDE.md` | Project documentation | No |
 | `client_1/` | Virtual test client sandbox | No |
@@ -265,6 +268,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 | 5 | ~~**Auto-update site stats**~~ — `update_site_stats.py` + weekly launchd agent | HIGH | **DONE** (Mar 9) |
 | 6 | ~~**GoatCounter visitor analytics**~~ — script tags on all 6 pages, account ACTIVE | HIGH | **DONE** (Mar 10) — dashboard at shortsfactory.goatcounter.com |
 | 7 | **Git hygiene overhaul** — feature branches, clean commit history | MEDIUM | PENDING |
+| 8 | ~~**Lead Command Center**~~ — `lead_dashboard.py` + `lead_dashboard.html`, FastAPI port 8009 | HIGH | **DONE** (Mar 12) |
 
 ### Paddle Migration Plan
 
@@ -291,7 +295,30 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 
 **Fallback**: Lemon Squeezy (also supports Jordan, simpler signup, but 7%+ fees)
 
+### Lead Command Center (`lead_dashboard.py` + `lead_dashboard.html`)
+
+| Property | Value |
+|----------|-------|
+| **Server** | FastAPI on port 8009 |
+| **URL** | `http://localhost:8009` |
+| **Start** | `python3 lead_dashboard.py` |
+| **Leads** | 6 real external (9 total incl. 2 internal tests + 1 spam) |
+| **Scoring** | 0-100: name quality, email domain, plan tier, phone, strategy form, niche, reply status |
+| **Stages** | New → Auto-Replied → Your Turn → Qualifying → Engaged → Won / Lost / Spam |
+| **YOUR TURN trigger** | Lead replies to email (+40 score) OR score ≥ 70 |
+| **Reply detection** | IMAP scan of inbox for emails FROM known lead addresses, cached 60s |
+| **Formspree poller** | Background thread polls every 3 min, auto-ingests new leads via `lead_responder.py` |
+| **Actions** | Qualify, Pass, Reply (sends email), Add Note, Move Stage, Poll Formspree |
+| **Thread colors** | Purple = submission, Blue = sent, Green = received |
+| **Thread expand** | Collapsible messages — 3-line preview with "Show full message" toggle |
+| **Email signature** | Brand-only: "Shorts Factory / Autonomous YouTube Production / shortsfactory.io" |
+| **Auto-refresh** | Every 30 seconds (with new-lead detection toast + tab flash) |
+| **Data files** | `leads.json` (leads), `sent_log.json` (full bodies), `.reply_cache.json` (IMAP cache) |
+
 ## Status
+- v25: **Lead Command Center auto-flow** — Formspree background poller (3-min interval, auto-ingests + auto-replies via `lead_responder.py`). Reply cache 5min→60s. UI refresh 60s→30s. New lead toast notification + tab title flash. "Poll Formspree" button + `/api/formspree/poll` + `/api/formspree/status` endpoints. (Mar 12, 2026)
+- v24: **Lead Command Center polish** — Collapsible thread messages (3-line preview + "Show full message" toggle). Full email bodies in sent_log.json (was 200 chars, rebuilt to full). Submission card enriched (form type, submitted time, auto-reply speed, waiting time). Email signature rebranded from "Khal Mahmoud" to brand-only "Shorts Factory". (Mar 12, 2026)
+- v23: **Lead Command Center** — `lead_dashboard.py` (FastAPI port 8009) + `lead_dashboard.html` (dark CRM dashboard). Auto-scoring 0-100, IMAP reply detection, pipeline stages, YOUR TURN alerts, conversation threads (submission→sent→received), action buttons (Qualify/Pass/Reply/Note). 6 real leads tracked, all auto-replied, 0 replies. (Mar 12, 2026)
 - v21: WoW + all-time % delta indicators on all stat numbers (green for growth, red for decline, muted for flat). Channel age "Live for X days" badge on both channel cards. `update_site_stats.py` delta regex rewritten (single-pass-per-channel, fixes HTML destruction bug). CiT social footer in `trending_uploader.py`. (Mar 11, 2026)
 - v18: Onboarding split public/internal. Public reframed as free channel strategy lead magnet (hero, value props, "Get My Free Strategy Report" CTA, Formspree submit). Internal version gitignored (`onboarding_internal.html`). `multi_channel_strategy.html` also gitignored. Main site nav → "Free Strategy". (Mar 10, 2026)
 - v17: `multi_channel_strategy.html` — comprehensive multi-channel YouTube compliance & monetization report. 11 sections covering Brand Accounts, AdSense consolidation, YPP, AI content policy, MCN analysis, risk factors, client onboarding SaaS model, intake form, 10 recommendations. (Mar 9, 2026)
