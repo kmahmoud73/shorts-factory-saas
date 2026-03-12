@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Command Center — Shorts Factory</title>
+<style>
+  :root {
+    --bg: #0a0a0a; --bg2: #111; --bg3: #181818; --bg4: #222;
+    --border: #2a2a2a; --border2: #333;
+    --text: #e0e0e0; --text2: #999; --text3: #666;
+    --hot: #ef4444; --warm: #f59e0b; --cold: #6b7280;
+    --blue: #3b82f6; --green: #10b981; --purple: #8b5cf6;
+    --gold: #eab308;
+    --radius: 10px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+  .header h1 span { color: var(--blue); }
+  .header-actions { display: flex; gap: 8px; }
+  .header-actions button { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.15s; }
+  .header-actions button:hover { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+  .header-actions button.scanning { color: var(--blue); border-color: var(--blue); }
+
+  /* Alert banner */
+  .alert-banner { display: none; padding: 10px 24px; background: linear-gradient(90deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05)); border-bottom: 1px solid rgba(239,68,68,0.3); flex-shrink: 0; animation: pulse-bg 2s ease-in-out infinite; }
+  .alert-banner.visible { display: flex; align-items: center; gap: 10px; }
+  .alert-dot { width: 8px; height: 8px; background: var(--hot); border-radius: 50%; animation: pulse-dot 1.5s ease-in-out infinite; }
+  .alert-banner span { font-size: 14px; font-weight: 600; color: var(--hot); }
+  @keyframes pulse-bg { 0%,100% { opacity: 0.8; } 50% { opacity: 1; } }
+  @keyframes pulse-dot { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.6; } }
+
+  /* Stats bar */
+  .stats-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg2); }
+  .stat { flex: 1; padding: 12px 20px; text-align: center; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-value { font-size: 22px; font-weight: 700; }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .stat-value.attention { color: var(--hot); }
+  .stat-value.won { color: var(--green); }
+
+  /* Main layout */
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  /* Left: Pipeline */
+  .pipeline { width: 360px; min-width: 360px; border-right: 1px solid var(--border); overflow-y: auto; background: var(--bg); }
+  .pipeline::-webkit-scrollbar { width: 6px; }
+  .pipeline::-webkit-scrollbar-track { background: transparent; }
+  .pipeline::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .stage-group { border-bottom: 1px solid var(--border); }
+  .stage-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; cursor: pointer; user-select: none; }
+  .stage-header:hover { background: var(--bg2); }
+  .stage-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
+  .stage-count { font-size: 11px; background: var(--bg3); color: var(--text2); padding: 2px 8px; border-radius: 10px; }
+  .stage-name.your-turn { color: var(--hot); }
+  .stage-name.auto-replied { color: var(--blue); }
+  .stage-name.qualifying { color: var(--warm); }
+  .stage-name.engaged { color: var(--green); }
+  .stage-name.won { color: var(--gold); }
+  .stage-name.lost { color: var(--text3); }
+  .stage-name.new { color: var(--text2); }
+  .stage-body { padding: 0 8px 8px; }
+  .stage-body.collapsed { display: none; }
+
+  /* Lead card */
+  .lead-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 6px; cursor: pointer; transition: all 0.15s; position: relative; }
+  .lead-card:hover { border-color: var(--border2); background: var(--bg3); }
+  .lead-card.active { border-color: var(--blue); background: rgba(59,130,246,0.08); }
+  .lead-card-top { display: flex; align-items: center; gap: 10px; }
+  .score-badge { min-width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .score-badge.hot { background: rgba(239,68,68,0.15); color: var(--hot); border: 2px solid var(--hot); }
+  .score-badge.warm { background: rgba(245,158,11,0.15); color: var(--warm); border: 2px solid var(--warm); }
+  .score-badge.cold { background: rgba(107,114,128,0.1); color: var(--cold); border: 2px solid var(--cold); }
+  .lead-info { flex: 1; min-width: 0; }
+  .lead-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lead-meta { font-size: 12px; color: var(--text2); display: flex; gap: 8px; align-items: center; margin-top: 2px; }
+  .niche-tag { font-size: 10px; padding: 1px 6px; border-radius: 4px; background: var(--bg4); color: var(--text2); }
+  .reply-indicator { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: var(--green); font-weight: 600; }
+  .age-label { font-size: 11px; color: var(--text3); }
+
+  /* Right: Detail panel */
+  .detail { flex: 1; overflow-y: auto; background: var(--bg); }
+  .detail::-webkit-scrollbar { width: 6px; }
+  .detail::-webkit-scrollbar-track { background: transparent; }
+  .detail::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .detail-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text3); font-size: 15px; }
+
+  .detail-header { padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--bg2); }
+  .detail-name { font-size: 20px; font-weight: 700; }
+  .detail-email { font-size: 14px; color: var(--text2); margin-top: 2px; }
+  .detail-badges { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .detail-badge { font-size: 11px; padding: 3px 10px; border-radius: 6px; font-weight: 600; }
+  .detail-badge.score { border: 1px solid; }
+  .detail-badge.score.hot { color: var(--hot); border-color: var(--hot); background: rgba(239,68,68,0.1); }
+  .detail-badge.score.warm { color: var(--warm); border-color: var(--warm); background: rgba(245,158,11,0.1); }
+  .detail-badge.score.cold { color: var(--cold); border-color: var(--cold); background: rgba(107,114,128,0.1); }
+  .detail-badge.niche { background: var(--bg4); color: var(--text2); }
+  .detail-badge.plan { background: rgba(139,92,246,0.15); color: var(--purple); }
+  .detail-badge.source { background: rgba(59,130,246,0.1); color: var(--blue); }
+  .detail-badge.age { background: var(--bg3); color: var(--text3); }
+  .detail-badge.stage-badge { text-transform: uppercase; letter-spacing: 1px; font-size: 10px; }
+  .detail-badge.stage-badge.your-turn { background: rgba(239,68,68,0.15); color: var(--hot); }
+  .detail-badge.stage-badge.auto-replied { background: rgba(59,130,246,0.1); color: var(--blue); }
+  .detail-badge.stage-badge.qualifying { background: rgba(245,158,11,0.1); color: var(--warm); }
+  .detail-badge.stage-badge.engaged { background: rgba(16,185,129,0.1); color: var(--green); }
+
+  /* Sections */
+  .detail-section { padding: 16px 24px; border-bottom: 1px solid var(--border); }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); margin-bottom: 12px; }
+
+  /* Thread */
+  .thread-item { margin-bottom: 12px; padding: 12px; border-radius: 8px; }
+  .thread-item.submission { background: rgba(139,92,246,0.08); border-left: 3px solid var(--purple); }
+  .thread-item.sent { background: rgba(59,130,246,0.08); border-left: 3px solid var(--blue); }
+  .thread-item.received { background: rgba(16,185,129,0.08); border-left: 3px solid var(--green); }
+  .thread-meta { font-size: 11px; color: var(--text3); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .thread-direction { font-weight: 600; }
+  .thread-direction.submission { color: var(--purple); }
+  .thread-direction.sent { color: var(--blue); }
+  .thread-direction.received { color: var(--green); }
+  .thread-body { font-size: 13px; line-height: 1.5; color: var(--text); white-space: pre-wrap; word-break: break-word; max-height: 4.5em; overflow: hidden; position: relative; transition: max-height 0.3s ease; }
+  .thread-body.expanded { max-height: none; }
+  .thread-body:not(.expanded)::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1.5em; background: linear-gradient(transparent, var(--bg2)); pointer-events: none; }
+  .thread-item.submission .thread-body:not(.expanded)::after { background: linear-gradient(transparent, rgba(20,14,30,1)); }
+  .thread-item.sent .thread-body:not(.expanded)::after { background: linear-gradient(transparent, rgba(14,20,30,1)); }
+  .thread-item.received .thread-body:not(.expanded)::after { background: linear-gradient(transparent, rgba(14,25,20,1)); }
+  .thread-toggle { font-size: 11px; color: var(--blue); cursor: pointer; margin-top: 4px; user-select: none; display: none; }
+  .thread-toggle:hover { text-decoration: underline; }
+  .thread-toggle.visible { display: inline-block; }
+  .thread-empty { color: var(--text3); font-size: 13px; font-style: italic; padding: 8px 0; }
+
+  /* Score breakdown */
+  .score-breakdown { display: flex; flex-wrap: wrap; gap: 6px; }
+  .score-factor { font-size: 11px; padding: 3px 8px; border-radius: 4px; background: var(--bg3); color: var(--text2); }
+  .score-factor.positive { background: rgba(16,185,129,0.1); color: var(--green); }
+  .score-factor.negative { background: rgba(239,68,68,0.08); color: var(--hot); }
+
+  /* Notes */
+  .notes-text { font-size: 13px; line-height: 1.5; color: var(--text2); white-space: pre-wrap; }
+
+  /* Actions */
+  .actions-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .action-btn { padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; }
+  .action-btn:hover { background: var(--bg4); border-color: var(--border2); }
+  .action-btn.qualify { border-color: var(--green); color: var(--green); }
+  .action-btn.qualify:hover { background: rgba(16,185,129,0.15); }
+  .action-btn.pass { border-color: var(--hot); color: var(--hot); }
+  .action-btn.pass:hover { background: rgba(239,68,68,0.1); }
+  .action-btn.reply { border-color: var(--blue); color: var(--blue); }
+  .action-btn.reply:hover { background: rgba(59,130,246,0.1); }
+  .action-btn.note { border-color: var(--warm); color: var(--warm); }
+  .action-btn.note:hover { background: rgba(245,158,11,0.1); }
+
+  .stage-select { margin-top: 12px; display: flex; align-items: center; gap: 10px; }
+  .stage-select label { font-size: 12px; color: var(--text3); }
+  .stage-select select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+
+  /* Modals */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 500px; max-width: 90vw; max-height: 80vh; overflow-y: auto; }
+  .modal h3 { font-size: 16px; margin-bottom: 16px; }
+  .modal label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 4px; margin-top: 12px; }
+  .modal input, .modal textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 14px; font-family: inherit; }
+  .modal textarea { min-height: 120px; resize: vertical; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+  .modal-actions button { padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; }
+  .modal-actions .cancel { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+  .modal-actions .send { background: var(--blue); color: #fff; }
+  .modal-actions .save { background: var(--green); color: #fff; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg3); border: 1px solid var(--border); padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
+  .toast.visible { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--hot); color: var(--hot); }
+
+  /* Last updated */
+  .last-updated { font-size: 11px; color: var(--text3); padding: 0 24px; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .pipeline { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border); max-height: 40vh; }
+    .main { flex-direction: column; }
+    .stats-bar { flex-wrap: wrap; }
+    .stat { min-width: 50%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>LEAD</span> COMMAND CENTER</h1>
+  <div class="header-actions">
+    <span class="last-updated" id="lastUpdated"></span>
+    <button onclick="pollFormspree()" id="pollBtn">Poll Formspree</button>
+    <button onclick="scanInbox()" id="scanBtn">Scan Inbox</button>
+    <button onclick="loadLeads()">Refresh</button>
+  </div>
+</div>
+
+<div class="alert-banner" id="alertBanner">
+  <div class="alert-dot"></div>
+  <span id="alertText"></span>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value" id="statTotal">-</div><div class="stat-label">Total Leads</div></div>
+  <div class="stat"><div class="stat-value attention" id="statAttention">-</div><div class="stat-label">Need Attention</div></div>
+  <div class="stat"><div class="stat-value" id="statReplied">-</div><div class="stat-label">Auto-Replied</div></div>
+  <div class="stat"><div class="stat-value" id="statEngaged">-</div><div class="stat-label">Engaging</div></div>
+  <div class="stat"><div class="stat-value won" id="statWon">-</div><div class="stat-label">Won</div></div>
+</div>
+
+<div class="main">
+  <div class="pipeline" id="pipeline"></div>
+  <div class="detail" id="detail">
+    <div class="detail-empty">Select a lead to view details</div>
+  </div>
+</div>
+
+<!-- Reply Modal -->
+<div class="modal-overlay" id="replyModal">
+  <div class="modal">
+    <h3>Reply to <span id="replyTo"></span></h3>
+    <label>Subject</label>
+    <input type="text" id="replySubject" placeholder="Re: Thanks for your interest...">
+    <label>Message</label>
+    <textarea id="replyBody" placeholder="Hey [Name],&#10;&#10;..."></textarea>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal('replyModal')">Cancel</button>
+      <button class="send" onclick="sendReply()">Send Reply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Note Modal -->
+<div class="modal-overlay" id="noteModal">
+  <div class="modal">
+    <h3>Add Note</h3>
+    <label>Note</label>
+    <textarea id="noteText" placeholder="Your observation..."></textarea>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal('noteModal')">Cancel</button>
+      <button class="save" onclick="saveNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+let allLeads = [];
+let selectedLeadId = null;
+let autoRefreshInterval = null;
+
+async function loadLeads() {
+  try {
+    const res = await fetch('/api/leads');
+    const data = await res.json();
+    allLeads = data.leads;
+    renderStats(data.stats);
+    renderPipeline(data.leads);
+    if (selectedLeadId) renderDetail(selectedLeadId);
+    document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    showToast('Failed to load leads: ' + e.message, 'error');
+  }
+}
+
+function renderStats(stats) {
+  document.getElementById('statTotal').textContent = stats.total;
+  document.getElementById('statAttention').textContent = stats.needs_attention;
+  document.getElementById('statReplied').textContent = stats.auto_replied;
+  document.getElementById('statEngaged').textContent = (stats.qualifying || 0) + (stats.engaged || 0);
+  document.getElementById('statWon').textContent = stats.won;
+
+  const banner = document.getElementById('alertBanner');
+  if (stats.needs_attention > 0) {
+    banner.classList.add('visible');
+    document.getElementById('alertText').textContent =
+      `${stats.needs_attention} lead${stats.needs_attention > 1 ? 's' : ''} need your attention — a lead replied or scored high`;
+  } else {
+    banner.classList.remove('visible');
+  }
+}
+
+function renderPipeline(leads) {
+  const stages = [
+    { key: 'your-turn', label: 'YOUR TURN', cls: 'your-turn' },
+    { key: 'new', label: 'NEW', cls: 'new' },
+    { key: 'auto-replied', label: 'AUTO-REPLIED', cls: 'auto-replied' },
+    { key: 'qualifying', label: 'QUALIFYING', cls: 'qualifying' },
+    { key: 'engaged', label: 'ENGAGED', cls: 'engaged' },
+    { key: 'won', label: 'WON', cls: 'won' },
+    { key: 'lost', label: 'LOST', cls: 'lost' },
+  ];
+
+  const external = leads.filter(l => !l.is_internal && l.stage !== 'spam');
+  let html = '';
+
+  for (const stage of stages) {
+    const stageLeads = external.filter(l => l.stage === stage.key);
+    if (stageLeads.length === 0 && !['your-turn', 'auto-replied'].includes(stage.key)) continue;
+
+    const collapsed = stageLeads.length === 0 ? 'collapsed' : '';
+    html += `<div class="stage-group">
+      <div class="stage-header" onclick="toggleStage(this)">
+        <span class="stage-name ${stage.cls}">${stage.label}</span>
+        <span class="stage-count">${stageLeads.length}</span>
+      </div>
+      <div class="stage-body ${collapsed}">`;
+
+    for (const lead of stageLeads) {
+      const active = lead.id === selectedLeadId ? 'active' : '';
+      const age = formatAge(lead.age_hours);
+      const replied = lead.has_replied ? '<span class="reply-indicator">REPLIED</span>' : '';
+      html += `<div class="lead-card ${active}" onclick="selectLead(${lead.id})">
+        <div class="lead-card-top">
+          <div class="score-badge ${lead.score_label}">${lead.score}</div>
+          <div class="lead-info">
+            <div class="lead-name">${esc(lead.name || lead.email.split('@')[0])}</div>
+            <div class="lead-meta">
+              <span class="niche-tag">${esc(lead.niche || 'N/A')}</span>
+              ${replied}
+              <span class="age-label">${age}</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    html += '</div></div>';
+  }
+
+  document.getElementById('pipeline').innerHTML = html;
+}
+
+function selectLead(id) {
+  selectedLeadId = id;
+  renderPipeline(allLeads);
+  renderDetail(id);
+}
+
+function renderDetail(id) {
+  const lead = allLeads.find(l => l.id === id);
+  if (!lead) {
+    document.getElementById('detail').innerHTML = '<div class="detail-empty">Lead not found</div>';
+    return;
+  }
+
+  const age = formatAge(lead.age_hours);
+  const stageClass = lead.stage || 'new';
+
+  // Score breakdown
+  const factors = computeScoreFactors(lead);
+
+  // Build thread (sent + received, chronological)
+  const thread = buildThread(lead);
+
+  let html = `
+    <div class="detail-header">
+      <div class="detail-name">${esc(lead.name || 'Unknown')}</div>
+      <div class="detail-email">${esc(lead.email)}</div>
+      <div class="detail-badges">
+        <span class="detail-badge score ${lead.score_label}">Score: ${lead.score}</span>
+        <span class="detail-badge stage-badge ${stageClass}">${lead.stage}</span>
+        <span class="detail-badge niche">${esc(lead.niche || 'N/A')}</span>
+        ${lead.plan && lead.plan !== 'General' ? `<span class="detail-badge plan">${esc(lead.plan)}</span>` : ''}
+        <span class="detail-badge source">${esc(lead.source)}</span>
+        <span class="detail-badge age">${age}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="section-title">Score Breakdown</div>
+      <div class="score-breakdown">
+        ${factors.map(f => `<span class="score-factor ${f.type}">${f.label}: ${f.value > 0 ? '+' : ''}${f.value}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="section-title">Conversation Thread</div>
+      ${thread.length > 0 ? thread.map((t, idx) => {
+        let dirLabel = '';
+        if (t.direction === 'submission') dirLabel = t.label || 'Form Submission';
+        else if (t.direction === 'sent') dirLabel = `You &rarr; ${esc(lead.name || 'Lead')}`;
+        else dirLabel = `${esc(lead.name || 'Lead')} &rarr; You`;
+        const tid = `thread-${lead.id}-${idx}`;
+        return `
+        <div class="thread-item ${t.direction}">
+          <div class="thread-meta">
+            <span class="thread-direction ${t.direction}">${dirLabel}</span>
+            <span>${t.date}</span>
+          </div>
+          <div class="thread-body" id="${tid}">${esc(t.body)}</div>
+          <span class="thread-toggle" id="${tid}-toggle" onclick="toggleThread('${tid}')">Show full message</span>
+        </div>`;
+      }).join('') : '<div class="thread-empty">No activity yet</div>'}
+    </div>
+
+    <div class="detail-section">
+      <div class="section-title">Notes</div>
+      <div class="notes-text">${lead.notes ? esc(lead.notes) : 'No notes yet'}</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="section-title">Actions</div>
+      <div class="actions-row">
+        <button class="action-btn qualify" onclick="setStage(${lead.id}, 'qualifying')">Qualify</button>
+        <button class="action-btn pass" onclick="setStage(${lead.id}, 'lost')">Pass</button>
+        <button class="action-btn reply" onclick="openReply(${lead.id})">Reply</button>
+        <button class="action-btn note" onclick="openNote(${lead.id})">Add Note</button>
+      </div>
+      <div class="stage-select">
+        <label>Move to stage:</label>
+        <select onchange="setStage(${lead.id}, this.value)">
+          <option value="">-- select --</option>
+          <option value="new">New</option>
+          <option value="auto-replied">Auto-Replied</option>
+          <option value="your-turn">Your Turn</option>
+          <option value="qualifying">Qualifying</option>
+          <option value="engaged">Engaged</option>
+          <option value="won">Won</option>
+          <option value="lost">Lost</option>
+          <option value="spam">Spam</option>
+        </select>
+      </div>
+    </div>`;
+
+  document.getElementById('detail').innerHTML = html;
+
+  // After render: check which thread bodies overflow and show their toggles
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.thread-body').forEach(el => {
+      const toggle = document.getElementById(el.id + '-toggle');
+      if (toggle && el.scrollHeight > el.clientHeight + 2) {
+        toggle.classList.add('visible');
+      }
+    });
+  });
+}
+
+function toggleThread(id) {
+  const body = document.getElementById(id);
+  const toggle = document.getElementById(id + '-toggle');
+  if (!body || !toggle) return;
+  body.classList.toggle('expanded');
+  toggle.textContent = body.classList.contains('expanded') ? 'Show less' : 'Show full message';
+}
+
+function buildThread(lead) {
+  const items = [];
+
+  // Original form submission (always first)
+  const submissionParts = [];
+  if (lead.name) submissionParts.push(`Name: ${lead.name}`);
+  if (lead.email) submissionParts.push(`Email: ${lead.email}`);
+  if (lead.niche && lead.niche !== 'camera-submission') submissionParts.push(`Niche: ${lead.niche}`);
+  if (lead.plan) submissionParts.push(`Plan: ${lead.plan}`);
+
+  // Form type
+  const isStrategy = (lead.message || '').includes('STRATEGY INTAKE');
+  submissionParts.push(`Form: ${isStrategy ? 'Full Strategy Intake' : 'Quick Inquiry'}`);
+
+  // Submitted at (formatted day + time)
+  try {
+    const subDt = new Date(lead.date.replace(/\+\d{2}:\d{2}$/, ''));
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const timeStr = subDt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    submissionParts.push(`Submitted: ${dayNames[subDt.getDay()]}, ${subDt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${timeStr}`);
+  } catch {}
+
+  // Response time (how fast we auto-replied)
+  if (lead.sent_emails && lead.sent_emails.length > 0) {
+    try {
+      const subMs = new Date(lead.date.replace(/\+\d{2}:\d{2}$/, '')).getTime();
+      const replyMs = new Date(lead.sent_emails[0].date).getTime();
+      const diffMin = Math.round((replyMs - subMs) / 60000);
+      if (diffMin < 60) submissionParts.push(`Auto-replied in: ${diffMin} min`);
+      else if (diffMin < 1440) submissionParts.push(`Auto-replied in: ${Math.round(diffMin / 60)}h`);
+      else submissionParts.push(`Auto-replied in: ${Math.round(diffMin / 1440)}d`);
+    } catch {}
+  }
+
+  // Waiting time (days since last activity with no reply)
+  if (!lead.has_replied && lead.age_hours > 24) {
+    const waitDays = Math.round(lead.age_hours / 24);
+    submissionParts.push(`Waiting: ${waitDays} day${waitDays > 1 ? 's' : ''} — no reply yet`);
+  } else if (!lead.has_replied && lead.age_hours > 0) {
+    submissionParts.push(`Waiting: ${Math.round(lead.age_hours)}h — no reply yet`);
+  }
+
+  // Their message (if any real content)
+  if (lead.message) {
+    const cleanMsg = lead.message.replace(/^Submitted \d{2}:\d{2}.*$/m, '').trim();
+    if (cleanMsg && !cleanMsg.startsWith('STRATEGY INTAKE')) submissionParts.push(`Message: ${cleanMsg}`);
+    else if (isStrategy) submissionParts.push(`Message: ${lead.message}`);
+  }
+
+  if (submissionParts.length > 0) {
+    items.push({
+      direction: 'submission',
+      date: formatDate(lead.date),
+      body: submissionParts.join('\n'),
+      sortDate: new Date(lead.date.replace(/\+\d{2}:\d{2}$/, '')),
+      label: `${lead.name || 'Lead'} submitted via ${lead.source || 'form'}`,
+    });
+  }
+
+  // Sent emails
+  if (lead.sent_emails) {
+    for (const e of lead.sent_emails) {
+      items.push({
+        direction: 'sent',
+        date: formatDate(e.date),
+        body: e.body_preview || '',
+        sortDate: new Date(e.date),
+      });
+    }
+  }
+
+  // Received replies
+  if (lead.replies) {
+    for (const r of lead.replies) {
+      items.push({
+        direction: 'received',
+        date: r.date || '',
+        body: r.body || '',
+        sortDate: new Date(r.date || 0),
+      });
+    }
+  }
+
+  items.sort((a, b) => a.sortDate - b.sortDate);
+  return items;
+}
+
+function computeScoreFactors(lead) {
+  const factors = [];
+  const name = (lead.name || '').trim();
+  const email = (lead.email || '').toLowerCase();
+  const plan = lead.plan || '';
+  const niche = (lead.niche || '').toLowerCase();
+  const message = lead.message || '';
+
+  if (name && name.length > 2 && name.includes(' ')) factors.push({ label: 'Full name', value: 15, type: 'positive' });
+  else if (name && name.length > 2) factors.push({ label: 'Partial name', value: 5, type: 'positive' });
+  else factors.push({ label: 'No real name', value: 0, type: 'negative' });
+
+  if (['icloud.com','outlook.com','protonmail.com'].some(d => email.includes(d))) factors.push({ label: 'Quality email', value: 10, type: 'positive' });
+  else if (email.includes('gmail.com')) factors.push({ label: 'Gmail', value: 5, type: 'positive' });
+  else factors.push({ label: 'Email', value: 0, type: 'negative' });
+
+  if (plan && !plan.toLowerCase().includes('general')) factors.push({ label: 'Selected plan', value: 25, type: 'positive' });
+  if (/Phone:\s*\+?\d/.test(message)) factors.push({ label: 'Phone provided', value: 20, type: 'positive' });
+  if (message.includes('STRATEGY INTAKE')) factors.push({ label: 'Strategy form', value: 30, type: 'positive' });
+  if (['entertainment','gaming','technology','sports','cooking','education'].includes(niche)) factors.push({ label: 'Good niche', value: 10, type: 'positive' });
+  if (lead.has_replied) factors.push({ label: 'Replied!', value: 40, type: 'positive' });
+
+  const cleanMsg = message.replace(/Submitted \d{2}:\d{2}.*/, '').trim();
+  if (cleanMsg.length > 20) factors.push({ label: 'Detailed message', value: 10, type: 'positive' });
+
+  return factors;
+}
+
+// ===== API Actions =====
+
+async function setStage(id, stage) {
+  if (!stage) return;
+  try {
+    const res = await fetch(`/api/leads/${id}/stage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stage }),
+    });
+    if (res.ok) {
+      showToast(`Stage updated to: ${stage}`, 'success');
+      await loadLeads();
+    } else {
+      const err = await res.json();
+      showToast(err.detail || 'Failed', 'error');
+    }
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+function openReply(id) {
+  const lead = allLeads.find(l => l.id === id);
+  if (!lead) return;
+  document.getElementById('replyTo').textContent = lead.name || lead.email;
+  document.getElementById('replySubject').value = `Re: Thanks for your interest in Shorts Factory`;
+  document.getElementById('replyBody').value = `Hey ${lead.name || 'there'},\n\n`;
+  document.getElementById('replyModal').classList.add('active');
+  document.getElementById('replyModal').dataset.leadId = id;
+}
+
+async function sendReply() {
+  const id = parseInt(document.getElementById('replyModal').dataset.leadId);
+  const subject = document.getElementById('replySubject').value;
+  const body = document.getElementById('replyBody').value;
+  if (!subject || !body.trim()) { showToast('Subject and body required', 'error'); return; }
+
+  try {
+    const res = await fetch(`/api/leads/${id}/reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject, body }),
+    });
+    if (res.ok) {
+      showToast('Reply sent!', 'success');
+      closeModal('replyModal');
+      await loadLeads();
+    } else {
+      const err = await res.json();
+      showToast(err.detail || 'Send failed', 'error');
+    }
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+function openNote(id) {
+  document.getElementById('noteText').value = '';
+  document.getElementById('noteModal').classList.add('active');
+  document.getElementById('noteModal').dataset.leadId = id;
+}
+
+async function saveNote() {
+  const id = parseInt(document.getElementById('noteModal').dataset.leadId);
+  const note = document.getElementById('noteText').value;
+  if (!note.trim()) { showToast('Note cannot be empty', 'error'); return; }
+
+  try {
+    const res = await fetch(`/api/leads/${id}/notes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ note }),
+    });
+    if (res.ok) {
+      showToast('Note saved', 'success');
+      closeModal('noteModal');
+      await loadLeads();
+    } else {
+      showToast('Failed to save note', 'error');
+    }
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function pollFormspree() {
+  const btn = document.getElementById('pollBtn');
+  btn.classList.add('scanning');
+  btn.textContent = 'Polling...';
+  try {
+    const res = await fetch('/api/formspree/poll');
+    const data = await res.json();
+    if (data.status === 'already_running') {
+      showToast('Poll already in progress...', 'success');
+    } else {
+      showToast('Formspree poll started — refreshing in 5s...', 'success');
+      setTimeout(loadLeads, 5000);
+    }
+  } catch (e) {
+    showToast('Poll failed: ' + e.message, 'error');
+  }
+  btn.classList.remove('scanning');
+  btn.textContent = 'Poll Formspree';
+}
+
+async function scanInbox() {
+  const btn = document.getElementById('scanBtn');
+  btn.classList.add('scanning');
+  btn.textContent = 'Scanning...';
+  try {
+    const res = await fetch('/api/inbox/scan');
+    const data = await res.json();
+    showToast(`Inbox scanned. ${data.replies_found} lead replies found.`, data.replies_found > 0 ? 'success' : 'success');
+    await loadLeads();
+  } catch (e) {
+    showToast('Scan failed: ' + e.message, 'error');
+  }
+  btn.classList.remove('scanning');
+  btn.textContent = 'Scan Inbox';
+}
+
+// ===== Helpers =====
+
+function toggleStage(el) {
+  const body = el.nextElementSibling;
+  body.classList.toggle('collapsed');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast visible ' + (type || '');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+function formatAge(hours) {
+  if (hours < 1) return 'just now';
+  if (hours < 24) return Math.round(hours) + 'h ago';
+  const days = Math.round(hours / 24);
+  return days + 'd ago';
+}
+
+function formatDate(d) {
+  try {
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+           dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  } catch { return d; }
+}
+
+function esc(s) {
+  if (!s) return '';
+  const el = document.createElement('span');
+  el.textContent = s;
+  return el.innerHTML;
+}
+
+// Close modals on Escape or click outside
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('replyModal'); closeModal('noteModal'); } });
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
+
+// Track lead count to detect new arrivals
+let previousLeadCount = 0;
+
+async function refreshWithNewLeadDetection() {
+  const oldCount = previousLeadCount;
+  await loadLeads();
+  const newExternal = allLeads.filter(l => !l.is_internal && l.stage !== 'spam').length;
+  if (oldCount > 0 && newExternal > oldCount) {
+    const diff = newExternal - oldCount;
+    showToast(`${diff} new lead${diff > 1 ? 's' : ''} just arrived!`, 'success');
+    // Flash the title
+    const origTitle = document.title;
+    document.title = `(${diff} NEW) ${origTitle}`;
+    setTimeout(() => { document.title = origTitle; }, 10000);
+  }
+  previousLeadCount = newExternal;
+}
+
+// Load on start + auto-refresh every 30s (fast pickup)
+refreshWithNewLeadDetection();
+autoRefreshInterval = setInterval(refreshWithNewLeadDetection, 30000);
+</script>
+</body>
+</html>

@@ -31,8 +31,8 @@ SENT_LOG = SAAS_DIR / "sent_log.json"
 
 SIGNATURE = """
 --
-Khal Mahmoud
-Shorts Factory — Autonomous YouTube Production
+Shorts Factory
+Autonomous YouTube Production
 https://shortsfactory.io
 """
 
@@ -62,7 +62,7 @@ def send_email(to_addr, subject, body_text, body_html=None):
         "date": datetime.now().isoformat(),
         "to": to_addr,
         "subject": subject,
-        "body_preview": body_text[:200],
+        "body_preview": body_text,
     }
 
     sent_log = []
