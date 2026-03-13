@@ -18,6 +18,8 @@ import json
 import os
 import re
 import smtplib
+import subprocess
+import sys
 import ssl
 from datetime import datetime
 from email.header import decode_header
@@ -250,18 +252,92 @@ Talk soon."""
     return subject, body
 
 
+SMART_REPLY_SYSTEM = """You are the founder of Shorts Factory — an autonomous YouTube production company.
+You write short, warm, human-sounding email replies to people who inquire through your website.
+
+ABOUT SHORTS FACTORY:
+- We build and run fully autonomous YouTube video pipelines using AI
+- AI-generated scripts, images, voiceover, video animation, subtitles — daily uploads, zero manual editing
+- We do NOT sell subscribers, views, or engagement. We produce real content that grows channels organically.
+- Two live channels as proof: Jersey Vault (@JerseyVault, 1,280+ subs) and Caught It Trending (@CaughtItTrending, 60+ subs)
+- Pricing: Starter $997/mo (1 channel, 30 videos) | Growth $1,997/mo (2 channels, 60 videos)
+- Website: shortsfactory.io
+
+REPLY RULES:
+1. Actually READ and RESPOND to what the lead said — never ignore their message
+2. If they seem confused about what we offer, gently clarify (e.g. we don't sell subs)
+3. Sound like a real human founder, not a corporate bot. Casual but professional.
+4. Keep it SHORT — 4-8 sentences max. No walls of text.
+5. Always end by asking 1-2 qualifying questions to keep the conversation going:
+   - Do they have a channel already or starting fresh?
+   - What niche/topic?
+   - What's their goal?
+6. Mention our live channels as proof ONLY if relevant, not every time
+7. Sign off casually (no "Best regards" corporate stuff)
+8. Do NOT include a signature block — that's added automatically
+9. Output ONLY the email body text — no subject line, no headers"""
+
+
+def _call_llm_for_reply(prompt):
+    """Call Claude CLI (Haiku) for smart lead reply. Returns text or None."""
+    try:
+        # Use llm_client from shorts-factory
+        sf_dir = Path(__file__).parent.parent / "shorts-factory"
+        sys.path.insert(0, str(sf_dir))
+        from llm_client import call_llm
+        result, provider = call_llm(
+            "haiku",
+            [{"role": "user", "content": prompt}],
+            system=SMART_REPLY_SYSTEM,
+            max_tokens=500,
+        )
+        if result and len(result.strip()) > 20:
+            log(f"LLM provider: {provider}")
+            # Clean up LLM output: remove preamble, signature placeholders, stray lines
+            body = result.strip()
+            # Remove everything before "Hey " or "Hi " if LLM added preamble
+            for greeting in ["Hey ", "Hi ", "Hello "]:
+                idx = body.find(greeting)
+                if idx > 0:
+                    body = body[idx:]
+                    break
+            # Remove markdown hr lines
+            body = re.sub(r'^-{3,}\s*$', '', body, flags=re.MULTILINE).strip()
+            # Remove placeholder signatures like [Founder], [Name], etc.
+            body = re.sub(r'\n\[.*?\]\s*$', '', body).strip()
+            if len(body) > 20:
+                return body
+    except Exception as e:
+        log(f"LLM smart reply failed: {e}")
+    return None
+
+
 def build_reply(lead):
-    """Generate personalized reply for a new Shorts Factory lead (simple contact form)."""
+    """Generate personalized reply — LLM-powered with template fallback."""
     name = lead.get("name", "there").strip() or "there"
     niche = lead.get("niche", "")
     message = lead.get("message", "")
 
-    # Personalize based on niche
+    # Try LLM-powered smart reply first
+    llm_prompt = f"""New lead just submitted a form on shortsfactory.io.
+
+Name: {name}
+Niche they selected: {niche or 'not specified'}
+Their message: {message or '(no message)'}
+
+Write a reply email to this person. Remember to actually address what they said."""
+
+    smart_body = _call_llm_for_reply(llm_prompt)
+    if smart_body:
+        log(f"Smart reply generated for {name}")
+        return "Thanks for your interest in Shorts Factory", smart_body
+
+    # Fallback: template reply
+    log(f"Falling back to template reply for {name}")
     niche_line = ""
     if niche and niche.lower() not in ["general", "other", ""]:
         niche_line = f" Saw you're interested in {niche} content — that's right in our wheelhouse."
 
-    # If they left a message, acknowledge it
     message_line = ""
     if message and len(message.strip()) > 5:
         message_line = f"\n\nRegarding your note — got it, and happy to discuss further."
