@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 12, 2026 (v25 -- **Lead Command Center auto-flow**: (1) Formspree background poller integrated into dashboard server — polls every 3 min, auto-ingests new leads + auto-replies via `lead_responder.py`. (2) Reply cache dropped from 5 min to 60s — lead replies appear within 1 refresh cycle. (3) UI auto-refresh dropped from 60s to 30s. (4) New lead detection with toast notification + tab title flash. (5) "Poll Formspree" button for manual trigger. (6) `/api/formspree/poll` + `/api/formspree/status` endpoints. Previous: v24 Lead Command Center polish)
+**Last Updated**: March 13, 2026 (v27 -- **LLM-Powered Smart Lead Replies**: `lead_responder.py` `build_reply()` now uses Claude Haiku via `llm_client.py` to generate context-aware first replies that actually read and respond to what the lead said. Template reply kept as fallback if LLM fails. Output cleanup: strips preamble, markdown hrs, placeholder signatures. Tested: Vynx "100k subs" → smart reply clarifies we grow channels with real content, not sell subs. Previous: v26 Pricing Overhaul + Ownership Messaging)
 
 ---
 
@@ -14,7 +14,10 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 - Dark theme (#0a0a0a), blue-to-purple gradient accents
 - Sections: hero, stats bar, how it works (4 steps), features (9-card grid), live results (JV + CiT cards), **live demo teaser** (animated pipeline viz + "Request Early Access" CTA), pricing (3 tiers), social proof CTA, footer
 - Stats auto-updated weekly via `update_site_stats.py` from live channel data
-- Pricing: Starter $997/mo (1 channel), Growth $1,997/mo (2 channels), Enterprise (custom)
+- Pricing: Starter $997/mo (1 channel, 150 img + 100 vid credits), Growth $1,997/mo (2 channels, 300+200 credits), Enterprise (custom, unlimited vault)
+- Promo: "Commit 3 months, first month FREE" + cancel guarantee
+- Ownership: Channel 100% client-owned, leave anytime keep everything
+- No engine brand names on any client-facing page (all generic: "premium AI engines")
 - Fully self-contained: inline CSS, no JS frameworks, no build tools
 - Responsive (900px + 640px breakpoints)
 - Payment: Starter + Growth → Stripe Payment Links (direct checkout). Enterprise → Formspree contact form
@@ -94,7 +97,7 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | `update_site_stats.py` | Auto-update site stats from live channel data, commit + push | No |
 | `email_sender.py` | Send emails from hello@shortsfactory.io via SMTP | No |
 | `inbox_reader.py` | Read inbox via IMAP (unread, search, Formspree filter) | No |
-| `lead_responder.py` | Auto-check inbox, reply to new Formspree leads + WorldView camera submissions, log to leads.json | No |
+| `lead_responder.py` | Auto-check inbox, **LLM-powered smart replies** (Claude Haiku) to new Formspree leads + WorldView camera submissions, log to leads.json. Template fallback if LLM fails. | No |
 | `lead_dashboard.py` | **Lead Command Center** — FastAPI server (port 8009). Lead scoring, IMAP reply detection, stage management, email sending | No |
 | `lead_dashboard.html` | Lead Command Center UI — pipeline view, YOUR TURN alerts, conversation threads, score breakdown, actions | No |
 | `leads.json` | Lead tracker (gitignored) | No |
@@ -240,7 +243,7 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | **Script** | `lead_responder.py` |
 | **Agent** | `com.shortsfactory.lead-responder` |
 | **Schedule** | Every 30 minutes + on load |
-| **What it does** | IMAP check → parse Formspree leads → auto-reply → log to leads.json |
+| **What it does** | IMAP check → parse Formspree leads → **LLM smart reply** (Haiku, falls back to template) → log to leads.json |
 | **Log** | `/tmp/sf-lead-responder.log` |
 | **CLI** | `--dry-run`, `--status` |
 
@@ -316,6 +319,8 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 | **Data files** | `leads.json` (leads), `sent_log.json` (full bodies), `.reply_cache.json` (IMAP cache) |
 
 ## Status
+- v27: **LLM-Powered Smart Lead Replies** — `lead_responder.py` `build_reply()` upgraded from hardcoded template to Claude Haiku-powered context-aware replies via `llm_client.py`. Reads lead's actual message, responds intelligently (e.g. clarifies we don't sell subs if they ask about subscriber growth). Template kept as fallback. Output cleanup strips LLM preamble/signatures. (Mar 13, 2026)
+- v26: **Pricing Overhaul + Ownership Messaging** — Credit system (Starter 150+100, Growth 300+200, Enterprise Unlimited Vault). All engine brand names scrubbed from client-facing pages. "3 months, first month FREE" promo badge. Channel Ownership section (3-card grid). Guarantee bar. Updated index.html, deck.html, onboarding.html, onboarding_internal.html. Pushed to GitHub Pages. (Mar 13, 2026)
 - v25: **Lead Command Center auto-flow** — Formspree background poller (3-min interval, auto-ingests + auto-replies via `lead_responder.py`). Reply cache 5min→60s. UI refresh 60s→30s. New lead toast notification + tab title flash. "Poll Formspree" button + `/api/formspree/poll` + `/api/formspree/status` endpoints. (Mar 12, 2026)
 - v24: **Lead Command Center polish** — Collapsible thread messages (3-line preview + "Show full message" toggle). Full email bodies in sent_log.json (was 200 chars, rebuilt to full). Submission card enriched (form type, submitted time, auto-reply speed, waiting time). Email signature rebranded from "Khal Mahmoud" to brand-only "Shorts Factory". (Mar 12, 2026)
 - v23: **Lead Command Center** — `lead_dashboard.py` (FastAPI port 8009) + `lead_dashboard.html` (dark CRM dashboard). Auto-scoring 0-100, IMAP reply detection, pipeline stages, YOUR TURN alerts, conversation threads (submission→sent→received), action buttons (Qualify/Pass/Reply/Note). 6 real leads tracked, all auto-replied, 0 replies. (Mar 12, 2026)
