@@ -580,6 +580,92 @@ nav .container {
 }
 .price-card .price-cta.filled:hover { box-shadow: 0 8px 30px rgba(59,130,246,0.3); }
 
+/* ---- PRICING EXTRAS ---- */
+.pricing-promo {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: -12px;
+}
+.pricing-promo-badge {
+  display: inline-block;
+  padding: 10px 28px;
+  background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(59,130,246,0.15));
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 0.5px;
+}
+.pricing-promo-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+.credit-highlight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin: 16px 0;
+  background: rgba(59,130,246,0.06);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--accent-blue);
+  font-weight: 600;
+}
+.credit-highlight .cr-icon { font-size: 18px; flex-shrink: 0; }
+.credit-highlight .cr-label { color: var(--text-muted); font-weight: 400; font-size: 12px; }
+.credit-vault {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  margin: 16px 0;
+  background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(234,179,8,0.1));
+  border: 1px solid rgba(234,179,8,0.3);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #eab308;
+}
+.credit-vault .vault-icon { font-size: 22px; }
+.credit-vault .vault-sub { font-size: 11px; color: var(--text-dim); font-weight: 400; display: block; margin-top: 2px; }
+.ownership-section {
+  text-align: center;
+  padding: 60px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.ownership-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 40px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.ownership-item { text-align: center; }
+.ownership-icon { font-size: 36px; margin-bottom: 12px; }
+.ownership-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.ownership-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.guarantee-bar {
+  text-align: center;
+  padding: 20px;
+  margin-top: 48px;
+  background: rgba(34,197,94,0.06);
+  border: 1px solid rgba(34,197,94,0.15);
+  border-radius: 12px;
+}
+.guarantee-bar .g-text { font-size: 15px; color: var(--text); font-weight: 600; }
+.guarantee-bar .g-sub { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+@media (max-width: 768px) {
+  .ownership-grid { grid-template-columns: 1fr; gap: 24px; }
+}
+
 /* ---- SOCIAL PROOF ---- */
 .social-proof {
   padding: 100px 0;
@@ -910,7 +996,7 @@ footer p {
       <div class="feature">
         <div class="feature-icon">&#129302;</div>
         <h3>AI Mascot Avatar</h3>
-        <p>3D lip-synced AI presenter avatar using Hedra Character-3. Consistent brand identity across all videos. Automatic overlay on every upload.</p>
+        <p>3D lip-synced AI presenter avatar powered by premium animation engines. Consistent brand identity across all videos. Automatic overlay on every upload.</p>
       </div>
       <div class="feature">
         <div class="feature-icon">&#128220;</div>
@@ -1029,11 +1115,24 @@ footer p {
     <div class="section-title">Scale your YouTube presence.</div>
     <div class="section-subtitle">Choose the plan that fits your ambition. All plans include the full autonomous pipeline.</div>
 
+    <div class="pricing-promo">
+      <div class="pricing-promo-badge">Commit 3 months &mdash; your first month is FREE</div>
+      <div class="pricing-promo-sub">Not happy with results? Cancel anytime. No questions asked.</div>
+    </div>
+
     <div class="pricing-grid">
       <div class="price-card">
         <div class="tier">Starter</div>
         <div class="price">$997</div>
         <div class="price-sub">per month</div>
+        <div class="credit-highlight">
+          <span class="cr-icon">&#127912;</span>
+          <span>150 premium image credits<br><span class="cr-label">Best-in-class AI image generation</span></span>
+        </div>
+        <div class="credit-highlight">
+          <span class="cr-icon">&#127916;</span>
+          <span>100 cinematic video credits<br><span class="cr-label">AI-powered video animation engines</span></span>
+        </div>
         <ul>
           <li>1 YouTube channel</li>
           <li>Daily content production</li>
@@ -1049,10 +1148,18 @@ footer p {
         <div class="tier">Growth</div>
         <div class="price">$1,997</div>
         <div class="price-sub">per month</div>
+        <div class="credit-highlight">
+          <span class="cr-icon">&#127912;</span>
+          <span>300 premium image credits<br><span class="cr-label">Best-in-class AI image generation</span></span>
+        </div>
+        <div class="credit-highlight">
+          <span class="cr-icon">&#127916;</span>
+          <span>200 cinematic video credits<br><span class="cr-label">Top-tier AI video animation engines</span></span>
+        </div>
         <ul>
           <li>2 YouTube channels</li>
           <li>Daily content production</li>
-          <li>AI mascot avatar</li>
+          <li>AI mascot avatar with lip-sync</li>
           <li>Algorithm intelligence</li>
           <li>Performance feedback loop</li>
           <li>Suppression detection</li>
@@ -1066,6 +1173,10 @@ footer p {
         <div class="tier">Enterprise</div>
         <div class="price">Custom</div>
         <div class="price-sub">tailored to your needs</div>
+        <div class="credit-vault">
+          <span class="vault-icon">&#127942;</span>
+          <span>Unlimited Premium Credit Vault<br><span class="vault-sub">Unlimited image generation + cinematic video animation &mdash; no caps, no throttling</span></span>
+        </div>
         <ul>
           <li>Unlimited channels</li>
           <li>Custom content strategy</li>
@@ -1077,6 +1188,36 @@ footer p {
           <li>SLA guarantee</li>
         </ul>
         <a href="#" onclick="openForm('Enterprise');return false" class="price-cta outline">Contact Us</a>
+      </div>
+    </div>
+
+    <div class="guarantee-bar">
+      <div class="g-text">100% Channel Ownership &mdash; Your channel, your content, your brand. Always.</div>
+      <div class="g-sub">We build, run, and grow your channel autonomously. If you stop, you keep everything &mdash; every video, every subscriber, every view. We just stop producing new content.</div>
+    </div>
+  </div>
+</section>
+
+<!-- OWNERSHIP -->
+<section class="ownership-section">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <div class="section-title">Your channel. We just make it unstoppable.</div>
+    <div class="ownership-grid">
+      <div class="ownership-item">
+        <div class="ownership-icon">&#128273;</div>
+        <div class="ownership-title">100% Yours</div>
+        <div class="ownership-desc">The channel is created under your Google account. You own it completely &mdash; the brand, the content, the subscribers, the revenue. We are your production engine, not your landlord.</div>
+      </div>
+      <div class="ownership-item">
+        <div class="ownership-icon">&#9889;</div>
+        <div class="ownership-title">We Run It Autonomously</div>
+        <div class="ownership-desc">Trend scouting, scriptwriting, video production, uploads, cross-platform distribution, comment engagement, analytics &mdash; all on autopilot. You approve the strategy, we execute daily.</div>
+      </div>
+      <div class="ownership-item">
+        <div class="ownership-icon">&#128075;</div>
+        <div class="ownership-title">Leave Anytime, Keep Everything</div>
+        <div class="ownership-desc">If you cancel, your channel stays exactly as it is with all content intact. The only thing that stops is new content from us. No lock-in, no takedowns, no strings.</div>
       </div>
     </div>
   </div>

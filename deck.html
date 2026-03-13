@@ -481,6 +481,39 @@ body {
   background-size: 10px;
 }
 
+/* ---- PRICING EXTRAS ---- */
+.pricing-promo { text-align: center; margin-bottom: 16px; }
+.pricing-promo-badge {
+  display: inline-block; padding: 8px 22px;
+  background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(59,130,246,0.15));
+  border: 1px solid rgba(34,197,94,0.3); border-radius: 999px;
+  font-size: 13px; font-weight: 700; color: #22c55e; letter-spacing: 0.5px;
+}
+.pricing-promo-sub { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+.deck-credit {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px; margin: 10px 0;
+  background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 8px; font-size: 11px; color: var(--accent-blue); font-weight: 600;
+}
+.deck-credit .dc-icon { font-size: 14px; }
+.deck-credit .dc-sub { color: var(--text-dim); font-weight: 400; font-size: 10px; }
+.deck-vault {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; margin: 10px 0;
+  background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(234,179,8,0.1));
+  border: 1px solid rgba(234,179,8,0.3); border-radius: 10px;
+  font-size: 12px; font-weight: 700; color: #eab308;
+}
+.deck-vault .dv-icon { font-size: 16px; }
+.deck-vault .dv-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; display: block; }
+.deck-guarantee {
+  text-align: center; padding: 12px; margin-top: 20px;
+  background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); border-radius: 10px;
+  font-size: 12px; color: var(--text); font-weight: 600;
+}
+.deck-guarantee .dg-sub { font-size: 10px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
+
 /* ---- SLIDE 9: NEXT STEPS ---- */
 .next-steps-card {
   background: var(--bg-card);
@@ -804,7 +837,7 @@ body {
       <div class="tech-item">
         <div class="t-num">15+</div>
         <div class="t-label">Video Engines</div>
-        <div class="t-desc">Unified AI video gateway (PiAPI) connects 15+ models — Seedance, Kling 3, Hailuo, Luma, Veo 3, Sora 2. Autonomous credit monitor auto-disables depleted engines.</div>
+        <div class="t-desc">Unified AI video gateway connects 15+ cinematic animation engines. Autonomous credit monitor auto-disables depleted engines and routes to the best available option.</div>
       </div>
       <div class="tech-item">
         <div class="t-num">7d</div>
@@ -896,7 +929,7 @@ body {
           <div class="mf-icon">&#128260;</div>
           <div>
             <div class="mf-title">5-Tier Fallback</div>
-            <div class="mf-desc">Hedra 3D (premium) &rarr; SadTalker (free audio-synced) &rarr; Mascot Pipeline &rarr; 2D &rarr; LivePortrait. Includes studio mode (CNN-style anchor desk with animated TV).</div>
+            <div class="mf-desc">Premium 3D lip-sync &rarr; Audio-synced animation &rarr; Mascot Pipeline &rarr; 2D &rarr; Fallback. 5 tiers ensure your avatar always renders. Includes studio mode (CNN-style anchor desk with animated TV).</div>
           </div>
         </div>
         <div class="mascot-feature">
@@ -914,13 +947,19 @@ body {
   <div class="slide" data-slide="7">
     <div class="slide-label">Pricing</div>
     <div class="slide-title">Scale your <span class="gradient">YouTube presence</span>.</div>
+    <div class="pricing-promo">
+      <div class="pricing-promo-badge">Commit 3 months &mdash; first month FREE</div>
+      <div class="pricing-promo-sub">Cancel anytime if not happy with results.</div>
+    </div>
     <div class="pricing-row">
       <div class="price-card">
         <div class="pc-tier">Starter</div>
         <div class="pc-price">$997</div>
         <div class="pc-sub">per month</div>
+        <div class="deck-credit"><span class="dc-icon">&#127912;</span> 150 premium image credits <span class="dc-sub">&nbsp;&middot; AI image generation</span></div>
+        <div class="deck-credit"><span class="dc-icon">&#127916;</span> 100 cinematic video credits <span class="dc-sub">&nbsp;&middot; AI video animation</span></div>
         <ul>
-          <li>1 YouTube channel</li>
+          <li>1 YouTube channel (100% yours)</li>
           <li>Daily content production</li>
           <li>Automated uploads + multi-platform distribution</li>
           <li>Smart comment engagement</li>
@@ -932,10 +971,12 @@ body {
         <div class="pc-tier">Growth</div>
         <div class="pc-price">$1,997</div>
         <div class="pc-sub">per month</div>
+        <div class="deck-credit"><span class="dc-icon">&#127912;</span> 300 premium image credits <span class="dc-sub">&nbsp;&middot; AI image generation</span></div>
+        <div class="deck-credit"><span class="dc-icon">&#127916;</span> 200 cinematic video credits <span class="dc-sub">&nbsp;&middot; AI video animation</span></div>
         <ul>
-          <li>2 YouTube channels</li>
+          <li>2 YouTube channels (100% yours)</li>
           <li>Daily content production</li>
-          <li>AI mascot avatar</li>
+          <li>AI mascot avatar with lip-sync</li>
           <li>Algorithm intelligence</li>
           <li>Performance feedback loop</li>
           <li>Suppression detection</li>
@@ -947,8 +988,9 @@ body {
         <div class="pc-tier">Enterprise</div>
         <div class="pc-price">Custom</div>
         <div class="pc-sub">tailored to you</div>
+        <div class="deck-vault"><span class="dv-icon">&#127942;</span> Unlimited Premium Credit Vault<br><span class="dv-sub">Unlimited image + video credits &mdash; no caps</span></div>
         <ul>
-          <li>Unlimited channels</li>
+          <li>Unlimited channels (100% yours)</li>
           <li>Custom content strategy</li>
           <li>Custom AI voice & avatar</li>
           <li>Long-form compilations</li>
@@ -958,6 +1000,10 @@ body {
           <li>SLA guarantee</li>
         </ul>
       </div>
+    </div>
+    <div class="deck-guarantee">
+      Your channel, your content, your brand. Always. We run it &mdash; you own it.
+      <div class="dg-sub">Cancel anytime. Keep every video, subscriber, and view. We just stop producing new content.</div>
     </div>
   </div>
 
