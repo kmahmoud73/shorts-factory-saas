@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 13, 2026 (v27 -- **LLM-Powered Smart Lead Replies**: `lead_responder.py` `build_reply()` now uses Claude Haiku via `llm_client.py` to generate context-aware first replies that actually read and respond to what the lead said. Template reply kept as fallback if LLM fails. Output cleanup: strips preamble, markdown hrs, placeholder signatures. Tested: Vynx "100k subs" → smart reply clarifies we grow channels with real content, not sell subs. Previous: v26 Pricing Overhaul + Ownership Messaging)
+**Last Updated**: March 14, 2026 (v28 -- **7-Layer Dedup + Story Lifecycle reflected**: Updated `saas_transformation_strategy.html` Production + Distribution layers to document 7-layer dedup pipeline and story lifecycle (mark+move to `produced/`). Previous: v27 LLM-Powered Smart Lead Replies)
 
 ---
 
@@ -319,6 +319,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 | **Data files** | `leads.json` (leads), `sent_log.json` (full bodies), `.reply_cache.json` (IMAP cache) |
 
 ## Status
+- v28: **7-Layer Dedup + Story Lifecycle reflected** — Updated `saas_transformation_strategy.html` Production Layer (`trending_builder.py` row: tracker sync, queue dedup, mark+move lifecycle) and Distribution Layer (`trending_uploader.py` row: 2-layer dedup gate). Pipeline now has 7 independent dedup checks across 5 scripts + story files physically move to `produced/` after build. (Mar 14, 2026)
 - v27: **LLM-Powered Smart Lead Replies** — `lead_responder.py` `build_reply()` upgraded from hardcoded template to Claude Haiku-powered context-aware replies via `llm_client.py`. Reads lead's actual message, responds intelligently (e.g. clarifies we don't sell subs if they ask about subscriber growth). Template kept as fallback. Output cleanup strips LLM preamble/signatures. (Mar 13, 2026)
 - v26: **Pricing Overhaul + Ownership Messaging** — Credit system (Starter 150+100, Growth 300+200, Enterprise Unlimited Vault). All engine brand names scrubbed from client-facing pages. "3 months, first month FREE" promo badge. Channel Ownership section (3-card grid). Guarantee bar. Updated index.html, deck.html, onboarding.html, onboarding_internal.html. Pushed to GitHub Pages. (Mar 13, 2026)
 - v25: **Lead Command Center auto-flow** — Formspree background poller (3-min interval, auto-ingests + auto-replies via `lead_responder.py`). Reply cache 5min→60s. UI refresh 60s→30s. New lead toast notification + tab title flash. "Poll Formspree" button + `/api/formspree/poll` + `/api/formspree/status` endpoints. (Mar 12, 2026)

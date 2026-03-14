@@ -443,11 +443,11 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
                 </tr>
                 <tr>
                   <td><code>trending_builder.py</code></td>
-                  <td>Trending stories (<code>stories/trending/*.json</code>), build tracker, compliance gate</td>
-                  <td>Built MP4 in <code>output/</code>, added to <code>.trending_upload_queue.json</code></td>
+                  <td>Trending stories (<code>stories/trending/*.json</code>), build tracker, compliance gate, upload.log (sync)</td>
+                  <td>Built MP4 in <code>output/</code>, added to <code>.trending_upload_queue.json</code> (dedup-checked). Story JSON marked as <code>"produced"</code> and moved to <code>stories/trending/produced/</code></td>
                   <td>None (build only, no upload)</td>
-                  <td>None</td>
-                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Voice enforcement, queue alert threshold. <span class="layer-tag layer-tenant">PER-TENANT</span> Stories directory, tracker files</td>
+                  <td>3-layer dedup: tracker&harr;upload.log sync, queue title dedup, story lifecycle (mark+move)</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Voice enforcement, queue alert threshold. <span class="layer-tag layer-tenant">PER-TENANT</span> Stories directory, tracker files, produced archive</td>
                 </tr>
                 <tr>
                   <td><code>compilation_stitcher.py</code></td>
@@ -504,10 +504,10 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
                 </tr>
                 <tr>
                   <td><code>trending_uploader.py</code></td>
-                  <td><code>.trending_upload_queue.json</code>, interval tracking file, burst flag</td>
+                  <td><code>.trending_upload_queue.json</code>, <code>upload.log</code>, interval tracking file, burst flag</td>
                   <td>Uploaded video, queue entry removed, engagement comment posted, playlist updated</td>
-                  <td>YouTube Data API (upload, comments, playlists), overlay_mascot (optional pre-upload)</td>
-                  <td><strong>Interval gate:</strong> skips if <1 day since last upload. <strong>Burst mode:</strong> 2/run for 3 days. <strong>not_before date gate:</strong> holds time-sensitive content. <strong>Jitter:</strong> 0-15 min random sleep. <strong>Auto-overlay:</strong> checks <code>.has_mascot</code> marker, overlays if missing.</td>
+                  <td>YouTube Data API (upload, search/dupe-check, comments, playlists), overlay_mascot (optional pre-upload)</td>
+                  <td><strong>2-layer dedup gate:</strong> (1) scans upload.log for same title (local), (2) searches YouTube channel for exact title match (API). Blocks + removes dupes. <strong>Interval gate:</strong> skips if &lt;1 day since last upload. <strong>Burst mode:</strong> 2/run for 3 days. <strong>not_before date gate:</strong> holds time-sensitive content. <strong>Jitter:</strong> 0-15 min random sleep. <strong>Auto-overlay:</strong> checks <code>.has_mascot</code> marker, overlays if missing.</td>
                   <td><span class="layer-tag layer-config">CONFIGURABLE</span> Upload interval, burst mode, jitter range, not_before. <span class="layer-tag layer-tenant">PER-TENANT</span> Queue file, OAuth token, channel ID</td>
                 </tr>
                 <tr>
