@@ -594,6 +594,51 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
       </details>
 
       <details>
+        <summary><span class="badge badge-blue">Sales &amp; CRM Layer</span> 4 Modules &mdash; Lead capture, smart replies, qualification pipeline, dashboard</summary>
+        <div class="details-content">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Module</th><th>Inputs</th><th>Outputs</th><th>External APIs</th><th>Decision Points</th><th>SaaS Impact</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>lead_responder.py</code></td>
+                  <td>IMAP inbox (hello@shortsfactory.io), Formspree notifications (contact form + strategy intake + camera submissions)</td>
+                  <td>LLM-powered bilingual smart replies via SMTP, lead entries in <code>leads.json</code> with scoring metadata (<code>reply_type</code>, <code>needs_attention</code>, language info)</td>
+                  <td>IMAP/SMTP (Titan Private Email), LLM via <code>llm_client.py</code> (Haiku tier), lingua (language detection, 75+ languages), deep-translator (GoogleTranslator)</td>
+                  <td><strong>Language detection:</strong> lingua with confidence thresholds + script-based fallback (Cyrillic, Arabic, CJK). <strong>Bilingual reply:</strong> lead's language first, English below. <strong>Manual reply detection:</strong> 3-layer check &mdash; (1) <code>sent_log.json</code> auto-reply log, (2) <code>.no_auto_reply.json</code> blocklist (Khal manually replied), (3) INBOX scan for lead replies. If any layer detects prior engagement, auto-reply skipped. <strong>Template fallback:</strong> message-aware keyword matching (subs, money, brainrot, non-English) when LLM unavailable. <strong>API key loading:</strong> <code>_load_zshrc_env()</code> reads keys from <code>~/.zshrc</code> (launchd-proof).</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Reply tone/persona, LLM model tier, template keywords. <span class="layer-tag layer-tenant">PER-TENANT</span> Email credentials, language preferences, blocklist, brand voice</td>
+                </tr>
+                <tr>
+                  <td><code>lead_dashboard.py</code></td>
+                  <td><code>leads.json</code>, <code>sent_log.json</code>, IMAP inbox (reply detection), <code>.reply_cache.json</code></td>
+                  <td>FastAPI server (port 8009) with lead scoring (0-100), pipeline stage management, conversation threads, email sending, Formspree background poller</td>
+                  <td>IMAP (reply scanning), SMTP (manual reply sending), Formspree (background polling every 3 min)</td>
+                  <td><strong>Scoring:</strong> name quality + email domain + plan tier + phone + strategy form + niche + reply status. <strong>YOUR TURN trigger:</strong> lead replies (+40 score) OR score &ge; 70. <strong>"I replied manually" endpoint:</strong> <code>POST /api/leads/{id}/manual-reply</code> adds email to <code>.no_auto_reply.json</code> blocklist, updates stage to qualifying. <strong>Auto-refresh:</strong> 30s with new-lead toast + tab title flash.</td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Score weights, stage definitions, refresh interval. <span class="layer-tag layer-tenant">PER-TENANT</span> Dashboard branding, email credentials, lead data</td>
+                </tr>
+                <tr>
+                  <td><code>email_sender.py</code></td>
+                  <td>Recipient address, subject, body text</td>
+                  <td>Email sent via SMTP SSL, delivery confirmation</td>
+                  <td>SMTP (smtp.privateemail.com:465)</td>
+                  <td>SSL context, BCC to founder, timeout 15s.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> SMTP protocol. <span class="layer-tag layer-tenant">PER-TENANT</span> Sender credentials, from address, BCC</td>
+                </tr>
+                <tr>
+                  <td><code>inbox_reader.py</code></td>
+                  <td>IMAP credentials, search query (unread, from, subject filter)</td>
+                  <td>Parsed email messages (sender, subject, body, date), Formspree-filtered results</td>
+                  <td>IMAP (imap.privateemail.com:993)</td>
+                  <td>Formspree filter mode, unread-only mode, search-by-sender.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> IMAP protocol. <span class="layer-tag layer-tenant">PER-TENANT</span> Mailbox credentials, filter rules</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details>
         <summary><span class="badge badge-orange">Analytics Layer</span> 6 Modules &mdash; Channel stats, performance, anomaly detection, reporting</summary>
         <div class="details-content">
           <div class="table-wrap">
