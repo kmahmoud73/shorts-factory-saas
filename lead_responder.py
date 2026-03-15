@@ -547,6 +547,72 @@ https://shortsfactory.io
     SENT_LOG.write_text(json.dumps(sent_log, indent=2))
 
 
+NO_AUTO_REPLY_FILE = SAAS_DIR / ".no_auto_reply.json"
+
+
+def _load_no_auto_reply():
+    """Load the manual reply blocklist. Emails in this list skip auto-reply."""
+    if NO_AUTO_REPLY_FILE.exists():
+        try:
+            return {e.lower().strip() for e in json.loads(NO_AUTO_REPLY_FILE.read_text())}
+        except Exception:
+            pass
+    return set()
+
+
+def add_to_no_auto_reply(email_addr):
+    """Add an email to the no-auto-reply blocklist (used when Khal replies manually)."""
+    blocklist = _load_no_auto_reply()
+    blocklist.add(email_addr.lower().strip())
+    NO_AUTO_REPLY_FILE.write_text(json.dumps(sorted(blocklist), indent=2))
+
+
+def _already_replied(lead_email, mail_conn=None):
+    """Check if we (auto or Khal manually) already replied to this lead.
+    Checks: (1) sent_log.json (auto-replies), (2) .no_auto_reply.json (Khal's manual replies),
+    (3) INBOX for emails FROM the lead (indicates active conversation).
+    Returns True if auto-responder should back off."""
+    lead_email = lead_email.lower().strip()
+
+    # Layer 1: Check sent_log.json for any email TO this address (auto-replies)
+    if SENT_LOG.exists():
+        try:
+            sent_log = json.loads(SENT_LOG.read_text())
+            for entry in sent_log:
+                if entry.get("to", "").lower().strip() == lead_email:
+                    log(f"Already replied to {lead_email} (found in sent_log.json)")
+                    return True
+        except Exception:
+            pass
+
+    # Layer 2: Check .no_auto_reply.json blocklist (Khal's manual replies)
+    blocklist = _load_no_auto_reply()
+    if lead_email in blocklist:
+        log(f"Already replied to {lead_email} (found in .no_auto_reply.json blocklist)")
+        return True
+
+    # Layer 3: Check INBOX for emails FROM this lead (they replied → conversation active)
+    try:
+        conn = mail_conn
+        own_conn = False
+        if not conn:
+            conn = imaplib.IMAP4_SSL(IMAP_HOST, IMAP_PORT, timeout=15)
+            conn.login(EMAIL, PASSWORD)
+            own_conn = True
+
+        conn.select("INBOX", readonly=True)
+        status, messages = conn.search(None, f'(FROM "{lead_email}")')
+        if own_conn:
+            conn.logout()
+        if status == "OK" and messages[0]:
+            log(f"Lead {lead_email} already replied to us (found in INBOX) — conversation active")
+            return True
+    except Exception as e:
+        log(f"INBOX reply check failed: {e}")
+
+    return False
+
+
 def check_for_new_leads(dry_run=False):
     """Main loop: check inbox, find new leads, reply, log."""
     leads = load_leads()
@@ -607,7 +673,12 @@ def check_for_new_leads(dry_run=False):
                 "notes": "",
             }
             if cam_email:
-                if dry_run:
+                # Check if Khal already replied manually — back off if so
+                if _already_replied(cam_email):
+                    log(f"SKIPPING cam reply to {cam_email} — manual reply already exists")
+                    entry["status"] = "manual-reply"
+                    entry["notes"] = "Camera submission — skipped auto-reply (manual reply detected)."
+                elif dry_run:
                     log(f"[DRY RUN] Would send cam thank-you to {cam_email}")
                 else:
                     try:
@@ -640,7 +711,11 @@ def check_for_new_leads(dry_run=False):
             subject, reply_body = build_strategy_reply(strategy)
             status_val = "new"
 
-            if dry_run:
+            # Check if Khal already replied manually — back off if so
+            if _already_replied(s_email):
+                log(f"SKIPPING strategy reply to {s_email} — manual reply already exists")
+                status_val = "manual-reply"
+            elif dry_run:
                 log(f"[DRY RUN] Would send strategy reply to {s_email}:")
                 log(f"  Subject: {subject}")
                 log(f"  Body preview: {reply_body[:100]}...")
@@ -682,32 +757,40 @@ def check_for_new_leads(dry_run=False):
         if lead.get("message"):
             log(f"  Message: {lead['message'][:100]}")
 
-        # Build reply (sets lead["_reply_type"] as side effect)
-        subject, reply_body = build_reply(lead)
-        reply_type = lead.pop("_reply_type", "unknown")
-
-        if dry_run:
-            log(f"[DRY RUN] Would send to {lead_email} (reply_type={reply_type}):")
-            log(f"  Subject: {subject}")
-            log(f"  Body preview: {reply_body[:150]}...")
+        # Check if Khal already replied manually — back off if so
+        if _already_replied(lead_email):
+            log(f"SKIPPING auto-reply to {lead_email} — manual reply already exists")
+            status_val = "manual-reply"
+            reply_type = "skipped"
+            needs_attention = False
+            notes = "Auto-detected from Formspree. Skipped auto-reply (manual reply detected)."
         else:
-            try:
-                send_email(lead_email, subject, reply_body)
-                log(f"Reply sent to {lead_email} (reply_type={reply_type})")
-                status_val = "auto-replied"
-            except Exception as e:
-                log(f"SEND FAILED to {lead_email}: {e}")
-                status_val = "reply-failed"
+            # Build reply (sets lead["_reply_type"] as side effect)
+            subject, reply_body = build_reply(lead)
+            reply_type = lead.pop("_reply_type", "unknown")
 
-        # Flag needs_attention if LLM failed (template went out)
-        needs_attention = reply_type == "template"
-        notes = f"Auto-detected from Formspree. "
-        if dry_run:
-            notes += "[DRY RUN]"
-        elif reply_type == "smart":
-            notes += "Smart LLM reply sent."
-        else:
-            notes += "TEMPLATE reply sent (LLM unavailable). NEEDS MANUAL FOLLOW-UP."
+            if dry_run:
+                log(f"[DRY RUN] Would send to {lead_email} (reply_type={reply_type}):")
+                log(f"  Subject: {subject}")
+                log(f"  Body preview: {reply_body[:150]}...")
+            else:
+                try:
+                    send_email(lead_email, subject, reply_body)
+                    log(f"Reply sent to {lead_email} (reply_type={reply_type})")
+                    status_val = "auto-replied"
+                except Exception as e:
+                    log(f"SEND FAILED to {lead_email}: {e}")
+                    status_val = "reply-failed"
+
+            # Flag needs_attention if LLM failed (template went out)
+            needs_attention = reply_type == "template"
+            notes = f"Auto-detected from Formspree. "
+            if dry_run:
+                notes += "[DRY RUN]"
+            elif reply_type == "smart":
+                notes += "Smart LLM reply sent."
+            else:
+                notes += "TEMPLATE reply sent (LLM unavailable). NEEDS MANUAL FOLLOW-UP."
 
         # Detect and record language
         lang_code, lang_name = detect_language(lead.get("message", ""))

@@ -466,6 +466,36 @@ async def formspree_status():
     return _poller_state
 
 
+@app.post("/api/leads/{lead_id}/manual-reply")
+async def mark_manual_reply(lead_id: int):
+    """Mark a lead as manually replied by Khal. Adds to .no_auto_reply.json
+    blocklist so the auto-responder won't send a duplicate reply."""
+    leads = load_leads()
+    lead = next((l for l in leads if l.get("id") == lead_id), None)
+    if not lead:
+        raise HTTPException(404, "Lead not found")
+
+    lead_email = lead.get("email", "").lower().strip()
+    if not lead_email or lead_email == "anonymous":
+        raise HTTPException(400, "No valid email for this lead")
+
+    # Add to .no_auto_reply.json blocklist
+    sys.path.insert(0, str(SAAS_DIR))
+    from lead_responder import add_to_no_auto_reply
+    sys.path.pop(0)
+    add_to_no_auto_reply(lead_email)
+
+    # Update lead status
+    lead["status"] = "manual-reply"
+    lead["stage"] = "qualifying"
+    ts = datetime.now().strftime("%b %d %H:%M")
+    existing_notes = lead.get("notes", "")
+    lead["notes"] = f"{existing_notes}\n[{ts}] Khal replied manually — auto-responder blocked.".strip()
+    save_leads(leads)
+
+    return {"ok": True, "email": lead_email, "status": "manual-reply"}
+
+
 @app.on_event("startup")
 async def start_formspree_poller():
     """Start the background Formspree poller on server boot."""
