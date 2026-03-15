@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 14, 2026 (v28 -- **7-Layer Dedup + Story Lifecycle reflected**: Updated `saas_transformation_strategy.html` Production + Distribution layers to document 7-layer dedup pipeline and story lifecycle (mark+move to `produced/`). Previous: v27 LLM-Powered Smart Lead Replies)
+**Last Updated**: March 15, 2026 (v29 -- **Lead Responder Smart Reply Fix**: Fixed LLM replies broken since launch (launchd had no API keys). Added `_load_zshrc_env()` for launchd-proof key loading, bilingual replies (lingua language detection + deep-translator), improved template fallback, `reply_type`/`needs_attention`/language fields. Previous: v28 7-Layer Dedup + Story Lifecycle)
 
 ---
 
@@ -97,7 +97,7 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | `update_site_stats.py` | Auto-update site stats from live channel data, commit + push | No |
 | `email_sender.py` | Send emails from hello@shortsfactory.io via SMTP | No |
 | `inbox_reader.py` | Read inbox via IMAP (unread, search, Formspree filter) | No |
-| `lead_responder.py` | Auto-check inbox, **LLM-powered smart replies** (Claude Haiku) to new Formspree leads + WorldView camera submissions, log to leads.json. Template fallback if LLM fails. | No |
+| `lead_responder.py` | Auto-check inbox, **LLM-powered bilingual smart replies** (Claude Haiku) to new Formspree leads + WorldView camera submissions. Language detection (lingua, 75+ languages) + translation (deep-translator). Template fallback if LLM fails. Tracks `reply_type`, `needs_attention`, language info. `_load_zshrc_env()` for launchd-proof API key loading. | No |
 | `lead_dashboard.py` | **Lead Command Center** — FastAPI server (port 8009). Lead scoring, IMAP reply detection, stage management, email sending | No |
 | `lead_dashboard.html` | Lead Command Center UI — pipeline view, YOUR TURN alerts, conversation threads, score breakdown, actions | No |
 | `leads.json` | Lead tracker (gitignored) | No |
@@ -243,9 +243,21 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | **Script** | `lead_responder.py` |
 | **Agent** | `com.shortsfactory.lead-responder` |
 | **Schedule** | Every 30 minutes + on load |
-| **What it does** | IMAP check → parse Formspree leads → **LLM smart reply** (Haiku, falls back to template) → log to leads.json |
+| **What it does** | IMAP check → parse Formspree leads → **LLM bilingual smart reply** (Haiku, falls back to improved template) → log to leads.json |
 | **Log** | `/tmp/sf-lead-responder.log` |
 | **CLI** | `--dry-run`, `--status` |
+| **Env vars (plist)** | `HOME`, `PATH` — required for `_load_zshrc_env()` to find `~/.zshrc` |
+
+**Smart Reply System (Fixed Mar 15)**:
+- **Root cause**: LLM replies were broken since launch — the launchd plist had no API keys injected, so every LLM call failed silently and the generic template fallback fired for ALL 14 leads
+- **Fix**: `_load_zshrc_env()` reads `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, etc. from `~/.zshrc` at startup, making the script launchd-proof (launchd inherits minimal env, not shell profile)
+- **Language detection**: Uses `lingua` library (75+ languages) to detect the lead's message language
+- **Bilingual replies**: LLM replies in the lead's detected language FIRST, then English translation below (if non-English)
+- **Translation**: `deep-translator` / `GoogleTranslator` for template fallback translations
+- **Template fallback improved**: References the lead's actual message content instead of generic "got it" boilerplate
+- **New tracking fields**: `reply_type` (smart/template), `needs_attention` flag (for messages needing human follow-up), language info in `notes`
+- **Plist updated**: `HOME` + `PATH` environment variables added to `com.shortsfactory.lead-responder.plist`
+- **Agent reloaded**: `launchctl bootout` + `bootstrap` after plist update
 
 ### X (Twitter) Accounts
 - `@shortsfactoryio` — SaaS business account (khal.mahmoud+shortsfactory@gmail.com). Profile pic: sf_logo_v2.png. Bio set. URL: shortsfactory.io. X Developer app active (API keys in Developer Console)
@@ -305,7 +317,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 | **Server** | FastAPI on port 8009 |
 | **URL** | `http://localhost:8009` |
 | **Start** | `python3 lead_dashboard.py` |
-| **Leads** | 6 real external (9 total incl. 2 internal tests + 1 spam) |
+| **Leads** | 14 total (smart replies now working — were all template fallback before Mar 15 fix) |
 | **Scoring** | 0-100: name quality, email domain, plan tier, phone, strategy form, niche, reply status |
 | **Stages** | New → Auto-Replied → Your Turn → Qualifying → Engaged → Won / Lost / Spam |
 | **YOUR TURN trigger** | Lead replies to email (+40 score) OR score ≥ 70 |
@@ -319,6 +331,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 | **Data files** | `leads.json` (leads), `sent_log.json` (full bodies), `.reply_cache.json` (IMAP cache) |
 
 ## Status
+- v29: **Lead Responder Smart Reply Fix** — Smart replies were broken since launch: launchd plist had no API keys, so LLM always failed and generic template went to ALL 14 leads. Fixed with `_load_zshrc_env()` that reads API keys from `~/.zshrc` at startup (launchd-proof). Added language detection (lingua, 75+ languages) + translation (deep-translator/GoogleTranslator) for bilingual replies — LLM replies in lead's language first, then English below. Template fallback improved to reference actual message instead of generic "got it." New fields: `reply_type` (smart/template), `needs_attention` flag, language info in notes. Plist updated with HOME + PATH env vars, agent reloaded. (Mar 15, 2026)
 - v28: **7-Layer Dedup + Story Lifecycle reflected** — Updated `saas_transformation_strategy.html` Production Layer (`trending_builder.py` row: tracker sync, queue dedup, mark+move lifecycle) and Distribution Layer (`trending_uploader.py` row: 2-layer dedup gate). Pipeline now has 7 independent dedup checks across 5 scripts + story files physically move to `produced/` after build. (Mar 14, 2026)
 - v27: **LLM-Powered Smart Lead Replies** — `lead_responder.py` `build_reply()` upgraded from hardcoded template to Claude Haiku-powered context-aware replies via `llm_client.py`. Reads lead's actual message, responds intelligently (e.g. clarifies we don't sell subs if they ask about subscriber growth). Template kept as fallback. Output cleanup strips LLM preamble/signatures. (Mar 13, 2026)
 - v26: **Pricing Overhaul + Ownership Messaging** — Credit system (Starter 150+100, Growth 300+200, Enterprise Unlimited Vault). All engine brand names scrubbed from client-facing pages. "3 months, first month FREE" promo badge. Channel Ownership section (3-card grid). Guarantee bar. Updated index.html, deck.html, onboarding.html, onboarding_internal.html. Pushed to GitHub Pages. (Mar 13, 2026)

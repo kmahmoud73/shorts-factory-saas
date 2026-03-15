@@ -27,6 +27,26 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
+# Load API keys from ~/.zshrc if not already in env (fixes launchd missing env)
+def _load_zshrc_env():
+    """Extract export lines from ~/.zshrc so launchd has API keys."""
+    zshrc = Path.home() / ".zshrc"
+    if not zshrc.exists():
+        return
+    needed = ["GROQ_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "HEDRA_API_KEY"]
+    for line in zshrc.read_text().splitlines():
+        line = line.strip()
+        if line.startswith("#") or not line.startswith("export "):
+            continue
+        for key in needed:
+            if key in line and not os.environ.get(key):
+                # export KEY="value" or export KEY=value
+                match = re.match(rf'export\s+{key}=["\'"]?([^"\'"\s]+)["\'"]?', line)
+                if match:
+                    os.environ[key] = match.group(1)
+
+_load_zshrc_env()
+
 IMAP_HOST = "imap.privateemail.com"
 IMAP_PORT = 993
 SMTP_HOST = "smtp.privateemail.com"
@@ -72,6 +92,71 @@ def get_known_cam_fingerprints(leads):
         if l.get("niche") == "camera-submission" and l.get("email") == "anonymous":
             fps.add(l.get("message", "").lower().strip())
     return fps
+
+
+def detect_language(text):
+    """Detect the language of a message. Returns (lang_code, lang_name) or ('en', 'English').
+    Uses confidence threshold to avoid false positives on short English text."""
+    if not text or len(text.strip()) < 3:
+        return "en", "English"
+    # Quick script check first — Cyrillic/Arabic/CJK are unambiguous
+    has_non_latin = False
+    if any('\u0400' <= c <= '\u04ff' for c in text):
+        has_non_latin = True  # Cyrillic — let lingua determine exact language
+    elif any('\u0600' <= c <= '\u06ff' for c in text):
+        has_non_latin = True
+    elif any('\u4e00' <= c <= '\u9fff' for c in text):
+        has_non_latin = True
+    elif any('\u3040' <= c <= '\u30ff' or '\u30a0' <= c <= '\u30ff' for c in text):
+        has_non_latin = True
+    elif any('\uac00' <= c <= '\ud7af' for c in text):
+        has_non_latin = True
+
+    # For short pure-ASCII text, default to English (avoid false Dutch/Swahili)
+    if not has_non_latin and len(text.strip()) < 30:
+        return "en", "English"
+
+    try:
+        from lingua import Language, LanguageDetectorBuilder
+        detector = LanguageDetectorBuilder.from_all_languages().with_minimum_relative_distance(0.25).build()
+        confidences = detector.compute_language_confidence_values(text)
+        if confidences:
+            top = confidences[0]
+            lang = top.language
+            confidence = top.value
+            if lang != Language.ENGLISH and confidence > 0.5:
+                return lang.iso_code_639_1.name.lower(), lang.name.title()
+            elif lang != Language.ENGLISH and has_non_latin:
+                # Non-Latin script but low confidence — still use it
+                return lang.iso_code_639_1.name.lower(), lang.name.title()
+    except Exception as e:
+        log(f"Language detection failed (lingua): {e}")
+        # Fallback: pure script-based detection
+        if any('\u0400' <= c <= '\u04ff' for c in text):
+            return "bg", "Bulgarian/Russian"
+        if any('\u0600' <= c <= '\u06ff' for c in text):
+            return "ar", "Arabic"
+        if any('\u4e00' <= c <= '\u9fff' for c in text):
+            return "zh", "Chinese"
+        if any('\u3040' <= c <= '\u30ff' for c in text):
+            return "ja", "Japanese"
+        if any('\uac00' <= c <= '\ud7af' for c in text):
+            return "ko", "Korean"
+    return "en", "English"
+
+
+def translate_message(text, source_lang="auto"):
+    """Translate non-English text to English. Returns translated text or original."""
+    if not text or len(text.strip()) < 3:
+        return text
+    try:
+        from deep_translator import GoogleTranslator
+        translated = GoogleTranslator(source=source_lang, target="en").translate(text)
+        if translated and translated.strip() != text.strip():
+            return translated.strip()
+    except Exception as e:
+        log(f"Translation failed: {e}")
+    return text
 
 
 def decode_str(s):
@@ -275,72 +360,134 @@ REPLY RULES:
 6. Mention our live channels as proof ONLY if relevant, not every time
 7. Sign off casually (no "Best regards" corporate stuff)
 8. Do NOT include a signature block — that's added automatically
-9. Output ONLY the email body text — no subject line, no headers"""
+9. Output ONLY the email body text — no subject line, no headers
+
+MULTILINGUAL RULES:
+10. If the lead wrote in a non-English language, you MUST reply in BOTH their language AND English.
+    Structure: greeting in their language, 2-3 sentences in their language, then "(In English:)" followed by the English version.
+11. If a translation of their message is provided, address the TRANSLATED meaning, not the raw text.
+12. If their message doesn't relate to YouTube/video production, acknowledge what they said and gently explain what Shorts Factory actually does — don't just ignore the mismatch."""
 
 
 def _call_llm_for_reply(prompt):
-    """Call Claude CLI (Haiku) for smart lead reply. Returns text or None."""
+    """Call LLM for smart lead reply. Returns text or None. Logs every code path."""
     try:
         # Use llm_client from shorts-factory
         sf_dir = Path(__file__).parent.parent / "shorts-factory"
-        sys.path.insert(0, str(sf_dir))
+        if str(sf_dir) not in sys.path:
+            sys.path.insert(0, str(sf_dir))
         from llm_client import call_llm
-        result, provider = call_llm(
+        log("Calling LLM for smart reply...")
+        raw = call_llm(
             "haiku",
             [{"role": "user", "content": prompt}],
             system=SMART_REPLY_SYSTEM,
             max_tokens=500,
         )
-        if result and len(result.strip()) > 20:
-            log(f"LLM provider: {provider}")
-            # Clean up LLM output: remove preamble, signature placeholders, stray lines
-            body = result.strip()
-            # Remove everything before "Hey " or "Hi " if LLM added preamble
-            for greeting in ["Hey ", "Hi ", "Hello "]:
-                idx = body.find(greeting)
-                if idx > 0:
-                    body = body[idx:]
-                    break
-            # Remove markdown hr lines
-            body = re.sub(r'^-{3,}\s*$', '', body, flags=re.MULTILINE).strip()
-            # Remove placeholder signatures like [Founder], [Name], etc.
-            body = re.sub(r'\n\[.*?\]\s*$', '', body).strip()
-            if len(body) > 20:
-                return body
+        # call_llm returns (result, provider) tuple
+        if isinstance(raw, tuple):
+            result, provider = raw
+        else:
+            result, provider = raw, "unknown"
+            log(f"LLM returned non-tuple: {type(raw)}")
+
+        if not result:
+            log(f"LLM returned empty result (provider: {provider})")
+            return None
+
+        if len(result.strip()) <= 20:
+            log(f"LLM result too short ({len(result.strip())} chars, provider: {provider}): {result[:50]}")
+            return None
+
+        log(f"LLM raw reply OK ({len(result)} chars, provider: {provider})")
+        # Clean up LLM output: remove preamble, signature placeholders, stray lines
+        body = result.strip()
+        # Remove everything before "Hey " or "Hi " if LLM added preamble
+        for greeting in ["Hey ", "Hi ", "Hello "]:
+            idx = body.find(greeting)
+            if idx > 0:
+                body = body[idx:]
+                break
+        # Remove markdown hr lines
+        body = re.sub(r'^-{3,}\s*$', '', body, flags=re.MULTILINE).strip()
+        # Remove placeholder signatures like [Founder], [Name], etc.
+        body = re.sub(r'\n\[.*?\]\s*$', '', body).strip()
+        if len(body) > 20:
+            log(f"Smart reply ready ({len(body)} chars after cleanup)")
+            return body
+        else:
+            log(f"LLM reply too short after cleanup ({len(body)} chars)")
+            return None
     except Exception as e:
-        log(f"LLM smart reply failed: {e}")
+        log(f"LLM smart reply FAILED: {type(e).__name__}: {e}")
     return None
 
 
 def build_reply(lead):
-    """Generate personalized reply — LLM-powered with template fallback."""
+    """Generate personalized reply — LLM-powered with template fallback.
+    Detects language, translates, and ensures contextual response."""
     name = lead.get("name", "there").strip() or "there"
     niche = lead.get("niche", "")
     message = lead.get("message", "")
+    reply_type = "smart"  # track which path was used
 
-    # Try LLM-powered smart reply first
+    # Detect language
+    lang_code, lang_name = "en", "English"
+    translated_message = message
+    if message and len(message.strip()) > 2:
+        lang_code, lang_name = detect_language(message)
+        if lang_code != "en":
+            log(f"Non-English message detected: {lang_name} ({lang_code})")
+            translated_message = translate_message(message)
+            log(f"Translated: '{message}' -> '{translated_message}'")
+
+    # Build LLM prompt with language context
+    lang_context = ""
+    if lang_code != "en":
+        lang_context = f"""
+IMPORTANT — LANGUAGE CONTEXT:
+- The lead wrote in {lang_name}: "{message}"
+- English translation: "{translated_message}"
+- You MUST reply in BOTH {lang_name} AND English.
+- First write 2-3 sentences in {lang_name}, then "(In English:)" and the English version.
+- Address the MEANING of their translated message, not just the raw text."""
+
     llm_prompt = f"""New lead just submitted a form on shortsfactory.io.
 
 Name: {name}
 Niche they selected: {niche or 'not specified'}
 Their message: {message or '(no message)'}
-
+{f'Translated message: {translated_message}' if lang_code != 'en' else ''}
+{lang_context}
 Write a reply email to this person. Remember to actually address what they said."""
 
     smart_body = _call_llm_for_reply(llm_prompt)
     if smart_body:
-        log(f"Smart reply generated for {name}")
+        log(f"SMART reply generated for {name}")
         return "Thanks for your interest in Shorts Factory", smart_body
 
-    # Fallback: template reply
-    log(f"Falling back to template reply for {name}")
+    # Fallback: improved template that actually addresses the message
+    reply_type = "template"
+    log(f"TEMPLATE FALLBACK for {name} (LLM unavailable)")
+
     niche_line = ""
     if niche and niche.lower() not in ["general", "other", ""]:
         niche_line = f" Saw you're interested in {niche} content — that's right in our wheelhouse."
 
+    # Build a message-aware response instead of generic "got it"
     message_line = ""
-    if message and len(message.strip()) > 5:
-        message_line = f"\n\nRegarding your note — got it, and happy to discuss further."
+    if message and len(message.strip()) > 3:
+        if lang_code != "en" and translated_message != message:
+            # Non-English: acknowledge language + provide translated context
+            message_line = f'\n\nI noticed you wrote in {lang_name} — "{translated_message}" (if I\'m reading that right). Just to clarify: Shorts Factory builds and runs fully autonomous YouTube channels using AI — we handle scripting, video production, voiceover, and daily uploads. If that\'s what you\'re looking for, I\'d love to hear more about your project.'
+        elif any(kw in message.lower() for kw in ["sub", "subscriber", "follow", "100k", "1m"]):
+            message_line = "\n\nJust to clarify — we don't sell subscribers or views. We build fully autonomous YouTube pipelines that produce real AI-generated content daily, which grows your channel organically."
+        elif any(kw in message.lower() for kw in ["money", "earn", "income", "monetiz"]):
+            message_line = "\n\nI see you're looking to generate income through YouTube. We build fully autonomous video pipelines — AI scripts, images, voiceover, animation, daily uploads — so your channel grows without you lifting a finger. Monetization comes from the organic growth."
+        elif any(kw in message.lower() for kw in ["brainrot", "meme", "viral", "short"]):
+            message_line = f'\n\nYou mentioned "{message.strip()}" — we can definitely help with that. Our AI pipeline produces trending shorts daily with custom scripts, AI visuals, and voiceover. Everything runs autonomously.'
+        else:
+            message_line = f'\n\nYou mentioned: "{message.strip()}" — happy to discuss how that fits with what we do. We build fully autonomous YouTube channels using AI (scripts, images, voiceover, animation, daily uploads).'
 
     subject = "Thanks for your interest in Shorts Factory"
 
@@ -361,6 +508,8 @@ Happy to walk you through how the pipeline works and what results look like.
 
 Looking forward to hearing from you."""
 
+    # Return reply type so caller can flag needs_attention
+    lead["_reply_type"] = reply_type
     return subject, body
 
 
@@ -530,22 +679,42 @@ def check_for_new_leads(dry_run=False):
 
         # New lead found
         log(f"NEW LEAD: {lead.get('name', '?')} <{lead_email}> — niche: {lead.get('niche', '?')}")
+        if lead.get("message"):
+            log(f"  Message: {lead['message'][:100]}")
 
-        # Build reply
+        # Build reply (sets lead["_reply_type"] as side effect)
         subject, reply_body = build_reply(lead)
+        reply_type = lead.pop("_reply_type", "unknown")
 
         if dry_run:
-            log(f"[DRY RUN] Would send to {lead_email}:")
+            log(f"[DRY RUN] Would send to {lead_email} (reply_type={reply_type}):")
             log(f"  Subject: {subject}")
-            log(f"  Body preview: {reply_body[:100]}...")
+            log(f"  Body preview: {reply_body[:150]}...")
         else:
             try:
                 send_email(lead_email, subject, reply_body)
-                log(f"Reply sent to {lead_email}")
+                log(f"Reply sent to {lead_email} (reply_type={reply_type})")
                 status_val = "auto-replied"
             except Exception as e:
                 log(f"SEND FAILED to {lead_email}: {e}")
                 status_val = "reply-failed"
+
+        # Flag needs_attention if LLM failed (template went out)
+        needs_attention = reply_type == "template"
+        notes = f"Auto-detected from Formspree. "
+        if dry_run:
+            notes += "[DRY RUN]"
+        elif reply_type == "smart":
+            notes += "Smart LLM reply sent."
+        else:
+            notes += "TEMPLATE reply sent (LLM unavailable). NEEDS MANUAL FOLLOW-UP."
+
+        # Detect and record language
+        lang_code, lang_name = detect_language(lead.get("message", ""))
+        lang_note = ""
+        if lang_code != "en":
+            translated = translate_message(lead.get("message", ""))
+            lang_note = f" Language: {lang_name}. Translated: '{translated}'."
 
         # Add to leads.json
         leads.append({
@@ -558,7 +727,9 @@ def check_for_new_leads(dry_run=False):
             "message": lead.get("message", ""),
             "source": "shortsfactory.io",
             "status": status_val if not dry_run else "new",
-            "notes": f"Auto-detected from Formspree. {'[DRY RUN]' if dry_run else 'Auto-reply sent.'}"
+            "reply_type": reply_type,
+            "needs_attention": needs_attention,
+            "notes": notes + lang_note,
         })
         known_emails.add(lead_email)
         next_id += 1
