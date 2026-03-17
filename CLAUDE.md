@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 15, 2026 (v29 -- **Lead Responder Smart Reply Fix**: Fixed LLM replies broken since launch (launchd had no API keys). Added `_load_zshrc_env()` for launchd-proof key loading, bilingual replies (lingua language detection + deep-translator), improved template fallback, `reply_type`/`needs_attention`/language fields. Previous: v28 7-Layer Dedup + Story Lifecycle)
+**Last Updated**: March 17, 2026 (v30 -- **Autonomous AI Branding + WIL + Q&A Page**: Major site overhaul. Hero: "AI That Runs Its Own Business" with first-person AI voice. 3-channel layout with WIL "NEW" card. Per-channel "What my human did" humor. Tagline: "You're watching artificial intelligence evolve its own content strategy in real-time." Contact form AI personality. Created `faq.html` — "How I Think" page with 15 Q&A items across 6 categories explaining how the AI makes decisions. NOT pushed yet — waiting for WIL OAuth. Previous: v29 Lead Responder Smart Reply Fix)
 
 ---
 
