@@ -370,56 +370,88 @@ MULTILINGUAL RULES:
 
 
 def _call_llm_for_reply(prompt):
-    """Call LLM for smart lead reply. Returns text or None. Logs every code path."""
-    try:
-        # Use llm_client from shorts-factory
-        sf_dir = Path(__file__).parent.parent / "shorts-factory"
-        if str(sf_dir) not in sys.path:
-            sys.path.insert(0, str(sf_dir))
-        from llm_client import call_llm
-        log("Calling LLM for smart reply...")
-        raw = call_llm(
-            "haiku",
-            [{"role": "user", "content": prompt}],
-            system=SMART_REPLY_SYSTEM,
-            max_tokens=500,
-        )
-        # call_llm returns (result, provider) tuple
-        if isinstance(raw, tuple):
-            result, provider = raw
-        else:
-            result, provider = raw, "unknown"
-            log(f"LLM returned non-tuple: {type(raw)}")
+    """Call Anthropic API directly for smart lead reply. No cross-dir imports, no pyc issues."""
+    import requests as _requests
 
-        if not result:
-            log(f"LLM returned empty result (provider: {provider})")
-            return None
-
-        if len(result.strip()) <= 20:
-            log(f"LLM result too short ({len(result.strip())} chars, provider: {provider}): {result[:50]}")
-            return None
-
-        log(f"LLM raw reply OK ({len(result)} chars, provider: {provider})")
-        # Clean up LLM output: remove preamble, signature placeholders, stray lines
-        body = result.strip()
-        # Remove everything before "Hey " or "Hi " if LLM added preamble
+    def _cleanup(text):
+        body = text.strip()
         for greeting in ["Hey ", "Hi ", "Hello "]:
             idx = body.find(greeting)
             if idx > 0:
                 body = body[idx:]
                 break
-        # Remove markdown hr lines
         body = re.sub(r'^-{3,}\s*$', '', body, flags=re.MULTILINE).strip()
-        # Remove placeholder signatures like [Founder], [Name], etc.
         body = re.sub(r'\n\[.*?\]\s*$', '', body).strip()
-        if len(body) > 20:
-            log(f"Smart reply ready ({len(body)} chars after cleanup)")
-            return body
-        else:
-            log(f"LLM reply too short after cleanup ({len(body)} chars)")
-            return None
-    except Exception as e:
-        log(f"LLM smart reply FAILED: {type(e).__name__}: {e}")
+        return body
+
+    # Tier 1: Anthropic API (direct — no llm_client import)
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if api_key:
+        try:
+            log("Calling LLM for smart reply... (Anthropic)")
+            resp = _requests.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": "claude-haiku-4-5-20251001",
+                    "max_tokens": 500,
+                    "system": SMART_REPLY_SYSTEM,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+                timeout=30,
+            )
+            resp.raise_for_status()
+            result = resp.json()["content"][0]["text"]
+            if result and len(result.strip()) > 20:
+                body = _cleanup(result)
+                if len(body) > 20:
+                    log(f"Smart reply ready ({len(body)} chars, provider: anthropic)")
+                    return body
+            log(f"Anthropic reply too short ({len(result)} chars)")
+        except Exception as e:
+            log(f"Anthropic API failed: {type(e).__name__}: {e}")
+    else:
+        log("ANTHROPIC_API_KEY not set — skipping Anthropic tier")
+
+    # Tier 2: Groq (free API)
+    groq_key = os.environ.get("GROQ_API_KEY", "")
+    if groq_key:
+        try:
+            log("Calling LLM for smart reply... (Groq fallback)")
+            resp = _requests.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {groq_key}",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": "llama-3.3-70b-versatile",
+                    "max_tokens": 500,
+                    "messages": [
+                        {"role": "system", "content": SMART_REPLY_SYSTEM},
+                        {"role": "user", "content": prompt},
+                    ],
+                },
+                timeout=30,
+            )
+            resp.raise_for_status()
+            result = resp.json()["choices"][0]["message"]["content"]
+            if result and len(result.strip()) > 20:
+                body = _cleanup(result)
+                if len(body) > 20:
+                    log(f"Smart reply ready ({len(body)} chars, provider: groq)")
+                    return body
+            log(f"Groq reply too short ({len(result)} chars)")
+        except Exception as e:
+            log(f"Groq API failed: {type(e).__name__}: {e}")
+    else:
+        log("GROQ_API_KEY not set — skipping Groq tier")
+
+    log("LLM smart reply FAILED: all tiers exhausted")
     return None
 
 
@@ -430,6 +462,10 @@ def build_reply(lead):
     niche = lead.get("niche", "")
     message = lead.get("message", "")
     reply_type = "smart"  # track which path was used
+
+    # Strip Formspree auto-timestamp — not a real message
+    if re.match(r'^Submitted\s+\d+:\d+\s+(AM|PM)\s+-\s+\d+\s+\w+\s+\d{4}', message.strip()):
+        message = ""
 
     # Detect language
     lang_code, lang_name = "en", "English"
@@ -464,6 +500,7 @@ Write a reply email to this person. Remember to actually address what they said.
     smart_body = _call_llm_for_reply(llm_prompt)
     if smart_body:
         log(f"SMART reply generated for {name}")
+        lead["_reply_type"] = "smart"
         return "Thanks for your interest in Shorts Factory", smart_body
 
     # Fallback: improved template that actually addresses the message
@@ -511,6 +548,33 @@ Looking forward to hearing from you."""
     # Return reply type so caller can flag needs_attention
     lead["_reply_type"] = reply_type
     return subject, body
+
+
+def _send_needs_attention_alert(lead_name, lead_email, lead_message):
+    """Alert Khal when a template reply went out — lead needs a manual follow-up."""
+    try:
+        alert_body = f"""Hey Khal,
+
+Template reply just went out to a new lead — LLM was unavailable. Needs a manual follow-up.
+
+Lead: {lead_name} <{lead_email}>
+Message: {lead_message or '(no message)'}
+
+Open the Lead Command Center: http://localhost:8009
+
+-- Sandy"""
+        msg = MIMEMultipart("alternative")
+        msg["From"] = f"Shorts Factory <{EMAIL}>"
+        msg["To"] = BCC_ADDR
+        msg["Subject"] = f"⚠️ Lead needs follow-up: {lead_name}"
+        msg.attach(MIMEText(alert_body, "plain"))
+        ctx = ssl.create_default_context()
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=15) as server:
+            server.login(EMAIL, PASSWORD)
+            server.sendmail(EMAIL, [BCC_ADDR], msg.as_string())
+        log(f"ALERT sent to {BCC_ADDR} — template reply went to {lead_email}")
+    except Exception as e:
+        log(f"Alert send failed: {e}")
 
 
 def send_email(to_addr, subject, body_text):
@@ -783,7 +847,9 @@ def check_for_new_leads(dry_run=False):
                     status_val = "reply-failed"
 
             # Flag needs_attention if LLM failed (template went out)
-            needs_attention = reply_type == "template"
+            needs_attention = reply_type != "smart"
+            if needs_attention and not dry_run:
+                _send_needs_attention_alert(lead.get("name", "?"), lead_email, lead.get("message", ""))
             notes = f"Auto-detected from Formspree. "
             if dry_run:
                 notes += "[DRY RUN]"
