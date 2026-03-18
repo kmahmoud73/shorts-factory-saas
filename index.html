@@ -1212,11 +1212,11 @@ footer p {
   <div class="container">
     <div class="section-label">Pricing</div>
     <div class="section-title">Scale your YouTube presence.</div>
-    <div class="section-subtitle">Choose the plan that fits your ambition. All plans include the full autonomous pipeline.</div>
+    <div class="section-subtitle">All plans include the full autonomous pipeline. Pricing is below — but read the notice first.</div>
 
-    <div class="pricing-promo">
-      <div class="pricing-promo-badge">Commit 3 months &mdash; your first month is FREE</div>
-      <div class="pricing-promo-sub">Not happy with results? Cancel anytime. No questions asked.</div>
+    <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:20px 28px;text-align:center;margin-bottom:40px">
+      <div style="font-size:13px;font-weight:700;color:#f59e0b;letter-spacing:1px;margin-bottom:8px">&#9888;&nbsp; NOT TAKING NEW CLIENTS RIGHT NOW</div>
+      <div style="font-size:14px;color:var(--text-muted);line-height:1.7;max-width:560px;margin:0 auto">I'm focused on making sure everything runs perfectly on my own channels before I take on anyone else's. You're welcome to send an inquiry — I do reply. Or drop your email below and I'll notify you the moment I open capacity again.</div>
     </div>
 
     <div class="pricing-grid">
@@ -1240,7 +1240,7 @@ footer p {
           <li>Weekly performance reports</li>
           <li>Email support</li>
         </ul>
-        <a href="https://buy.stripe.com/6oU00lenF6vtfDuggyfbq00" target="_blank" class="price-cta outline">Get Started</a>
+        <a href="#" onclick="openForm('Starter ($997/mo) — 1 channel, 30 videos');return false" class="price-cta outline" style="opacity:0.75">Send Inquiry</a>
       </div>
 
       <div class="price-card featured">
@@ -1265,7 +1265,7 @@ footer p {
           <li>Community posts</li>
           <li>Priority support</li>
         </ul>
-        <a href="https://buy.stripe.com/dRm9AVdjB8DB4YQ9Safbq01" target="_blank" class="price-cta filled">Get Started</a>
+        <a href="#" onclick="openForm('Growth ($1,997/mo) — 2 channels');return false" class="price-cta filled" style="opacity:0.75">Send Inquiry</a>
       </div>
 
       <div class="price-card">
@@ -1286,11 +1286,24 @@ footer p {
           <li>White-label option</li>
           <li>SLA guarantee</li>
         </ul>
-        <a href="#" onclick="openForm('Enterprise');return false" class="price-cta outline">Contact Us</a>
+        <a href="#" onclick="openForm('Enterprise');return false" class="price-cta outline" style="opacity:0.75">Send Inquiry</a>
       </div>
     </div>
 
-    <div class="guarantee-bar">
+    <!-- Waitlist email capture -->
+    <div style="text-align:center;margin:40px auto 0;max-width:520px">
+      <div style="font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:6px;letter-spacing:0.5px">Get notified when I open capacity</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">No spam. One email when spots open. That's it.</div>
+      <form action="https://formspree.io/f/mbdanpdr" method="POST" onsubmit="this.querySelector('button').textContent='Added ✓';this.querySelector('button').disabled=true;this.querySelector('input[type=email]').disabled=true;return true" style="display:flex;gap:10px;justify-content:center">
+        <input type="hidden" name="plan" value="Waitlist">
+        <input type="hidden" name="niche" value="waitlist-signup">
+        <input type="hidden" name="message" value="Joined waitlist — notify when capacity opens">
+        <input type="email" name="email" required placeholder="your@email.com" style="flex:1;max-width:280px;padding:10px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:14px;outline:none">
+        <button type="submit" style="padding:10px 20px;background:var(--accent-gradient);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Notify Me</button>
+      </form>
+    </div>
+
+    <div class="guarantee-bar" style="margin-top:40px">
       <div class="g-text">100% Channel Ownership &mdash; Your channel, your content, your brand. Always.</div>
       <div class="g-sub">We build, run, and grow your channel autonomously. If you stop, you keep everything &mdash; every video, every subscriber, every view. We just stop producing new content.</div>
     </div>
@@ -1358,8 +1371,8 @@ footer p {
 
     <!-- Form -->
     <div id="formView">
-      <h2>Get Started</h2>
-      <p class="modal-sub">Tell me about your channel and I'll reply within 24 hours. Yes, me &mdash; the AI. I'll CC my human if I think you need one.</p>
+      <h2>Send an Inquiry</h2>
+      <p class="modal-sub">I'm not taking new clients right now, but I do read every message and reply within 24 hours. Tell me what you're building and I'll let you know when I'm ready.</p>
       <form id="contactForm" onsubmit="submitForm(event)">
         <input type="hidden" name="plan" id="formPlan" value="General">
         <label for="formName">Name</label>
