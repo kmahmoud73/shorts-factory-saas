@@ -155,6 +155,11 @@ def load_stats():
     cit_views_wow, cit_views_at = deltas(cit_views, cit_week, cit_first, _get_snap_views)
     cit_vids_wow, cit_vids_at = deltas(cit_videos, cit_week, cit_first, _get_snap_videos)
 
+    # Milestone progress (JV: 10K subs goal, CiT: 1K subs goal)
+    jv_milestone_pct = min(jv_subs / 10000 * 100, 100)
+    cit_milestone_pct = min(cit_subs / 1000 * 100, 100)
+    last_updated = datetime.now().strftime("%b %-d")
+
     return {
         "jv_subs": jv_subs,
         "jv_views": jv_views,
@@ -174,6 +179,9 @@ def load_stats():
         "cit_age": cit_age,
         "jv_date": jv_latest["date"],
         "cit_date": cit_latest["date"],
+        "last_updated": last_updated,
+        "jv_milestone_pct": jv_milestone_pct,
+        "cit_milestone_pct": cit_milestone_pct,
         # Delta HTML strings (pre-built for injection)
         "jv_subs_delta": build_delta_html(jv_subs_wow, jv_subs_at),
         "jv_views_delta": build_delta_html(jv_views_wow, jv_views_at),
@@ -213,6 +221,46 @@ def patch_html(filepath, stats):
     changes = []
 
     # --- INDEX.HTML patterns ---
+
+    # Last updated timestamp
+    lu = stats["last_updated"]
+    content, n = re.subn(
+        r'(<span id="stats-updated-ts">)[^<]*(</span>)',
+        rf'\g<1>{lu}\g<2>',
+        content,
+    )
+    if n:
+        changes.append(f"Last updated timestamp -> {lu}")
+
+    # JV milestone progress bar + label
+    jv_pct = f"{stats['jv_milestone_pct']:.1f}%"
+    content, n = re.subn(
+        r'(<span id="jv-milestone-pct"[^>]*>)[^<]*(</span>)',
+        rf'\g<1>{jv_pct}\g<2>',
+        content,
+    )
+    content, n2 = re.subn(
+        r'(<div id="jv-milestone-bar" style="width:)[^;]+(;)',
+        rf'\g<1>{jv_pct}\2',
+        content,
+    )
+    if n or n2:
+        changes.append(f"JV milestone progress -> {jv_pct}")
+
+    # CiT milestone progress bar + label
+    cit_pct = f"{stats['cit_milestone_pct']:.1f}%"
+    content, n = re.subn(
+        r'(<span id="cit-milestone-pct"[^>]*>)[^<]*(</span>)',
+        rf'\g<1>{cit_pct}\g<2>',
+        content,
+    )
+    content, n2 = re.subn(
+        r'(<div id="cit-milestone-bar" style="width:)[^;]+(;)',
+        rf'\g<1>{cit_pct}\2',
+        content,
+    )
+    if n or n2:
+        changes.append(f"CiT milestone progress -> {cit_pct}")
 
     # Stats bar: combined views
     content, n = re.subn(
