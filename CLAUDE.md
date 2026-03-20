@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 20, 2026 (v38 -- **Full Stats Refresh + Watch Time Bars + Dynamic Ages**: One-off site update: all 4 channel cards now show real subs/views/videos + teal YouTube handles (`@thejerseyvaulthq`, `@caughtittrending`, `@labofwhatif`, `@talesofgoha`). Watch time progress bars added to all 4 cards (cyan, /4,000 hrs monetization target). JV 1K subs milestone shown as ACHIEVED (green + trophy). Total views 23,300→26,300+. Agents 36→40+. Channel age now dynamic JS (auto-calculates days from `data-launch` date, never stale). WIL/Goha stats restructured from placeholders to real numbers. Previous: v37 -- Goha 15/15 Complete + SEO Optimization + WIL Titles)
+**Last Updated**: March 21, 2026 (v39 -- **Fact-Checker + AI Disclosure**: Green "AI Fact-Checker Active" badge on CiT card + "Science Fact-Checker Active" on WIL card. Fact-Check step added to pipeline visualization diagram. Compliance Gate feature renamed to "Compliance & Fact-Check". How It Works step 02 updated to "Write & Verify". New FAQ entry: "How do you avoid publishing fake news or false science?" Compliance FAQ updated with Stage 3 Fact-Checker. Previous: v38 -- Full Stats Refresh + Watch Time Bars + Dynamic Ages)
 
 ---
 
