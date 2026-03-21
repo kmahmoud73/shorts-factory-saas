@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 21, 2026 (v39 -- **Fact-Checker + AI Disclosure**: Green "AI Fact-Checker Active" badge on CiT card + "Science Fact-Checker Active" on WIL card. Fact-Check step added to pipeline visualization diagram. Compliance Gate feature renamed to "Compliance & Fact-Check". How It Works step 02 updated to "Write & Verify". New FAQ entry: "How do you avoid publishing fake news or false science?" Compliance FAQ updated with Stage 3 Fact-Checker. Previous: v38 -- Full Stats Refresh + Watch Time Bars + Dynamic Ages)
+**Last Updated**: March 21, 2026 (v40 -- **Hook Enforcer + 6-Gate Pipeline**: Blue "Hook Enforcer Active" badges on CiT + WIL cards. "Compliance & Fact-Check" feature renamed to "6-Gate Quality Pipeline" (content quality → hook enforcement → fact-check → compliance → visual QA → dedup). Write & Verify step updated with moment extraction + hook enforcement language. Previous: v39 -- Fact-Checker + AI Disclosure badges + FAQ updates)
 
 ---
 
