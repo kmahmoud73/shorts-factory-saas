@@ -22,6 +22,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SF_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "shorts-factory")
 JV_STATS = os.path.join(SF_DIR, "analytics", "channel_stats.json")
 CIT_STATS = os.path.join(SF_DIR, "analytics", "cit_channel_stats.json")
+ALL_STATS = os.path.join(SF_DIR, "analytics", "all_channels_stats.json")
 UPLOAD_QUEUE = os.path.join(SF_DIR, ".trending_upload_queue.json")
 INDEX_HTML = os.path.join(SCRIPT_DIR, "index.html")
 DECK_HTML = os.path.join(SCRIPT_DIR, "deck.html")
@@ -99,6 +100,35 @@ def build_delta_html(wow_pct, at_pct):
     )
 
 
+def _load_all_channels():
+    """Load WIL/Goha/IYB stats from all_channels_stats.json."""
+    if not os.path.exists(ALL_STATS):
+        return {}
+    try:
+        with open(ALL_STATS) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _get_all_channels_views(jv_views, cit_views):
+    """Get total views across ALL 5 channels (JV + CiT from snapshots, WIL/Goha/IYB from all_channels)."""
+    total = jv_views + cit_views
+    data = _load_all_channels()
+    for ch in ["WIL", "Goha", "IYB"]:
+        total += data.get("channels", {}).get(ch, {}).get("views", 0)
+    return total
+
+
+def _get_all_channels_videos(jv_videos, cit_videos):
+    """Get total video count across ALL 5 channels."""
+    total = jv_videos + cit_videos
+    data = _load_all_channels()
+    for ch in ["WIL", "Goha", "IYB"]:
+        total += data.get("channels", {}).get(ch, {}).get("videos", 0)
+    return total
+
+
 def load_stats():
     """Load latest stats from both channel JSON files + compute deltas."""
     with open(JV_STATS) as f:
@@ -171,8 +201,8 @@ def load_stats():
         "cit_videos": cit_videos,
         "cit_top_title": cit_top["title"],
         "cit_top_views": cit_top["views"],
-        "combined_views": jv_views + cit_views,
-        "total_videos": jv_videos + cit_videos,
+        "combined_views": _get_all_channels_views(jv_views, cit_views),
+        "total_videos": _get_all_channels_videos(jv_videos, cit_videos),
         "queue_count": queue_count,
         "days_since": days_since,
         "jv_age": jv_age,
