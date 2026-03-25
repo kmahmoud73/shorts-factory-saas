@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 21, 2026 (v40 -- **Hook Enforcer + 6-Gate Pipeline**: Blue "Hook Enforcer Active" badges on CiT + WIL cards. "Compliance & Fact-Check" feature renamed to "6-Gate Quality Pipeline" (content quality → hook enforcement → fact-check → compliance → visual QA → dedup). Write & Verify step updated with moment extraction + hook enforcement language. Previous: v39 -- Fact-Checker + AI Disclosure badges + FAQ updates)
+**Last Updated**: March 25, 2026 (v41 -- **5 Channels Live + Full Stats Refresh**: IYB (Body X-Ray) card added. All 5 channel stats updated from live YouTube API. Stats bar: 5 channels, 38,300+ total views. Grid auto-fit for 5 cards. `update_site_stats.py` reads `all_channels_stats.json` for WIL/Goha/IYB. `fetch_all_channel_stats.py` created in shorts-factory for ongoing fetches. Previous: v40 -- Hook Enforcer + 6-Gate Pipeline badges)
 
 ---
 
@@ -113,27 +113,38 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 |------|-------|
 | Channel stats (JV) | `shorts-factory/analytics/channel_stats.json` |
 | Channel stats (CiT) | `shorts-factory/analytics/cit_channel_stats.json` |
+| All channels stats (WIL/Goha/IYB) | `shorts-factory/analytics/all_channels_stats.json` |
 | Upload queue | `shorts-factory/.trending_upload_queue.json` |
 | System docs | `shorts-factory/system_docs.html` |
 | Performance data | `shorts-factory/.performance_tracker.json` |
 | Pipeline architecture | `shorts-factory/CLAUDE.md` |
 
-## Stats Snapshot (auto-updated weekly via `update_site_stats.py`, Mar 8 data)
+## Stats Snapshot (auto-updated via `update_site_stats.py`, Mar 25 data)
 
 | Metric | Value |
 |--------|-------|
-| JV Subscribers | 1,280 |
-| JV Total Views | 8,063 |
-| JV Videos | 32 |
-| JV Top Video | St. Regis Venice (1,625 views) |
-| CiT Subscribers | 57 |
-| CiT Total Views | 5,336 |
-| CiT Videos | 38 |
-| CiT Top Video | Bruno Mars Grammys (977 views) |
-| Combined Views | 13,399 |
-| Upload Queue | 15 videos |
-| Autonomous Agents | 27 |
-| Production Scripts | 42 |
+| JV Subscribers | 1,320 |
+| JV Total Views | 13,427 |
+| JV Videos | 53 |
+| JV Top Video | St. Regis Venice (1,643 views) |
+| CiT Subscribers | 92 |
+| CiT Total Views | 10,098 |
+| CiT Videos | 62 |
+| CiT Top Video | Bruno Mars Grammys (1,182 views) |
+| WIL Subscribers | 64 |
+| WIL Total Views | 11,125 |
+| WIL Videos | 12 |
+| WIL Top Video | Iron Man in Ancient Rome (1,966 views) |
+| Goha Subscribers | 9 |
+| Goha Total Views | 1,972 |
+| Goha Videos | 11 |
+| IYB Subscribers | 3 |
+| IYB Total Views | 1,693 |
+| IYB Videos | 9 |
+| Combined Views (All 5) | 38,315 |
+| Total Videos | 147 |
+| Autonomous Agents | 47 |
+| Production Scripts | 82 |
 | Daily LLM Cost | $0 |
 
 ## Team
@@ -332,6 +343,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 | **Data files** | `leads.json` (leads), `sent_log.json` (full bodies), `.reply_cache.json` (IMAP cache) |
 
 ## Status
+- v41: **5 Channels Live + Full Stats Refresh** — IYB (Body X-Ray) card added (blue theme, medical fact-checker + hook enforcer badges, 1,693 views / 9 videos). All 5 channel stats updated from live YouTube API. Stats bar: 5 channels, 38,300+ total views. "four"→"five" references. Grid: `repeat(4,1fr)` → `repeat(auto-fit,minmax(220px,1fr))` for responsive 5-card layout. `update_site_stats.py` now reads `all_channels_stats.json` for WIL/Goha/IYB combined totals. `fetch_all_channel_stats.py` created in shorts-factory. Pushed to GitHub Pages. (Mar 25, 2026)
 - v36: **Goha Channel Card + 4 Channels** — Added Tales of Goha card to results section. 3→4 col grid. All "three"→"four" references. FAQ updated with Goha description. Pushed to GitHub Pages. (Mar 19, 2026)
 - v35: **Payment Pause + Inquiry Mode** — Stripe checkout links removed. All 3 tier CTAs now open inquiry form. Amber "not taking new clients" notice + inline waitlist email capture (Formspree). Tiers stay visible. Contact modal copy updated. (Mar 18, 2026)
 - v34: **Milestone Progress Bars + 3-Day Refresh Cadence** — Added progress bars (JV: 10K subs, CiT/WIL: 1K subs). "Stats updated: [date] — refreshes every 3 days" label added to results section. `update_site_stats.py` now patches timestamp + milestone bar widths on every run. Launchd schedule: weekly → Mon+Thu+Sun at 11:35 PM. Sandy's decision: WIL growing fast, potential clients need numbers ≤72h old, weekly is too stale for a sales pitch site. (Mar 18, 2026)
