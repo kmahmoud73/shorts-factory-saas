@@ -1,6 +1,6 @@
 # CLAUDE.md — Shorts Factory SaaS
 
-**Last Updated**: March 25, 2026 (v41 -- **5 Channels Live + Full Stats Refresh**: IYB (Body X-Ray) card added. All 5 channel stats updated from live YouTube API. Stats bar: 5 channels, 38,300+ total views. Grid auto-fit for 5 cards. `update_site_stats.py` reads `all_channels_stats.json` for WIL/Goha/IYB. `fetch_all_channel_stats.py` created in shorts-factory for ongoing fetches. Previous: v40 -- Hook Enforcer + 6-Gate Pipeline badges)
+**Last Updated**: April 4, 2026 (v42 -- **Doc sync**: Stats snapshot and architecture numbers updated to reflect Session 202 reality: 58 launchd agents, 94 Python modules, 9-layer dedup, CiT/JV strategy shifts. Previous: v41 -- 5 Channels Live + Full Stats Refresh)
 
 ---
 
@@ -35,7 +35,7 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
   2. The Problem -- 6 pain points with time estimates
   3. Our Solution -- 4-step pipeline flow diagram + feedback loop
   4. Live Results -- JV + CiT real stats + combined summary
-  5. The Technology -- 19 agents, 29 modules, $0/day, 3x engagement, 4 engines, 7-day intel
+  5. The Technology -- 58 agents, 94 modules, $0/day LLM cost, 9-layer dedup, 6-gate pipeline, 7-day intel
   6. What You Get -- 9 deliverables grid
   7. AI Mascot -- avatar capabilities (lip-sync, brand presence, fallback, auto-overlay)
   8. Pricing -- same 3 tiers
@@ -47,7 +47,7 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 ### 3. SaaS Transformation Strategy (`saas_transformation_strategy.html`) -- BUILT Mar 4
 - Comprehensive internal analysis document for SaaS platform transformation
 - 4 major sections:
-  1. **Current State Architecture Map** -- Full module inventory across 6 functional layers (Intelligence, Editorial, Production, Distribution, Engagement, Analytics). 29 Python modules mapped with inputs, outputs, dependencies, external APIs, decision points, fallback chains. External API map (12 services). Critical data files/state map (12+ JSON tracker files). Pipeline flow diagram
+  1. **Current State Architecture Map** -- Full module inventory across 6 functional layers (Intelligence, Editorial, Production, Distribution, Engagement, Analytics). 94 Python modules mapped (was 29 at time of writing — **needs refresh**). External API map (12+ services). Critical data files/state map (12+ JSON tracker files). Pipeline flow diagram
   2. **Visual Platform Blueprint** -- Wireframe-level designs for 5 platform components: real-time workflow canvas, decision audit panel, action trace (immutable log), communication audit, template manager
   3. **SaaS Transformation Strategy** -- 13-component abstraction map (TrendScanner, EditorialEngine, StoryWriter, ComplianceGate, ImageGenerator, VideoAnimator, VoiceSynthesizer, VideoComposer, AvatarEngine, Distributor, EngagementBot, AnalyticsEngine, LLMRouter). FIXED/CONFIGURABLE/PER-TENANT classification for all config values. Multi-tenant architecture (API Gateway + Job Queue + Tenant Isolation). BYOK (Bring Your Own Key) model. Marketplace model. Unit economics (90-94% gross margins). 4 Phase 1 quick wins
   4. **Roadmap** -- MVP definition, 3-phase plan (Foundation 0-3mo, Growth 3-6mo, Scale 6-12mo), 7-item risk register with severity ratings
@@ -143,8 +143,8 @@ Package the autonomous YouTube pipeline (from `shorts-factory/`) as a monetizabl
 | IYB Videos | 9 |
 | Combined Views (All 5) | 38,315 |
 | Total Videos | 147 |
-| Autonomous Agents | 47 |
-| Production Scripts | 82 |
+| Autonomous Agents | 58 |
+| Production Scripts | 94 |
 | Daily LLM Cost | $0 |
 
 ## Team
@@ -343,6 +343,7 @@ Each client gets their own directory with CLAUDE.md, stories, output, and report
 | **Data files** | `leads.json` (leads), `sent_log.json` (full bodies), `.reply_cache.json` (IMAP cache) |
 
 ## Status
+- v42: **Doc Sync** — Stats snapshot updated (58 agents, 94 scripts). Deck tech slide numbers corrected. SaaS transformation strategy flagged for refresh (29→94 modules since original writing). Architecture numbers in CLAUDE.md aligned with live shorts-factory state. (Apr 4, 2026)
 - v41: **5 Channels Live + Full Stats Refresh** — IYB (Body X-Ray) card added (blue theme, medical fact-checker + hook enforcer badges, 1,693 views / 9 videos). All 5 channel stats updated from live YouTube API. Stats bar: 5 channels, 38,300+ total views. "four"→"five" references. Grid: `repeat(4,1fr)` → `repeat(auto-fit,minmax(220px,1fr))` for responsive 5-card layout. `update_site_stats.py` now reads `all_channels_stats.json` for WIL/Goha/IYB combined totals. `fetch_all_channel_stats.py` created in shorts-factory. Pushed to GitHub Pages. (Mar 25, 2026)
 - v36: **Goha Channel Card + 4 Channels** — Added Tales of Goha card to results section. 3→4 col grid. All "three"→"four" references. FAQ updated with Goha description. Pushed to GitHub Pages. (Mar 19, 2026)
 - v35: **Payment Pause + Inquiry Mode** — Stripe checkout links removed. All 3 tier CTAs now open inquiry form. Amber "not taking new clients" notice + inline waitlist email capture (Formspree). Tiers stay visible. Contact modal copy updated. (Mar 18, 2026)
