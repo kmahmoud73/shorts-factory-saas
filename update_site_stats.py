@@ -2,13 +2,13 @@
 """
 update_site_stats.py — Auto-update shortsfactory.io with latest channel stats.
 
-Reads from shorts-factory analytics JSONs, patches index.html + deck.html,
-commits + pushes to GitHub Pages. Includes WoW + all-time % change indicators.
+Queries YouTube API directly for all 6 channels, patches index.html + deck.html,
+commits + pushes to GitHub Pages.
 
 Usage:
     python3 update_site_stats.py           # Update + commit + push
     python3 update_site_stats.py --dry-run # Preview changes, don't commit
-    python3 update_site_stats.py --status  # Show current vs site stats
+    python3 update_site_stats.py --status  # Show current stats from YouTube API
 """
 
 import json
@@ -16,219 +16,202 @@ import os
 import re
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
+from pathlib import Path
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-SF_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "shorts-factory")
-JV_STATS = os.path.join(SF_DIR, "analytics", "channel_stats.json")
-CIT_STATS = os.path.join(SF_DIR, "analytics", "cit_channel_stats.json")
-ALL_STATS = os.path.join(SF_DIR, "analytics", "all_channels_stats.json")
-UPLOAD_QUEUE = os.path.join(SF_DIR, ".trending_upload_queue.json")
-INDEX_HTML = os.path.join(SCRIPT_DIR, "index.html")
-DECK_HTML = os.path.join(SCRIPT_DIR, "deck.html")
-LAUNCH_DATE = datetime(2026, 2, 19)  # overall pipeline launch
-JV_LAUNCH = datetime(2026, 2, 20)
-CIT_LAUNCH = datetime(2026, 2, 27)
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
+from googleapiclient.discovery import build
+
+SCRIPT_DIR = Path(__file__).parent
+SF_DIR = SCRIPT_DIR.parent / "shorts-factory"
+INDEX_HTML = SCRIPT_DIR / "index.html"
+DECK_HTML = SCRIPT_DIR / "deck.html"
+
+# Channel config: token, channel_id, card anchor pattern, milestone_goal
+CHANNELS = {
+    "jv": {
+        "name": "The Jersey Vault",
+        "token": SF_DIR / ".youtube_token.json",
+        "channel_id": "UCjispA9UIoqkXI9etQicbog",
+        "milestone_subs": 10000,
+        "launch": "2026-02-21",
+    },
+    "cit": {
+        "name": "Caught It Trending",
+        "token": SF_DIR / ".youtube_token_trending.json",
+        "channel_id": "UCaCi2G18tgDJqx6d1hcnY-Q",
+        "milestone_subs": 1000,
+        "launch": "2026-03-01",
+    },
+    "wil": {
+        "name": "What If Lab",
+        "token": SF_DIR / ".youtube_token_wil.json",
+        "channel_id": "UCdcRf5SvVwBCmKjoB1iJETQ",
+        "milestone_subs": 1000,
+        "launch": "2026-03-18",
+    },
+    "goha": {
+        "name": "Tales of Goha",
+        "token": SF_DIR / ".youtube_token_goha.json",
+        "channel_id": "UCs1jQlQ1wBhRI2NT4HS3gOQ",
+        "milestone_subs": 1000,
+        "launch": "2026-03-19",
+    },
+    "iyb": {
+        "name": "Body X-Ray",
+        "token": SF_DIR / ".youtube_token_iyb.json",
+        "channel_id": "UC_-EgHYAnmFJelHCMH9ae5w",
+        "milestone_subs": 1000,
+        "launch": "2026-03-23",
+    },
+    "crime60": {
+        "name": "60 Second Crime",
+        "token": SF_DIR / ".youtube_token_crime60.json",
+        "channel_id": "UCCRd00l1weSGq7byGzOjvzA",
+        "milestone_subs": 1000,
+        "launch": "2026-04-06",
+    },
+}
+
+# Regex anchors to find each channel's card in index.html
+# Each channel card starts with a unique text in a channel-name div
+CARD_ANCHORS = {
+    "jv": r'<div class="channel-name jv">The Jersey Vault</div>',
+    "cit": r'<div class="channel-name cit">Caught It Trending</div>',
+    "wil": r'channel-name"[^>]*>What If Lab</div>',
+    "goha": r'channel-name"[^>]*>Tales of Goha</div>',
+    "iyb": r'channel-name"[^>]*>Body X-Ray</div>',
+    "crime60": r'channel-name"[^>]*>60 Second Crime</div>',
+}
 
 
-def _get_snap_views(snap):
-    """Get total views from a snapshot, handling both JV and CiT formats."""
-    return snap.get("total_views") or snap.get("total_views_shorts", 0)
+ANALYTICS_SCOPE = "https://www.googleapis.com/auth/yt-analytics.readonly"
 
 
-def _get_snap_videos(snap):
-    """Get video count from a snapshot, handling both formats."""
-    if "video_count" in snap:
-        return snap["video_count"]
-    vids = snap.get("videos", {})
-    return len(vids) if isinstance(vids, dict) else 0
+def get_creds(token_file):
+    """Load and refresh OAuth creds from token file."""
+    creds = Credentials.from_authorized_user_file(str(token_file))
+    if creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+        with open(token_file, "w") as f:
+            f.write(creds.to_json())
+    return creds
 
 
-def find_snapshot_ago(snapshots, days):
-    """Find snapshot closest to N days before the latest snapshot."""
-    if len(snapshots) < 2:
+def get_youtube(token_file):
+    """Auth via token file. Uses token's own scopes to avoid mismatch."""
+    return build("youtube", "v3", credentials=get_creds(token_file))
+
+
+def fetch_channel_stats(ch_key, ch_config):
+    """Fetch stats + top video for a channel from YouTube API."""
+    token = ch_config["token"]
+    ch_id = ch_config["channel_id"]
+
+    if not token.exists():
+        print(f"  {ch_key}: token not found, skipping")
         return None
-    latest_date = snapshots[-1]["date"][:10]
-    target_dt = datetime.strptime(latest_date, "%Y-%m-%d") - timedelta(days=days)
-    best = None
-    best_diff = float("inf")
-    for s in snapshots[:-1]:  # exclude latest itself
-        s_dt = datetime.strptime(s["date"][:10], "%Y-%m-%d")
-        diff = abs((s_dt - target_dt).days)
-        if diff < best_diff:
-            best_diff = diff
-            best = s
-    return best if best_diff <= 3 else None  # within 3 days tolerance
 
-
-def calc_pct(current, previous):
-    """Calculate percentage change. Returns None if not meaningful."""
-    if previous is None or previous == 0:
-        return None
-    if current == previous:
-        return 0.0
-    return ((current - previous) / previous) * 100
-
-
-def fmt_pct(pct):
-    """Format percentage with sign. Returns (text, css_class).
-    Extreme values (>999%) shown as multipliers (e.g., '31x')."""
-    if pct is None:
-        return "--", "delta-flat"
-    if pct == 0:
-        return "0%", "delta-flat"
-    cls = "delta-up" if pct > 0 else "delta-down"
-    sign = "+" if pct > 0 else ""
-    if abs(pct) > 999:
-        mult = abs(pct) / 100
-        return f"{mult:,.0f}x", cls
-    if abs(pct) >= 100:
-        return f"{sign}{pct:.0f}%", cls
-    return f"{sign}{pct:.1f}%", cls
-
-
-def build_delta_html(wow_pct, at_pct):
-    """Build the inner HTML for a delta div: weekly + all-time on separate lines."""
-    wow_text, wow_cls = fmt_pct(wow_pct)
-    at_text, at_cls = fmt_pct(at_pct)
-    wow_label = f"{wow_text} wk" if wow_text != "--" else "--"
-    at_label = f"{at_text} ALL TIME" if at_text != "--" else "--"
-    return (
-        f'<span class="wow {wow_cls}">{wow_label}</span>'
-        f'<br>'
-        f'<span class="at {at_cls}">{at_label}</span>'
-    )
-
-
-def _load_all_channels():
-    """Load WIL/Goha/IYB stats from all_channels_stats.json."""
-    if not os.path.exists(ALL_STATS):
-        return {}
     try:
-        with open(ALL_STATS) as f:
-            return json.load(f)
-    except Exception:
-        return {}
+        yt = get_youtube(token)
+
+        # Channel stats
+        resp = yt.channels().list(part="statistics,contentDetails", id=ch_id).execute()
+        if not resp.get("items"):
+            print(f"  {ch_key}: no channel data")
+            return None
+
+        stats = resp["items"][0]["statistics"]
+        subs = int(stats.get("subscriberCount", 0))
+        views = int(stats.get("viewCount", 0))
+        videos = int(stats.get("videoCount", 0))
+
+        # Get top video
+        uploads_pl = resp["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+        video_ids = []
+        pl_req = yt.playlistItems().list(
+            part="snippet", playlistId=uploads_pl, maxResults=50
+        )
+        while pl_req:
+            pl_resp = pl_req.execute()
+            video_ids.extend(
+                item["snippet"]["resourceId"]["videoId"]
+                for item in pl_resp.get("items", [])
+            )
+            pl_req = yt.playlistItems().list_next(pl_req, pl_resp)
+
+        top_title = ""
+        top_views = 0
+        # Fetch video stats in batches of 50
+        for i in range(0, len(video_ids), 50):
+            batch = video_ids[i:i + 50]
+            vid_resp = yt.videos().list(
+                part="statistics,snippet", id=",".join(batch)
+            ).execute()
+            for item in vid_resp.get("items", []):
+                v = int(item["statistics"].get("viewCount", 0))
+                if v > top_views:
+                    top_views = v
+                    top_title = item["snippet"]["title"]
+
+        return {
+            "subs": subs,
+            "views": views,
+            "videos": videos,
+            "top_title": top_title,
+            "top_views": top_views,
+        }
+    except Exception as e:
+        print(f"  {ch_key}: ERROR — {e}")
+        return None
 
 
-def _get_all_channels_views(jv_views, cit_views):
-    """Get total views across ALL 5 channels (JV + CiT from snapshots, WIL/Goha/IYB from all_channels)."""
-    total = jv_views + cit_views
-    data = _load_all_channels()
-    for ch in ["WIL", "Goha", "IYB"]:
-        total += data.get("channels", {}).get(ch, {}).get("views", 0)
-    return total
+def fetch_watch_hours(ch_key, ch_config):
+    """Fetch lifetime watch hours via YouTube Analytics API.
+    Returns hours (float) or None if scope missing / error."""
+    token = ch_config["token"]
+    ch_id = ch_config["channel_id"]
 
+    if not token.exists():
+        return None
 
-def _get_all_channels_videos(jv_videos, cit_videos):
-    """Get total video count across ALL 5 channels."""
-    total = jv_videos + cit_videos
-    data = _load_all_channels()
-    for ch in ["WIL", "Goha", "IYB"]:
-        total += data.get("channels", {}).get(ch, {}).get("videos", 0)
-    return total
+    try:
+        creds = get_creds(token)
+        # Check if token has analytics scope
+        scopes = getattr(creds, "scopes", None) or []
+        if not scopes:
+            # Read scopes from token file directly
+            with open(token) as f:
+                token_data = json.load(f)
+            scopes = token_data.get("scopes", [])
+        if ANALYTICS_SCOPE not in scopes:
+            print(f"  {ch_key}: no yt-analytics.readonly scope, skipping watch hours")
+            return None
 
+        yt_analytics = build("youtubeAnalytics", "v2", credentials=creds)
 
-def load_stats():
-    """Load latest stats from both channel JSON files + compute deltas."""
-    with open(JV_STATS) as f:
-        jv_data = json.load(f)
-    with open(CIT_STATS) as f:
-        cit_data = json.load(f)
+        # Query lifetime watch time (estimatedMinutesWatched)
+        # Use channel launch date as start, today as end
+        launch = ch_config.get("launch", "2026-01-01")
+        end_date = datetime.now().strftime("%Y-%m-%d")
 
-    jv_snaps = jv_data["snapshots"]
-    cit_snaps = cit_data["snapshots"]
-    jv_latest = jv_snaps[-1]
-    cit_latest = cit_snaps[-1]
+        resp = yt_analytics.reports().query(
+            ids=f"channel=={ch_id}",
+            startDate=launch,
+            endDate=end_date,
+            metrics="estimatedMinutesWatched",
+        ).execute()
 
-    jv_top = sorted(jv_latest["per_video"], key=lambda x: x["views"], reverse=True)[0]
-    cit_top = sorted(cit_latest["per_video"], key=lambda x: x["views"], reverse=True)[0]
-
-    queue_count = 0
-    if os.path.exists(UPLOAD_QUEUE):
-        with open(UPLOAD_QUEUE) as f:
-            queue_count = len(json.load(f))
-
-    days_since = (datetime.now() - LAUNCH_DATE).days
-    jv_age = (datetime.now() - JV_LAUNCH).days
-    cit_age = (datetime.now() - CIT_LAUNCH).days
-
-    # Current values
-    jv_subs = jv_data["channel"]["subscribers"]
-    jv_views = _get_snap_views(jv_latest)
-    jv_videos = _get_snap_videos(jv_latest)
-    cit_subs = cit_data["channel"]["subscribers"]
-    cit_views = _get_snap_views(cit_latest)
-    cit_videos = _get_snap_videos(cit_latest)
-
-    # WoW snapshots (7 days ago)
-    jv_week = find_snapshot_ago(jv_snaps, 7)
-    cit_week = find_snapshot_ago(cit_snaps, 7)
-
-    # All-time: first snapshot
-    jv_first = jv_snaps[0] if jv_snaps else None
-    cit_first = cit_snaps[0] if cit_snaps else None
-
-    # Compute deltas
-    def deltas(current, week_snap, first_snap, getter):
-        week_val = getter(week_snap) if week_snap else None
-        first_val = getter(first_snap) if first_snap else None
-        wow = calc_pct(current, week_val)
-        at = calc_pct(current, first_val)
-        return wow, at
-
-    jv_subs_wow, jv_subs_at = deltas(jv_subs, jv_week, jv_first, lambda s: s.get("subscribers", 0))
-    jv_views_wow, jv_views_at = deltas(jv_views, jv_week, jv_first, _get_snap_views)
-    jv_vids_wow, jv_vids_at = deltas(jv_videos, jv_week, jv_first, _get_snap_videos)
-
-    cit_subs_wow, cit_subs_at = deltas(cit_subs, cit_week, cit_first, lambda s: s.get("subscribers", 0))
-    cit_views_wow, cit_views_at = deltas(cit_views, cit_week, cit_first, _get_snap_views)
-    cit_vids_wow, cit_vids_at = deltas(cit_videos, cit_week, cit_first, _get_snap_videos)
-
-    # Milestone progress (JV: 10K subs goal, CiT: 1K subs goal)
-    jv_milestone_pct = min(jv_subs / 10000 * 100, 100)
-    cit_milestone_pct = min(cit_subs / 1000 * 100, 100)
-    last_updated = datetime.now().strftime("%b %-d")
-
-    return {
-        "jv_subs": jv_subs,
-        "jv_views": jv_views,
-        "jv_videos": jv_videos,
-        "jv_top_title": jv_top["title"],
-        "jv_top_views": jv_top["views"],
-        "cit_subs": cit_subs,
-        "cit_views": cit_views,
-        "cit_videos": cit_videos,
-        "cit_top_title": cit_top["title"],
-        "cit_top_views": cit_top["views"],
-        "combined_views": _get_all_channels_views(jv_views, cit_views),
-        "total_videos": _get_all_channels_videos(jv_videos, cit_videos),
-        "queue_count": queue_count,
-        "days_since": days_since,
-        "jv_age": jv_age,
-        "cit_age": cit_age,
-        "jv_date": jv_latest["date"],
-        "cit_date": cit_latest["date"],
-        "last_updated": last_updated,
-        "jv_milestone_pct": jv_milestone_pct,
-        "cit_milestone_pct": cit_milestone_pct,
-        # Delta HTML strings (pre-built for injection)
-        "jv_subs_delta": build_delta_html(jv_subs_wow, jv_subs_at),
-        "jv_views_delta": build_delta_html(jv_views_wow, jv_views_at),
-        "jv_vids_delta": build_delta_html(jv_vids_wow, jv_vids_at),
-        "cit_subs_delta": build_delta_html(cit_subs_wow, cit_subs_at),
-        "cit_views_delta": build_delta_html(cit_views_wow, cit_views_at),
-        "cit_vids_delta": build_delta_html(cit_vids_wow, cit_vids_at),
-        # Raw percentages for status display
-        "_deltas": {
-            "jv_subs": (jv_subs_wow, jv_subs_at),
-            "jv_views": (jv_views_wow, jv_views_at),
-            "jv_videos": (jv_vids_wow, jv_vids_at),
-            "cit_subs": (cit_subs_wow, cit_subs_at),
-            "cit_views": (cit_views_wow, cit_views_at),
-            "cit_videos": (cit_vids_wow, cit_vids_at),
-        },
-    }
+        rows = resp.get("rows", [])
+        if rows:
+            minutes = float(rows[0][0])
+            hours = minutes / 60.0
+            return round(hours, 1)
+        return 0.0
+    except Exception as e:
+        print(f"  {ch_key}: watch hours ERROR — {e}")
+        return None
 
 
 def fmt(n):
@@ -236,325 +219,369 @@ def fmt(n):
     return f"{n:,}"
 
 
-def round_combined(n):
-    """Round combined views to nearest 100 with + suffix."""
-    rounded = (n // 100) * 100
-    return f"{fmt(rounded)}+"
+def patch_channel_card(content, ch_key, stats, changes):
+    """Patch a single channel card's stats in the HTML. Returns updated content."""
+    anchor = CARD_ANCHORS[ch_key]
 
+    # Find the card region (from anchor to the next result-card or section end)
+    m = re.search(anchor, content)
+    if not m:
+        print(f"  {ch_key}: card anchor not found in HTML")
+        return content
 
-def patch_html(filepath, stats):
-    """Patch an HTML file with updated stats + deltas. Returns (new_content, changes_made)."""
-    with open(filepath) as f:
-        content = f.read()
+    card_start = m.start()
+    # Find the next </div>\s*<div class="result-card" or </section> after the anchor
+    # We need the region containing this card's stats
+    remaining = content[card_start:]
 
-    original = content
-    changes = []
+    # Patch the 3 rs-value divs (subs, views, videos) — they appear in order
+    # Pattern: <div class="rs-value"[^>]*>NUMBER</div>
+    rs_pattern = r'(<div class="rs-value"[^>]*>)[\d,]+(</div>)'
+    values = [fmt(stats["subs"]), fmt(stats["views"]), fmt(stats["videos"])]
 
-    # --- INDEX.HTML patterns ---
+    patched = remaining
+    for i, val in enumerate(values):
+        # Replace the (i+1)th occurrence
+        count = 0
+        def replacer(m):
+            nonlocal count
+            count += 1
+            if count == i + 1:
+                return f"{m.group(1)}{val}{m.group(2)}"
+            return m.group(0)
+        count = 0
+        patched = re.sub(rs_pattern, replacer, patched, count=0)
 
-    # Last updated timestamp
-    lu = stats["last_updated"]
-    content, n = re.subn(
-        r'(<span id="stats-updated-ts">)[^<]*(</span>)',
-        rf'\g<1>{lu}\g<2>',
-        content,
+    # Patch top video title
+    patched = re.sub(
+        r'(<div class="tv-title">).*?(</div>)',
+        rf'\g<1>{stats["top_title"]}\g<2>',
+        patched,
+        count=1,
     )
-    if n:
-        changes.append(f"Last updated timestamp -> {lu}")
 
-    # JV milestone progress bar + label
-    jv_pct = f"{stats['jv_milestone_pct']:.1f}%"
-    content, n = re.subn(
-        r'(<span id="jv-milestone-pct"[^>]*>)[^<]*(</span>)',
-        rf'\g<1>{jv_pct}\g<2>',
-        content,
+    # Patch top video views
+    patched = re.sub(
+        r'(<div class="tv-views">)[\d,]+ views(</div>)',
+        rf'\g<1>{fmt(stats["top_views"])} views\g<2>',
+        patched,
+        count=1,
     )
-    content, n2 = re.subn(
-        r'(<div id="jv-milestone-bar" style="width:)[^;]+(;)',
-        rf'\g<1>{jv_pct}\2',
-        content,
-    )
-    if n or n2:
-        changes.append(f"JV milestone progress -> {jv_pct}")
 
-    # CiT milestone progress bar + label
-    cit_pct = f"{stats['cit_milestone_pct']:.1f}%"
-    content, n = re.subn(
-        r'(<span id="cit-milestone-pct"[^>]*>)[^<]*(</span>)',
-        rf'\g<1>{cit_pct}\g<2>',
-        content,
-    )
-    content, n2 = re.subn(
-        r'(<div id="cit-milestone-bar" style="width:)[^;]+(;)',
-        rf'\g<1>{cit_pct}\2',
-        content,
-    )
-    if n or n2:
-        changes.append(f"CiT milestone progress -> {cit_pct}")
+    content = content[:card_start] + patched
+    changes.append(f"{ch_key.upper()}: {fmt(stats['subs'])} subs, {fmt(stats['views'])} views, {stats['videos']} videos | Top: {stats['top_title'][:40]} ({fmt(stats['top_views'])})")
 
-    # Stats bar: combined views
-    content, n = re.subn(
+    return content
+
+
+def patch_milestone(content, ch_key, stats, ch_config, changes):
+    """Patch milestone progress bar for a channel."""
+    goal = ch_config["milestone_subs"]
+    pct = min(stats["subs"] / goal * 100, 100)
+    pct_str = f"{pct:.1f}%"
+
+    # JV and CiT have id-based milestone elements
+    if ch_key == "jv":
+        # JV 1K milestone is achieved — show percentage over 1K, capped bar at 100%
+        jv_1k_pct = min(stats["subs"] / 1000 * 100, 999)
+        jv_pct_display = f"&#10003; {jv_1k_pct:.0f}%" if stats["subs"] >= 1000 else f"{jv_1k_pct:.1f}%"
+        jv_bar_width = "100%" if stats["subs"] >= 1000 else f"{jv_1k_pct:.1f}%"
+        content = re.sub(
+            r'(<span id="jv-milestone-pct"[^>]*>)[^<]*(</span>)',
+            rf'\g<1>{jv_pct_display}\g<2>', content
+        )
+        content = re.sub(
+            r'(<div id="jv-milestone-bar" style="width:)[^;]+(;)',
+            rf'\g<1>{jv_bar_width}\2', content
+        )
+        changes.append(f"{ch_key.upper()} milestone: {jv_pct_display} (1K subs)")
+    elif ch_key == "cit":
+        content = re.sub(
+            r'(<span id="cit-milestone-pct"[^>]*>)[^<]*(</span>)',
+            rf'\g<1>{pct_str}\g<2>', content
+        )
+        content = re.sub(
+            r'(<div id="cit-milestone-bar" style="width:)[^;]+(;)',
+            rf'\g<1>{pct_str}\2', content
+        )
+        changes.append(f"{ch_key.upper()} milestone: {pct_str} of {fmt(goal)}")
+    else:
+        # Other channels: find their milestone bar by color/proximity to anchor
+        # These use inline percentage text + bar width
+        anchor = CARD_ANCHORS[ch_key]
+        m = re.search(anchor, content)
+        if m:
+            # Find the milestone section after this anchor
+            region_start = m.start()
+            region = content[region_start:]
+
+            # Pattern: percentage text in a span with font-weight:700
+            # followed by a progress bar div with width:X%
+            color_map = {
+                "wil": "var(--accent-purple)",
+                "goha": "#eab308",
+                "iyb": "#3b82f6",
+                "crime60": "#ef4444",
+            }
+            color = color_map.get(ch_key, "")
+
+            # Update percentage text
+            old_pct_pattern = rf'(color:{re.escape(color)};font-weight:700">)[\d.]+%(</span>)'
+            region_new = re.sub(old_pct_pattern, rf'\g<1>{pct_str}\g<2>', region, count=1)
+
+            # Update bar width
+            bar_colors = {
+                "wil": r"var\(--accent-purple\),#7c3aed",
+                "goha": r"#eab308,#d97706",
+                "iyb": r"#3b82f6,#2563eb",
+                "crime60": r"#ef4444,#dc2626",
+            }
+            bar_gradient = bar_colors.get(ch_key, "")
+            if bar_gradient:
+                old_bar_pattern = rf'(width:)[\d.]+%(;height:100%;background:linear-gradient\(90deg,{bar_gradient}\))'
+                region_new = re.sub(old_bar_pattern, rf'\g<1>{pct_str}\g<2>', region_new, count=1)
+
+            content = content[:region_start] + region_new
+            changes.append(f"{ch_key.upper()} milestone: {pct_str} of {fmt(goal)}")
+
+    return content
+
+
+def patch_watch_time(content, ch_key, hours, changes):
+    """Patch watch time display for a channel card. Returns updated content."""
+    anchor = CARD_ANCHORS[ch_key]
+    m = re.search(anchor, content)
+    if not m:
+        return content
+
+    card_start = m.start()
+    remaining = content[card_start:]
+
+    # Pattern: "Watch time: XX hrs / 4,000 hrs" (with optional ~)
+    wt_pattern = r'(<span>Watch time: )~?[\d.,]+ hrs( / 4,000 hrs</span>)'
+    wt_match = re.search(wt_pattern, remaining)
+    if not wt_match:
+        # No watch time element exists for this channel — skip
+        return content
+
+    hrs_display = f"{hours:,.1f}" if hours >= 10 else f"{hours:.1f}"
+    remaining = re.sub(wt_pattern, rf'\g<1>{hrs_display} hrs\2', remaining, count=1)
+
+    # Update the percentage text and bar width
+    pct = hours / 4000 * 100
+    pct_str = f"{pct:.1f}%" if pct >= 0.1 else "<0.1%"
+    bar_width = f"{max(pct, 0.05):.2f}%"  # min visible width
+
+    # The percentage span follows the watch time span — it's the cyan one
+    # Pattern: color:#06b6d4;font-weight:700">XX%</span>
+    pct_pattern = r'(color:#06b6d4;font-weight:700">)[^<]*(</span>)'
+    # Replace only the FIRST occurrence (the watch time %, not some other cyan element)
+    pct_match = re.search(pct_pattern, remaining)
+    if pct_match:
+        remaining = remaining[:pct_match.start()] + \
+            re.sub(pct_pattern, rf'\g<1>{pct_str}\g<2>', remaining[pct_match.start():], count=1)
+
+    # Update bar width — the cyan gradient bar
+    bar_pattern = r'(width:)[\d.]+%(;height:100%;background:linear-gradient\(90deg,#06b6d4,#0891b2\))'
+    bar_match = re.search(bar_pattern, remaining)
+    if bar_match:
+        remaining = remaining[:bar_match.start()] + \
+            re.sub(bar_pattern, rf'\g<1>{bar_width}\g<2>', remaining[bar_match.start():], count=1)
+
+    content = content[:card_start] + remaining
+    changes.append(f"{ch_key.upper()} watch time: {hrs_display} hrs ({pct_str})")
+    return content
+
+
+def patch_stats_bar(content, all_stats, changes):
+    """Patch the top stats bar (combined views, timestamp)."""
+    total_views = sum(s["views"] for s in all_stats.values() if s)
+    total_videos = sum(s["videos"] for s in all_stats.values() if s)
+    combined_rounded = (total_views // 100) * 100
+    combined_str = f"{combined_rounded:,}+"
+
+    content = re.sub(
         r'(<div class="stat-number">)[\d,]+\+?(</div>\s*<div class="stat-label">Total Views)',
-        rf'\g<1>{round_combined(stats["combined_views"])}\2',
-        content,
+        rf'\g<1>{combined_str}\g<2>', content
     )
-    if n:
-        changes.append(f"Stats bar combined views -> {round_combined(stats['combined_views'])}")
+    changes.append(f"Stats bar: {combined_str} combined views")
 
-    # JV result card block (index.html format) — .*? tolerates delta divs
-    content, n = re.subn(
-        r'(<div class="channel-name jv">The Jersey Vault</div>.*?'
-        r'<div class="rs-value">)[\d,]+(</div>.*?<div class="rs-label">Subscribers</div>.*?'
-        r'<div class="rs-value">)[\d,]+(</div>.*?<div class="rs-label">Total Views</div>.*?'
-        r'<div class="rs-value">)[\d,]+(</div>.*?<div class="rs-label">Videos</div>)',
-        rf'\g<1>{fmt(stats["jv_subs"])}\g<2>{fmt(stats["jv_views"])}\g<3>{fmt(stats["jv_videos"])}\4',
-        content,
-        flags=re.DOTALL,
+    # Timestamp
+    ts = datetime.now().strftime("%b %-d")
+    content = re.sub(
+        r'(<span id="stats-updated-ts">)[^<]*(</span>)',
+        rf'\g<1>{ts}\g<2>', content
     )
-    if n:
-        changes.append(f"JV card: {fmt(stats['jv_subs'])} subs, {fmt(stats['jv_views'])} views, {stats['jv_videos']} videos")
+    changes.append(f"Timestamp: {ts}")
 
-    # JV top video views (index.html)
-    content, n = re.subn(
-        r'(<div class="channel-name jv">.*?<div class="tv-views">)[\d,]+ views(</div>)',
-        rf'\g<1>{fmt(stats["jv_top_views"])} views\2',
-        content,
-        flags=re.DOTALL,
-    )
-    if n:
-        changes.append(f"JV top video views -> {fmt(stats['jv_top_views'])}")
+    return content
 
-    # CiT result card block (index.html format)
-    content, n = re.subn(
-        r'(<div class="channel-name cit">Caught It Trending</div>.*?'
-        r'<div class="rs-value">)[\d,]+(</div>.*?<div class="rs-label">Subscribers</div>.*?'
-        r'<div class="rs-value">)[\d,]+(</div>.*?<div class="rs-label">Total Views</div>.*?'
-        r'<div class="rs-value">)[\d,]+(</div>.*?<div class="rs-label">Videos</div>)',
-        rf'\g<1>{fmt(stats["cit_subs"])}\g<2>{fmt(stats["cit_views"])}\g<3>{fmt(stats["cit_videos"])}\4',
-        content,
-        flags=re.DOTALL,
-    )
-    if n:
-        changes.append(f"CiT card: {fmt(stats['cit_subs'])} subs, {fmt(stats['cit_views'])} views, {stats['cit_videos']} videos")
 
-    # CiT top video title + views (index.html)
-    content, n = re.subn(
-        r'(<div class="channel-name cit">.*?<div class="tv-title">).*?(</div>\s*<div class="tv-views">)[\d,]+ views(</div>)',
-        rf'\g<1>{stats["cit_top_title"]}\g<2>{fmt(stats["cit_top_views"])} views\3',
-        content,
-        flags=re.DOTALL,
-    )
-    if n:
-        changes.append(f"CiT top video -> {stats['cit_top_title']} ({fmt(stats['cit_top_views'])} views)")
+def patch_deck(content, all_stats, changes):
+    """Patch deck.html stats. JV + CiT cards + summary."""
+    for ch_key in ["jv", "cit"]:
+        stats = all_stats.get(ch_key)
+        if not stats:
+            continue
 
-    # --- INDEX.HTML delta patches (all 3 per channel in single pass) ---
-    content, n = re.subn(
-        r'(<div class="channel-name jv">The Jersey Vault</div>.*?'
-        r'<div class="rs-delta">).*?(</div>\s*<div class="rs-label">Subscribers</div>.*?'
-        r'<div class="rs-delta">).*?(</div>\s*<div class="rs-label">Total Views</div>.*?'
-        r'<div class="rs-delta">).*?(</div>\s*<div class="rs-label">Videos</div>)',
-        rf'\1{stats["jv_subs_delta"]}\2{stats["jv_views_delta"]}\3{stats["jv_vids_delta"]}\4',
-        content, count=1, flags=re.DOTALL,
-    )
-    if n:
-        changes.append("JV deltas updated (subs/views/videos)")
+        if ch_key == "jv":
+            name_pattern = r'<div class="cc-name jv">The Jersey Vault</div>'
+        else:
+            name_pattern = r'<div class="cc-name cit">Caught It Trending</div>'
 
-    content, n = re.subn(
-        r'(<div class="channel-name cit">Caught It Trending</div>.*?'
-        r'<div class="rs-delta">).*?(</div>\s*<div class="rs-label">Subscribers</div>.*?'
-        r'<div class="rs-delta">).*?(</div>\s*<div class="rs-label">Total Views</div>.*?'
-        r'<div class="rs-delta">).*?(</div>\s*<div class="rs-label">Videos</div>)',
-        rf'\1{stats["cit_subs_delta"]}\2{stats["cit_views_delta"]}\3{stats["cit_vids_delta"]}\4',
-        content, count=1, flags=re.DOTALL,
-    )
-    if n:
-        changes.append("CiT deltas updated (subs/views/videos)")
+        # Patch subs/views/videos
+        content, n = re.subn(
+            rf'({name_pattern}.*?'
+            r'<div class="cc-val">)[\d,]+(</div>.*?<div class="cc-lbl">Subscribers</div>.*?'
+            r'<div class="cc-val">)[\d,]+(</div>.*?<div class="cc-lbl">Views</div>.*?'
+            r'<div class="cc-val">)[\d,]+(</div>.*?<div class="cc-lbl">Videos</div>)',
+            rf'\g<1>{fmt(stats["subs"])}\g<2>{fmt(stats["views"])}\g<3>{fmt(stats["videos"])}\4',
+            content, flags=re.DOTALL,
+        )
+        if n:
+            changes.append(f"Deck {ch_key.upper()}: {fmt(stats['subs'])} subs, {fmt(stats['views'])} views")
 
-    # --- Channel age badges (per-channel, anchored to channel name) ---
-    jv_age = f'Live for {stats["jv_age"]} days'
-    cit_age = f'Live for {stats["cit_age"]} days'
-    # JV age (index.html channel-age OR deck.html cc-age)
-    content, n = re.subn(
-        r'((?:channel-name|cc-name) jv">.*?<div class="(?:channel-age|cc-age)">)Live for \d+ days(</div>)',
-        rf'\g<1>{jv_age}\2',
-        content, flags=re.DOTALL,
-    )
-    # CiT age
-    content, n2 = re.subn(
-        r'((?:channel-name|cc-name) cit">.*?<div class="(?:channel-age|cc-age)">)Live for \d+ days(</div>)',
-        rf'\g<1>{cit_age}\2',
-        content, flags=re.DOTALL,
-    )
-    if n or n2:
-        changes.append(f"Channel age -> JV {jv_age}, CiT {cit_age}")
+        # Patch top video views
+        content, n = re.subn(
+            rf'({name_pattern}.*?<div class="cc-hl-val">.*?<span>)[\d,]+ views(</span>)',
+            rf'\g<1>{fmt(stats["top_views"])} views\2',
+            content, flags=re.DOTALL,
+        )
 
-    # --- DECK.HTML patterns ---
+    # Combined summary
+    total_views = sum(s["views"] for s in all_stats.values() if s)
+    total_videos = sum(s["videos"] for s in all_stats.values() if s)
+    combined_str = f"{(total_views // 100) * 100:,}+"
 
-    # JV card (deck format)
-    content, n = re.subn(
-        r'(<div class="cc-name jv">The Jersey Vault</div>.*?'
-        r'<div class="cc-val">)[\d,]+(</div>.*?<div class="cc-lbl">Subscribers</div>.*?'
-        r'<div class="cc-val">)[\d,]+(</div>.*?<div class="cc-lbl">Views</div>.*?'
-        r'<div class="cc-val">)[\d,]+(</div>.*?<div class="cc-lbl">Videos</div>)',
-        rf'\g<1>{fmt(stats["jv_subs"])}\g<2>{fmt(stats["jv_views"])}\g<3>{fmt(stats["jv_videos"])}\4',
-        content,
-        flags=re.DOTALL,
-    )
-    if n:
-        changes.append(f"Deck JV: {fmt(stats['jv_subs'])} subs, {fmt(stats['jv_views'])} views, {stats['jv_videos']} videos")
-
-    # JV top video views (deck)
-    content, n = re.subn(
-        r'(<div class="cc-name jv">.*?<div class="cc-hl-val">.*?<span>)[\d,]+ views(</span>)',
-        rf'\g<1>{fmt(stats["jv_top_views"])} views\2',
-        content,
-        flags=re.DOTALL,
-    )
-    if n:
-        changes.append(f"Deck JV top views -> {fmt(stats['jv_top_views'])}")
-
-    # CiT card (deck format)
-    content, n = re.subn(
-        r'(<div class="cc-name cit">Caught It Trending</div>.*?'
-        r'<div class="cc-val">)[\d,]+(</div>.*?<div class="cc-lbl">Subscribers</div>.*?'
-        r'<div class="cc-val">)[\d,]+(</div>.*?<div class="cc-lbl">Views</div>.*?'
-        r'<div class="cc-val">)[\d,]+(</div>.*?<div class="cc-lbl">Videos</div>)',
-        rf'\g<1>{fmt(stats["cit_subs"])}\g<2>{fmt(stats["cit_views"])}\g<3>{fmt(stats["cit_videos"])}\4',
-        content,
-        flags=re.DOTALL,
-    )
-    if n:
-        changes.append(f"Deck CiT: {fmt(stats['cit_subs'])} subs, {fmt(stats['cit_views'])} views, {stats['cit_videos']} videos")
-
-    # CiT top video (deck) — title short form + views
-    cit_short_title = stats["cit_top_title"].split(" -- ")[0][:40]
-    content, n = re.subn(
-        r'(<div class="cc-name cit">.*?<div class="cc-hl-val">).*?(<span>)[\d,]+ views(</span>)',
-        rf'\g<1>{cit_short_title} -- \g<2>{fmt(stats["cit_top_views"])} views\3',
-        content,
-        flags=re.DOTALL,
-    )
-    if n:
-        changes.append(f"Deck CiT top -> {cit_short_title} ({fmt(stats['cit_top_views'])} views)")
-
-    # Combined summary (deck)
-    content, n = re.subn(
+    content, _ = re.subn(
         r'(<div class="rs-big">)[\d,]+\+?(</div>\s*<div class="rs-small">Combined Views)',
-        rf'\g<1>{round_combined(stats["combined_views"])}\2',
-        content,
+        rf'\g<1>{combined_str}\2', content
     )
-    if n:
-        changes.append(f"Deck combined -> {round_combined(stats['combined_views'])}")
-
-    content, n = re.subn(
+    content, _ = re.subn(
         r'(<div class="rs-big">)\d+(</div>\s*<div class="rs-small">Videos Live)',
-        rf'\g<1>{stats["total_videos"]}\2',
-        content,
+        rf'\g<1>{total_videos}\2', content
     )
-    if n:
-        changes.append(f"Deck videos live -> {stats['total_videos']}")
 
-    content, n = re.subn(
-        r'(<div class="rs-big">)\d+(</div>\s*<div class="rs-small">In Upload Queue)',
-        rf'\g<1>{stats["queue_count"]}\2',
-        content,
-    )
-    if n:
-        changes.append(f"Deck queue -> {stats['queue_count']}")
-
-    content, n = re.subn(
+    days_since = (datetime.now() - datetime(2026, 2, 19)).days
+    content, _ = re.subn(
         r'(<div class="rs-big">)\d+ days(</div>\s*<div class="rs-small">Since Launch)',
-        rf'\g<1>{stats["days_since"]} days\2',
-        content,
+        rf'\g<1>{days_since} days\2', content
     )
-    if n:
-        changes.append(f"Deck days since -> {stats['days_since']}")
 
-    # --- DECK.HTML delta patches (all 3 per channel in single pass) ---
-    content, n = re.subn(
-        r'(<div class="cc-name jv">The Jersey Vault</div>.*?'
-        r'<div class="cc-delta">).*?(</div>\s*<div class="cc-lbl">Subscribers</div>.*?'
-        r'<div class="cc-delta">).*?(</div>\s*<div class="cc-lbl">Views</div>.*?'
-        r'<div class="cc-delta">).*?(</div>\s*<div class="cc-lbl">Videos</div>)',
-        rf'\1{stats["jv_subs_delta"]}\2{stats["jv_views_delta"]}\3{stats["jv_vids_delta"]}\4',
-        content, count=1, flags=re.DOTALL,
-    )
-    if n:
-        changes.append("Deck JV deltas updated (subs/views/videos)")
+    # Channel age badges
+    for ch_key in ["jv", "cit"]:
+        launch = datetime.strptime(CHANNELS[ch_key]["launch"], "%Y-%m-%d")
+        age = (datetime.now() - launch).days
+        age_text = f"Live for {age} days"
+        cls = ch_key
+        content, _ = re.subn(
+            rf'((?:channel-name|cc-name) {cls}">.*?<div class="(?:channel-age|cc-age)">)Live for \d+ days(</div>)',
+            rf'\g<1>{age_text}\2', content, flags=re.DOTALL,
+        )
 
-    content, n = re.subn(
-        r'(<div class="cc-name cit">Caught It Trending</div>.*?'
-        r'<div class="cc-delta">).*?(</div>\s*<div class="cc-lbl">Subscribers</div>.*?'
-        r'<div class="cc-delta">).*?(</div>\s*<div class="cc-lbl">Views</div>.*?'
-        r'<div class="cc-delta">).*?(</div>\s*<div class="cc-lbl">Videos</div>)',
-        rf'\1{stats["cit_subs_delta"]}\2{stats["cit_views_delta"]}\3{stats["cit_vids_delta"]}\4',
-        content, count=1, flags=re.DOTALL,
-    )
-    if n:
-        changes.append("Deck CiT deltas updated (subs/views/videos)")
-
-    changed = content != original
-    return content, changes, changed
+    return content
 
 
 def main():
     dry_run = "--dry-run" in sys.argv
     status_only = "--status" in sys.argv
 
-    stats = load_stats()
+    print("=== Fetching YouTube API stats for all 6 channels ===")
+    all_stats = {}
+    for ch_key, ch_config in CHANNELS.items():
+        stats = fetch_channel_stats(ch_key, ch_config)
+        all_stats[ch_key] = stats
+        if stats:
+            print(f"  {ch_key:8s} | {fmt(stats['subs']):>6s} subs | {fmt(stats['views']):>8s} views | {stats['videos']:>4d} videos | Top: {stats['top_title'][:45]}")
+
+    # Fetch watch hours (Analytics API — needs yt-analytics.readonly scope)
+    print("\n=== Fetching watch hours (Analytics API) ===")
+    watch_hours = {}
+    for ch_key, ch_config in CHANNELS.items():
+        hrs = fetch_watch_hours(ch_key, ch_config)
+        watch_hours[ch_key] = hrs
+        if hrs is not None:
+            print(f"  {ch_key:8s} | {hrs:>8.1f} hrs")
 
     if status_only:
-        d = stats["_deltas"]
-        print("=== Current Channel Stats ===")
-        print(f"JV:  {fmt(stats['jv_subs'])} subs ({fmt_pct(d['jv_subs'][0])[0]} wk / {fmt_pct(d['jv_subs'][1])[0]} total)")
-        print(f"     {fmt(stats['jv_views'])} views ({fmt_pct(d['jv_views'][0])[0]} wk / {fmt_pct(d['jv_views'][1])[0]} total)")
-        print(f"     {stats['jv_videos']} videos ({fmt_pct(d['jv_videos'][0])[0]} wk / {fmt_pct(d['jv_videos'][1])[0]} total)")
-        print(f"     Top: {stats['jv_top_title']} ({fmt(stats['jv_top_views'])})")
-        print(f"CiT: {fmt(stats['cit_subs'])} subs ({fmt_pct(d['cit_subs'][0])[0]} wk / {fmt_pct(d['cit_subs'][1])[0]} total)")
-        print(f"     {fmt(stats['cit_views'])} views ({fmt_pct(d['cit_views'][0])[0]} wk / {fmt_pct(d['cit_views'][1])[0]} total)")
-        print(f"     {stats['cit_videos']} videos ({fmt_pct(d['cit_videos'][0])[0]} wk / {fmt_pct(d['cit_videos'][1])[0]} total)")
-        print(f"     Top: {stats['cit_top_title']} ({fmt(stats['cit_top_views'])})")
-        print(f"Combined: {fmt(stats['combined_views'])} views | {stats['total_videos']} videos | Queue: {stats['queue_count']} | Days: {stats['days_since']}")
-        print(f"JV data: {stats['jv_date']}")
-        print(f"CiT data: {stats['cit_date']}")
+        total_views = sum(s["views"] for s in all_stats.values() if s)
+        total_videos = sum(s["videos"] for s in all_stats.values() if s)
+        total_watch = sum(h for h in watch_hours.values() if h is not None)
+        print(f"\n  Combined: {fmt(total_views)} views | {total_videos} videos | {total_watch:.1f} watch hrs")
         return
 
+    # Patch index.html
     all_changes = []
     files_changed = []
 
-    for filepath in [INDEX_HTML, DECK_HTML]:
-        name = os.path.basename(filepath)
-        content, changes, changed = patch_html(filepath, stats)
-        if changed:
-            files_changed.append(name)
-            all_changes.extend(changes)
-            if not dry_run:
-                with open(filepath, "w") as f:
-                    f.write(content)
-                print(f"[UPDATED] {name}")
-            else:
-                print(f"[DRY RUN] {name} would be updated:")
-            for c in changes:
-                print(f"  - {c}")
+    with open(INDEX_HTML) as f:
+        index_content = f.read()
+    original_index = index_content
+
+    for ch_key, stats in all_stats.items():
+        if stats:
+            index_content = patch_channel_card(index_content, ch_key, stats, all_changes)
+            index_content = patch_milestone(index_content, ch_key, stats, CHANNELS[ch_key], all_changes)
+
+    # Patch watch hours for channels that have analytics data
+    for ch_key, hrs in watch_hours.items():
+        if hrs is not None:
+            index_content = patch_watch_time(index_content, ch_key, hrs, all_changes)
+
+    index_content = patch_stats_bar(index_content, all_stats, all_changes)
+
+    if index_content != original_index:
+        files_changed.append("index.html")
+        if not dry_run:
+            with open(INDEX_HTML, "w") as f:
+                f.write(index_content)
+            print(f"\n[UPDATED] index.html")
         else:
-            print(f"[NO CHANGE] {name} — already up to date")
+            print(f"\n[DRY RUN] index.html would be updated")
+
+    # Patch deck.html
+    if DECK_HTML.exists():
+        with open(DECK_HTML) as f:
+            deck_content = f.read()
+        original_deck = deck_content
+        deck_changes = []
+        deck_content = patch_deck(deck_content, all_stats, deck_changes)
+        if deck_content != original_deck:
+            files_changed.append("deck.html")
+            all_changes.extend(deck_changes)
+            if not dry_run:
+                with open(DECK_HTML, "w") as f:
+                    f.write(deck_content)
+                print(f"[UPDATED] deck.html")
+
+    for c in all_changes:
+        print(f"  - {c}")
 
     if not files_changed:
         print("\nNo changes needed — site is current.")
         return
 
     if dry_run:
-        print(f"\n[DRY RUN] Would update {len(files_changed)} file(s). Run without --dry-run to apply.")
+        print(f"\n[DRY RUN] Would update {len(files_changed)} file(s).")
         return
 
     # Git commit + push
     print("\nCommitting + pushing to GitHub Pages...")
+    total_views = sum(s["views"] for s in all_stats.values() if s)
+    combined_str = f"{(total_views // 100) * 100:,}+"
+    total_videos = sum(s["videos"] for s in all_stats.values() if s)
     date_str = datetime.now().strftime("%b %d")
-    combined = round_combined(stats["combined_views"])
-    msg = f"Auto-update stats {date_str} — {combined} combined views, {stats['total_videos']} videos"
+    msg = f"Auto-update stats {date_str} — {combined_str} combined views, {total_videos} videos"
 
-    os.chdir(SCRIPT_DIR)
-    subprocess.run(["git", "add"] + [os.path.basename(f) for f in [INDEX_HTML, DECK_HTML]], check=True)
+    os.chdir(str(SCRIPT_DIR))
+    subprocess.run(["git", "add"] + [os.path.basename(str(f)) for f in [INDEX_HTML, DECK_HTML]], check=True)
+
+    # Check if there are changes to commit
+    result = subprocess.run(["git", "diff", "--cached", "--quiet"], capture_output=True)
+    if result.returncode == 0:
+        print("No git changes to commit.")
+        return
+
     subprocess.run(["git", "commit", "-m", msg], check=True)
     result = subprocess.run(["git", "push"], capture_output=True, text=True)
     if result.returncode == 0:
