@@ -270,12 +270,12 @@ html { scroll-behavior: smooth; scroll-padding-top: 80px; }
     <div class="section-header">
       <div class="section-number">Section 1</div>
       <h2>Current State Architecture Map</h2>
-      <p>Complete topology of the existing codebase: 97 modules across 6 functional layers, their interconnections, decision points, and data flows.</p>
+      <p>Complete topology of the existing codebase: 103 modules across 6 functional layers (+ a 7th <strong>Governance Layer</strong> added Apr 9, 2026: Sandy-CEO autonomous agent with audit, rule-based remediation, LLM brain, and conversational <code>--ask</code> interface), their interconnections, decision points, and data flows.</p>
     </div>
 
     <!-- SYSTEM METRICS -->
     <div class="metrics">
-      <div class="metric-box"><div class="value">97</div><div class="label">Python Modules</div></div>
+      <div class="metric-box"><div class="value">103</div><div class="label">Python Modules</div></div>
       <div class="metric-box"><div class="value">60</div><div class="label">Launchd Agents</div></div>
       <div class="metric-box"><div class="value">11</div><div class="label">External APIs</div></div>
       <div class="metric-box"><div class="value">6</div><div class="label">Functional Layers</div></div>
@@ -729,6 +729,49 @@ Wed    auto_compilation.py    [PRODUCTION]</div>
                   <td>Batch-rewrites <code>image_prompt</code> fields for motion-rich cinematic prompts</td>
                   <td>Uses LLM to enhance image prompts with lighting, camera angle, motion direction.</td>
                   <td><span class="layer-tag layer-config">CONFIGURABLE</span> Rewrite style/prompt. <span class="layer-tag layer-tenant">PER-TENANT</span> Visual style preferences</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details open>
+        <summary><span class="badge badge-purple">Governance Layer (NEW — Apr 9, 2026)</span> 1 Module &mdash; Sandy-CEO autonomous agent: audit, rule-based remediation, LLM brain, conversational <code>--ask</code></summary>
+        <div class="details-content">
+          <p style="margin-bottom: 16px;"><strong>The Governance Layer sits above everything else.</strong> It monitors the other 6 layers, detects failures in real time, auto-remediates known problems, reasons about novel problems via LLM, emails digest reports, and answers natural-language questions from the operator. It is the "CEO" of the factory — what makes Shorts Factory truly autonomous.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Module / Component</th><th>Purpose</th><th>Key Details</th><th>SaaS Impact</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>channel_director.py</code><br><span class="badge badge-purple">GOVERNANCE CORE</span></td>
+                  <td>4-tier autonomous CEO agent monitoring all 6 channels</td>
+                  <td>
+                    <strong>Tier 1 — Audit:</strong> Every 2 hours (7am-11pm Amman, 9 runs/day), walks all 6 channels and computes queue size, upload queue size, upload gap, today's-build status, recent alerts. Output: <code>daily_directive.json</code>.<br><br>
+                    <strong>Tier 2 — Rule-Based Remediation:</strong> Maps alerts to concrete subprocess spawns (empty upload queue → spawn builder, low story queue → spawn writer, high upload gap → force uploader). Per-action cooldowns tracked in <code>.director_remediation_log.json</code> to prevent infinite retry loops. All spawns are <code>subprocess.Popen(..., start_new_session=True)</code> — fully detached.<br><br>
+                    <strong>Tier 3 — LLM CEO Brain (<code>_ceo_escalate</code>):</strong> When alerts exceed what rules covered, calls Claude Sonnet with a CEO system prompt + full state snapshot. Returns JSON decisions picked from a sandboxed whitelist (<code>_CEO_ALLOWED_ACTIONS</code> + <code>_CEO_ALLOWED_SCRIPTS</code>). Novel reasoning: on breakouts, CEO may spawn <code>auto_scout.py</code> to amplify; on persistent failures, escalates to human via email.<br><br>
+                    <strong>Tier 4 — Conversational <code>--ask</code>:</strong> <code>python3 channel_director.py --ask "your question"</code> — pipes factory state into the LLM with a CEO system prompt and returns a grounded briefing with specific CLI commands. Every Q&amp;A logged to <code>.ceo_decisions.json</code>.<br><br>
+                    <strong>Email digest:</strong> After every run, consolidated alerts + breakouts + remediations + channel snapshot table emailed via <code>upload_watchdog._send_alert</code>. Fingerprint-deduplicated in <code>.director_alert_digest.json</code> (4h cooldown on identical alert sets).
+                  </td>
+                  <td><span class="layer-tag layer-config">CONFIGURABLE</span> Remediation cooldowns, alert thresholds, CEO action whitelist. <span class="layer-tag layer-tenant">PER-TENANT</span> Alert email destination, channel set, budget caps (future).<br><br><strong>SaaS CRITICAL:</strong> This is the entire autonomy story for multi-tenant mode. Each tenant gets their own CEO with per-client budget and decision log. Audit log in <code>.ceo_decisions.json</code> becomes the compliance surface for the prepaid-card multi-client vision.</td>
+                </tr>
+                <tr>
+                  <td><code>detect_breakouts()</code> + <code>_suggest_clone_targets()</code><br><span class="badge badge-cyan">BREAKOUT RADAR v2</span></td>
+                  <td>Real-time velocity monitoring + cross-channel amplification</td>
+                  <td>
+                    Adaptive per-channel baselines: median views-per-hour over the last 20 uploads per channel (6h-21d age window to avoid noise and stale data). Cached 12h in <code>.breakout_baselines.json</code>. Uses YouTube Data API (API key OR OAuth fallback via any <code>.youtube_token_*.json</code> with <code>youtube.readonly</code> scope).<br><br>
+                    Threshold: any video with views/hour &gt; 3x channel median AND &gt;100 absolute views fires a BREAKOUT alert. Dedup via <code>.breakout_clone_tracker.json</code> (mark source video once cloned, don't re-fire).<br><br>
+                    <strong>Auto-clone:</strong> When a breakout is detected, <code>_suggest_clone_targets</code> keyword-matches the title to sibling channels (biology → WIL + IYB + Crime60 dark angle; crime → Crime60; sports → JV; physics → WIL). Successful target channels get their story writer spawned via <code>--topic</code> subprocess with an angle instruction.<br><br>
+                    <strong>First live catches (Apr 9, 2026):</strong> IYB liver regeneration at 376x baseline (1,541 views in 6.2h vs 0.66 baseline vph), and WIL molten lava at 30x (239 views in 8.2h).
+                  </td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> Detection logic, clone dedup. <span class="layer-tag layer-config">CONFIGURABLE</span> Breakout multiplier, lookback window, baseline sample size. <span class="layer-tag layer-tenant">PER-TENANT</span> Channel set, baseline cache, clone tracker.</td>
+                </tr>
+                <tr>
+                  <td><code>.ceo_decisions.json</code> (audit log)</td>
+                  <td>Every CEO decision with timestamp, reasoning, state snapshot</td>
+                  <td>Append-only log of: LLM escalation invocations (with alert counts, breakout counts, decisions), conversational <code>--ask</code> queries + answers, remediation outcomes, rejected actions (out of whitelist). Capped at last 200 entries to bound disk growth.</td>
+                  <td><span class="layer-tag layer-fixed">FIXED</span> Log format. <span class="layer-tag layer-tenant">PER-TENANT</span> Per-client log file, retention policy, dashboard UI (future).<br><br><strong>The compliance surface for multi-tenant mode.</strong> Every dollar the CEO spends (in the prepaid-card vision) will have a decision with reasoning logged here.</td>
                 </tr>
               </tbody>
             </table>
