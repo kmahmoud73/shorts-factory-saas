@@ -14,3 +14,7 @@ onboarding_internal.html
 *.secret
 *.pem
 *.key
+
+# Private architecture/strategy doc — never commit to public repo
+CLAUDE.md
+SAAS_CLAUDE.md
