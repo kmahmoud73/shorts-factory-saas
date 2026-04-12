@@ -72,6 +72,13 @@ CHANNELS = {
         "milestone_subs": 1000,
         "launch": "2026-04-06",
     },
+    "beauty": {
+        "name": "Beauty Science",
+        "token": SF_DIR / ".youtube_token_beauty_science.json",
+        "channel_id": "UC3maTBpE1A3Wfb-dMh9hPsw",
+        "milestone_subs": 1000,
+        "launch": "2026-04-12",
+    },
 }
 
 # Regex anchors to find each channel's card in index.html
@@ -83,6 +90,7 @@ CARD_ANCHORS = {
     "goha": r'channel-name"[^>]*>Tales of Goha</div>',
     "iyb": r'channel-name"[^>]*>Body X-Ray</div>',
     "crime60": r'channel-name"[^>]*>60 Second Crime</div>',
+    "beauty": r'channel-name"[^>]*>Beauty Science</div>',
 }
 
 
@@ -322,6 +330,7 @@ def patch_milestone(content, ch_key, stats, ch_config, changes):
                 "goha": "#eab308",
                 "iyb": "#3b82f6",
                 "crime60": "#ef4444",
+                "beauty": "#B76E79",
             }
             color = color_map.get(ch_key, "")
 
@@ -335,6 +344,7 @@ def patch_milestone(content, ch_key, stats, ch_config, changes):
                 "goha": r"#eab308,#d97706",
                 "iyb": r"#3b82f6,#2563eb",
                 "crime60": r"#ef4444,#dc2626",
+                "beauty": r"#B76E79,#a05a64",
             }
             bar_gradient = bar_colors.get(ch_key, "")
             if bar_gradient:
@@ -486,7 +496,7 @@ def main():
     dry_run = "--dry-run" in sys.argv
     status_only = "--status" in sys.argv
 
-    print("=== Fetching YouTube API stats for all 6 channels ===")
+    print("=== Fetching YouTube API stats for all 7 channels ===")
     all_stats = {}
     for ch_key, ch_config in CHANNELS.items():
         stats = fetch_channel_stats(ch_key, ch_config)
