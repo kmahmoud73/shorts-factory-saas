@@ -79,18 +79,26 @@ CHANNELS = {
         "milestone_subs": 1000,
         "launch": "2026-04-12",
     },
+    "velvet": {
+        "name": "Velvet Mind",
+        "token": SF_DIR / ".youtube_token_velvet_mind.json",
+        "channel_id": "UCKuphpSPj72GJbP7St-Arsw",
+        "milestone_subs": 1000,
+        "launch": "2026-04-13",
+    },
 }
 
 # Regex anchors to find each channel's card in index.html
 # Each channel card starts with a unique text in a channel-name div
 CARD_ANCHORS = {
-    "jv": r'<div class="channel-name jv">The Jersey Vault</div>',
-    "cit": r'<div class="channel-name cit">Caught It Trending</div>',
-    "wil": r'channel-name"[^>]*>What If Lab</div>',
-    "goha": r'channel-name"[^>]*>Tales of Goha</div>',
-    "iyb": r'channel-name"[^>]*>Body X-Ray</div>',
-    "crime60": r'channel-name"[^>]*>60 Second Crime</div>',
-    "beauty": r'channel-name"[^>]*>Beauty Science</div>',
+    "jv": r'@thejerseyvaulthq',
+    "cit": r'@caughtittrending',
+    "wil": r'@labofwhatif',
+    "goha": r'@talesofgoha',
+    "iyb": r'@YourBodyXray',
+    "crime60": r'@60secondcrime',
+    "beauty": r'@BeautyScienceTips',
+    "velvet": r'@VelvetMindHQ',
 }
 
 
