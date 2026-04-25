@@ -54,7 +54,9 @@ SMTP_PORT = 465
 EMAIL = os.environ.get("SF_EMAIL", "hello@shortsfactory.io")
 PASSWORD = os.environ.get("SF_EMAIL_PASS", "")
 
-BCC_ADDR = "hello@shortsfactory.io"
+BCC_ADDR = "hello@shortsfactory.io"      # archive copy (saas mailbox)
+KHAL_BCC = "khal.mahmoud@gmail.com"      # Khal personal — restored S243 Apr 25
+BCC_LIST = [BCC_ADDR, KHAL_BCC]
 
 SAAS_DIR = Path(__file__).parent
 LEADS_FILE = SAAS_DIR / "leads.json"
@@ -565,14 +567,15 @@ Open the Lead Command Center: http://localhost:8009
 -- Sandy"""
         msg = MIMEMultipart("alternative")
         msg["From"] = f"Shorts Factory <{EMAIL}>"
-        msg["To"] = BCC_ADDR
+        msg["To"] = KHAL_BCC
+        msg["Cc"] = BCC_ADDR
         msg["Subject"] = f"⚠️ Lead needs follow-up: {lead_name}"
         msg.attach(MIMEText(alert_body, "plain"))
         ctx = ssl.create_default_context()
         with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=15) as server:
             server.login(EMAIL, PASSWORD)
-            server.sendmail(EMAIL, [BCC_ADDR], msg.as_string())
-        log(f"ALERT sent to {BCC_ADDR} — template reply went to {lead_email}")
+            server.sendmail(EMAIL, BCC_LIST, msg.as_string())
+        log(f"ALERT sent to {KHAL_BCC} (cc {BCC_ADDR}) — template reply went to {lead_email}")
     except Exception as e:
         log(f"Alert send failed: {e}")
 
@@ -588,12 +591,12 @@ https://shortsfactory.io
     msg = MIMEMultipart("alternative")
     msg["From"] = f"Shorts Factory <{EMAIL}>"
     msg["To"] = to_addr
-    msg["Bcc"] = BCC_ADDR
+    msg["Bcc"] = ", ".join(BCC_LIST)
     msg["Subject"] = subject
     msg.attach(MIMEText(body_text.rstrip() + signature, "plain"))
 
     ctx = ssl.create_default_context()
-    recipients = [to_addr, BCC_ADDR]
+    recipients = [to_addr] + BCC_LIST
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=15) as server:
         server.login(EMAIL, PASSWORD)
         server.sendmail(EMAIL, recipients, msg.as_string())
