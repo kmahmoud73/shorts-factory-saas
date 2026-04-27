@@ -18,3 +18,4 @@ onboarding_internal.html
 # Private architecture/strategy doc — never commit to public repo
 CLAUDE.md
 SAAS_CLAUDE.md
+.site_stats_last.json

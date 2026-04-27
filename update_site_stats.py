@@ -27,6 +27,8 @@ SCRIPT_DIR = Path(__file__).parent
 SF_DIR = SCRIPT_DIR.parent / "shorts-factory"
 INDEX_HTML = SCRIPT_DIR / "index.html"
 DECK_HTML = SCRIPT_DIR / "deck.html"
+LAST_STATS_CACHE = SCRIPT_DIR / ".site_stats_last.json"  # S243: latent-guard cache
+STALE_ALERT_HOURS = 24  # if cache is older than this on a channel, emit ALERT line
 
 # Channel config: token, channel_id, card anchor pattern, milestone_goal
 CHANNELS = {
@@ -118,6 +120,40 @@ def get_creds(token_file):
 def get_youtube(token_file):
     """Auth via token file. Uses token's own scopes to avoid mismatch."""
     return build("youtube", "v3", credentials=get_creds(token_file))
+
+
+def load_last_stats():
+    """Load cached per-channel stats. Returns dict (possibly empty)."""
+    if not LAST_STATS_CACHE.exists():
+        return {}
+    try:
+        with open(LAST_STATS_CACHE) as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"  WARN: could not read {LAST_STATS_CACHE.name}: {e}")
+        return {}
+
+
+def save_last_stats(all_stats, watch_hours):
+    """Persist successful per-channel stats + watch hours to cache.
+    Only saves entries that are not None and not stale-fallbacks."""
+    payload = {}
+    for ch_key, stats in all_stats.items():
+        if stats and not stats.get("_stale"):
+            entry = {k: v for k, v in stats.items() if not k.startswith("_")}
+            entry["fetched_at"] = datetime.now().isoformat()
+            entry["watch_hours"] = watch_hours.get(ch_key)
+            payload[ch_key] = entry
+    # Preserve cached entries for channels that failed this run
+    existing = load_last_stats()
+    for ch_key, entry in existing.items():
+        if ch_key not in payload:
+            payload[ch_key] = entry
+    try:
+        with open(LAST_STATS_CACHE, "w") as f:
+            json.dump(payload, f, indent=2)
+    except Exception as e:
+        print(f"  WARN: could not write {LAST_STATS_CACHE.name}: {e}")
 
 
 def fetch_channel_stats(ch_key, ch_config):
@@ -504,13 +540,47 @@ def main():
     dry_run = "--dry-run" in sys.argv
     status_only = "--status" in sys.argv
 
-    print("=== Fetching YouTube API stats for all 7 channels ===")
+    print("=== Fetching YouTube API stats for all 8 channels ===")
+    cached = load_last_stats()
     all_stats = {}
+    stale_channels = []  # channels using cached data this run
+    missing_channels = []  # channels with neither fresh NOR cached data
     for ch_key, ch_config in CHANNELS.items():
         stats = fetch_channel_stats(ch_key, ch_config)
-        all_stats[ch_key] = stats
-        if stats:
+        if stats is None:
+            # Latent guard: fall back to cached value if available
+            cached_entry = cached.get(ch_key)
+            if cached_entry:
+                fallback = {k: v for k, v in cached_entry.items() if k not in ("fetched_at", "watch_hours")}
+                fallback["_stale"] = True
+                fallback["_cached_at"] = cached_entry.get("fetched_at", "unknown")
+                all_stats[ch_key] = fallback
+                stale_channels.append((ch_key, cached_entry.get("fetched_at", "unknown")))
+                print(f"  {ch_key:8s} | STALE (using cache from {cached_entry.get('fetched_at', '?')[:19]})")
+            else:
+                all_stats[ch_key] = None
+                missing_channels.append(ch_key)
+        else:
+            all_stats[ch_key] = stats
             print(f"  {ch_key:8s} | {fmt(stats['subs']):>6s} subs | {fmt(stats['views']):>8s} views | {stats['videos']:>4d} videos | Top: {stats['top_title'][:45]}")
+
+    # Latent-guard alert: surface to launchd-captured stderr so daily digest catches it.
+    if missing_channels:
+        msg = f"[SHORTS FACTORY ALERT] update_site_stats: {len(missing_channels)} channel(s) have NO data (no fresh, no cache): {', '.join(missing_channels)}. Site totals will be incomplete."
+        print(msg, file=sys.stderr)
+    if stale_channels:
+        # Emit ALERT only if any cache entry is older than STALE_ALERT_HOURS
+        from datetime import timedelta
+        threshold = datetime.now() - timedelta(hours=STALE_ALERT_HOURS)
+        old_ones = []
+        for ch_key, ts in stale_channels:
+            try:
+                if datetime.fromisoformat(ts) < threshold:
+                    old_ones.append(f"{ch_key}@{ts[:19]}")
+            except Exception:
+                old_ones.append(f"{ch_key}@unparsed")
+        if old_ones:
+            print(f"[SHORTS FACTORY ALERT] update_site_stats: stale cache (>{STALE_ALERT_HOURS}h) for: {', '.join(old_ones)}", file=sys.stderr)
 
     # Fetch watch hours (Analytics API — needs yt-analytics.readonly scope)
     print("\n=== Fetching watch hours (Analytics API) ===")
@@ -520,6 +590,9 @@ def main():
         watch_hours[ch_key] = hrs
         if hrs is not None:
             print(f"  {ch_key:8s} | {hrs:>8.1f} hrs")
+
+    # Persist successful fetches to cache (latent-guard for next run).
+    save_last_stats(all_stats, watch_hours)
 
     if status_only:
         total_views = sum(s["views"] for s in all_stats.values() if s)
