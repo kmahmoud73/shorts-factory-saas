@@ -1,0 +1,7 @@
+name = "sandy-sales"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+# Optional KV for conversation memory + lead capture:
+# [[kv_namespaces]]
+# binding = "LEADS"
+# id = "<your-kv-id>"

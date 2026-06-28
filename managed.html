@@ -156,5 +156,54 @@
 </div></section>
 
 <footer><div class="wrap">© Shorts Factory — Managed Faceless Channels · Arabic-first · <a href="/">shortsfactory.io</a></div></footer>
+<!-- ===== Sandy chat widget ===== -->
+<style>
+  #sf-bubble{position:fixed;right:20px;bottom:20px;width:60px;height:60px;border-radius:50%;
+    background:linear-gradient(135deg,#e7b94f,#f2d488);display:grid;place-items:center;cursor:pointer;
+    box-shadow:0 10px 30px rgba(231,185,79,.35);z-index:9998;font-size:26px;transition:.2s}
+  #sf-bubble:hover{transform:scale(1.06)}
+  #sf-chat{position:fixed;right:20px;bottom:90px;width:360px;max-width:92vw;height:520px;max-height:78vh;
+    background:#0e1424;border:1px solid #1e2a44;border-radius:18px;z-index:9999;display:none;flex-direction:column;
+    overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  #sf-chat.open{display:flex}
+  #sf-head{background:#121b2e;padding:14px 16px;border-bottom:1px solid #1e2a44;color:#e9edf5;font-weight:700;display:flex;align-items:center;gap:10px}
+  #sf-head .dot{width:9px;height:9px;border-radius:50%;background:#3ddc84}
+  #sf-head small{color:#9aa6bd;font-weight:400}
+  #sf-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+  .sf-b{padding:10px 13px;border-radius:14px;max-width:84%;font-size:.93rem;line-height:1.45;white-space:pre-wrap}
+  .sf-them{background:#19223a;color:#e9edf5;align-self:flex-start}
+  .sf-me{background:#1f3a2a;color:#eafff0;align-self:flex-end}
+  .sf-typing{color:#9aa6bd;font-size:.85rem;padding:4px 8px}
+  #sf-form{display:flex;gap:8px;padding:10px;border-top:1px solid #1e2a44;background:#0e1424}
+  #sf-in{flex:1;background:#121b2e;border:1px solid #1e2a44;border-radius:10px;color:#e9edf5;padding:11px 12px;font-size:.95rem;outline:none}
+  #sf-send{background:linear-gradient(135deg,#e7b94f,#f2d488);border:0;border-radius:10px;padding:0 16px;font-weight:700;color:#1a1205;cursor:pointer}
+</style>
+<div id="sf-bubble" title="Chat with Sandy">💬</div>
+<div id="sf-chat" aria-label="Sandy chat">
+  <div id="sf-head"><span class="dot"></span> Sandy <small>· AI content director</small></div>
+  <div id="sf-msgs"></div>
+  <form id="sf-form"><input id="sf-in" placeholder="Tell me your niche…" autocomplete="off"><button id="sf-send" type="submit">Send</button></form>
+</div>
+<script>
+(function(){
+  /* TODO: set to your stable backend. Cloudflare Worker (recommended): https://sandy-sales.<acct>.workers.dev/chat
+     or a cloudflared named-tunnel URL. (Trial trycloudflare URLs are temporary.) */
+  var SALES_API = "REPLACE_WITH_BACKEND_URL/chat";
+  var sid = localStorage.getItem("sf_sid") || Math.random().toString(36).slice(2);
+  localStorage.setItem("sf_sid", sid);
+  var bubble=document.getElementById("sf-bubble"), chat=document.getElementById("sf-chat"),
+      msgs=document.getElementById("sf-msgs"), form=document.getElementById("sf-form"), inp=document.getElementById("sf-in");
+  var greeted=false;
+  function add(t,who){var d=document.createElement("div");d.className="sf-b "+(who==="me"?"sf-me":"sf-them");d.textContent=t;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d;}
+  bubble.onclick=function(){chat.classList.toggle("open");if(chat.classList.contains("open")&&!greeted){greeted=true;add("Hi! I'm Sandy 👋 I run faceless YouTube channels — Arabic-first. Tell me a niche and I'll send you a free sample clip.","them");inp.focus();}};
+  form.onsubmit=async function(e){e.preventDefault();var q=inp.value.trim();if(!q)return;add(q,"me");inp.value="";
+    var typing=document.createElement("div");typing.className="sf-typing";typing.textContent="Sandy is typing…";msgs.appendChild(typing);msgs.scrollTop=msgs.scrollHeight;
+    try{var r=await fetch(SALES_API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({message:q,session:sid})});var j=await r.json();typing.remove();add(j.reply||"…","them");}
+    catch(err){typing.remove();add("Hmm, I'm having a hiccup — WhatsApp me and I'll sort it out.","them");}
+  };
+})();
+</script>
+<!-- ===== /Sandy chat widget ===== -->
+
 </body>
 </html>
