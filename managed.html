@@ -68,7 +68,7 @@
   <h1>We run your faceless channel.<br>You just send a <span style="color:var(--gold)">voice note.</span></h1>
   <p class="lead">Sandy — your AI content director — finds the trends, writes the script, voices it, animates it, captions it, publishes it, and replies to comments. You review clips and approve with a quick WhatsApp message. No dashboards. No editing. No team to manage. <span class="ar">إنتاج عربي بالكامل، أوتوماتيك.</span></p>
   <div class="cta-row">
-    <!-- TODO: replace with real Calendly --><a href="https://calendly.com/shortsfactory/strategy-call" class="btn">Book a free strategy call</a>
+    <!-- opens the live Sandy chat widget; swap to Calendly once it's created --><a href="#" onclick="document.getElementById('sf-bubble').click();return false;" class="btn">Chat with Sandy — get a free sample</a>
     <a href="#how" class="btn ghost">See how it works →</a>
   </div>
 
@@ -151,8 +151,8 @@
 <section id="cta"><div class="wrap" style="text-align:center">
   <h2>Your channel could be publishing daily next week.</h2>
   <p class="mut" style="max-width:560px;margin:10px auto 26px">Book a free 20-minute strategy call. We'll pick your niche, show you the numbers, and you'll have a sample clip before you decide.</p>
-  <!-- TODO: Calendly --><a href="https://calendly.com/shortsfactory/strategy-call" class="btn">Book a free strategy call</a>
-  <p class="mut" style="margin-top:14px">or <!-- TODO: dedicated demo number --><a href="https://wa.me/0000000000?text=Hi%20Sandy%2C%20I%27d%20like%20a%20free%20sample%20clip%20for%20my%20niche">WhatsApp us — meet Sandy</a> before you sign up.</p>
+  <a href="#" onclick="document.getElementById('sf-bubble').click();return false;" class="btn">Chat with Sandy — get a free sample</a>
+  <p class="mut" style="margin-top:14px">or <a href="https://wa.me/19144774053?text=Hi%20Sandy%2C%20I%27d%20like%20a%20free%20sample%20clip%20for%20my%20niche">WhatsApp us — meet Sandy</a> before you sign up.</p>
 </div></section>
 
 <footer><div class="wrap">© Shorts Factory — Managed Faceless Channels · Arabic-first · <a href="/">shortsfactory.io</a></div></footer>
@@ -188,7 +188,7 @@
 (function(){
   /* TODO: set to your stable backend. Cloudflare Worker (recommended): https://sandy-sales.<acct>.workers.dev/chat
      or a cloudflared named-tunnel URL. (Trial trycloudflare URLs are temporary.) */
-  var SALES_API = "REPLACE_WITH_BACKEND_URL/chat";
+  var SALES_API = "https://sandy-sales.shortsfactory.workers.dev/chat";
   var sid = localStorage.getItem("sf_sid") || Math.random().toString(36).slice(2);
   localStorage.setItem("sf_sid", sid);
   var bubble=document.getElementById("sf-bubble"), chat=document.getElementById("sf-chat"),
