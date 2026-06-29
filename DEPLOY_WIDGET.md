@@ -2,11 +2,13 @@
 
 The widget (`managed.html`) talks to a backend that holds the Claude key. The site is static (GitHub Pages), so we use a **Cloudflare Worker** (free, stable, no server to keep running). The local `sales_proxy.mjs` + cloudflared quick-tunnel works for *testing* but trial tunnel URLs are temporary — use the Worker for production.
 
-## ✅ Status
-- **Widget UI:** built + injected into `managed.html` (floating bubble, bottom-right).
-- **Sandy sales brain:** WORKS — verified end-to-end on localhost (perfect bilingual sales replies, offers the free sample, captures `[[LEAD]]`).
-- **Backend code:** `worker.js` (Cloudflare Worker) ready. `sales_proxy.mjs` = local test version.
-- **Pending:** deploy the Worker (needs your Cloudflare login, ~3 min) + paste its URL into the widget.
+## ✅ Status — LIVE (deployed Jun 28 2026)
+- **Worker:** DEPLOYED → `https://sandy-sales.shortsfactory.workers.dev` (account khal.mahmoud@gmail.com, f2a2f373…). Secret `ANTHROPIC_KEY` set. KV `LEADS` bound (id `17a4856eff3546ab9ccb09a7c0588793`).
+- **Widget:** wired in `managed.html` (`SALES_API = https://sandy-sales.shortsfactory.workers.dev/chat`) + pushed → LIVE at **shortsfactory.io/managed.html**.
+- **Verified end-to-end on production:** bilingual EN/AR sales replies, session memory (KV `sess:*`, 24h TTL), free-sample offer, structured lead capture (KV `lead:*` with name/niche/audience/goal/contact). `/health` → ok.
+- **CTAs:** "Book a call" buttons open the live Sandy chat (Calendly not created yet); WhatsApp CTA → dedicated number `wa.me/19144774053` (Hushed 914-477-4053; activate the WhatsApp app to receive).
+- **Read leads:** `wrangler kv key list --binding LEADS --remote` then `… key get lead:<ts> --remote`. NOTE: wrangler 4.x `kv` defaults to the LOCAL simulator — always pass `--remote` to see the worker's real data.
+- **Pending (Khal, optional):** create the Calendly + repoint CTAs; activate WhatsApp on the Hushed number; wire a push/email alert on new `lead:*`.
 
 ## Deploy the Worker (one-time, ~3 min)
 ```bash
