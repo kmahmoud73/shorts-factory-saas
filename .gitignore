@@ -21,3 +21,11 @@ SAAS_CLAUDE.md
 .site_stats_last.json
 web_leads.jsonl
 .wrangler/
+
+# Lead PII — never publish (public repo)
+reengagement_log.jsonl
+.reengagement_gate_state.json
+.reply_cache.json
+LEAD_AUDIT_*.md
+lead_audit_*.md
+*_leads.jsonl
