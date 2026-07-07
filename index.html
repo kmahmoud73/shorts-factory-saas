@@ -394,6 +394,48 @@ nav .container {
   font-weight: 600;
   color: var(--accent-blue);
 }
+.result-card .top-video[data-video], .result-card .top-video[data-yt] {
+  cursor: pointer;
+  border-radius: 10px;
+  margin-left: -8px; margin-right: -8px;
+  padding-left: 8px; padding-right: 8px;
+  padding-bottom: 8px;
+  transition: background 0.15s;
+}
+.result-card .top-video[data-video]:hover, .result-card .top-video[data-yt]:hover {
+  background: rgba(255,255,255,0.04);
+}
+.result-card .top-video .tv-play {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: #ef0000;
+  padding: 1px 7px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+/* Video lightbox */
+#videoModal {
+  position: fixed; inset: 0; z-index: 3000;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.85); padding: 20px;
+}
+#videoModal.active { display: flex; }
+#videoModal .vm-inner {
+  position: relative; width: min(92vw, 420px);
+  aspect-ratio: 9 / 16; max-height: 88vh;
+  background: #000; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+#videoModal iframe { width: 100%; height: 100%; border: 0; }
+#videoModal .vm-close {
+  position: absolute; top: -6px; right: 0; transform: translateY(-100%);
+  color: #fff; font-size: 26px; line-height: 1; cursor: pointer;
+  background: none; border: 0; padding: 4px 8px;
+}
 
 /* ---- DEMO TEASER ---- */
 .demo-teaser {
@@ -1059,8 +1101,8 @@ footer p {
             <div class="rs-label">Videos</div>
           </div>
         </div>
-        <div class="top-video">
-          <div class="tv-label">Top Performer</div>
+        <div class="top-video" data-yt="https://www.youtube.com/@thejerseyvaulthq">
+          <div class="tv-label">Top Performer <span class="tv-play">&#9654; Play</span></div>
           <div class="tv-title">Signed Rijkaard Framed Shirt — Barcelona Legend</div>
           <div class="tv-views">1,736 views</div>
         </div>
@@ -1104,8 +1146,8 @@ footer p {
             <div class="rs-label">Videos</div>
           </div>
         </div>
-        <div class="top-video">
-          <div class="tv-label">Top Performer</div>
+        <div class="top-video" data-video="LyBkiZYowlo">
+          <div class="tv-label">Top Performer <span class="tv-play">&#9654; Play</span></div>
           <div class="tv-title">The Year Bruno Mars Took Over the Grammys Completely</div>
           <div class="tv-views">1,268 views</div>
         </div>
@@ -1152,8 +1194,8 @@ footer p {
             <div class="rs-label">Videos</div>
           </div>
         </div>
-        <div class="top-video">
-          <div class="tv-label">Top Performer</div>
+        <div class="top-video" data-video="yEmKOgLxa2Q">
+          <div class="tv-label">Top Performer <span class="tv-play">&#9654; Play</span></div>
           <div class="tv-title">What If Vikings Found a Smartphone in 900 AD?</div>
           <div class="tv-views">3,001 views</div>
         </div>
@@ -1244,8 +1286,8 @@ footer p {
             <div class="rs-label">Videos</div>
           </div>
         </div>
-        <div class="top-video">
-          <div class="tv-label">Top Performer</div>
+        <div class="top-video" data-video="CsD2LL4pOtE">
+          <div class="tv-label">Top Performer <span class="tv-play">&#9654; Play</span></div>
           <div class="tv-title">جحا والفلوس اللي رجعت أكتر من اللي استلفها</div>
           <div class="tv-views">1,944 views</div>
         </div>
@@ -1292,8 +1334,8 @@ footer p {
             <div class="rs-label">Videos</div>
           </div>
         </div>
-        <div class="top-video">
-          <div class="tv-label">Top Performer</div>
+        <div class="top-video" data-video="3fIzPpjSZdI">
+          <div class="tv-label">Top Performer <span class="tv-play">&#9654; Play</span></div>
           <div class="tv-title">Your Liver Does The IMPOSSIBLE (Regenerates 75%)</div>
           <div class="tv-views">2,320 views</div>
         </div>
@@ -1335,8 +1377,8 @@ footer p {
             <div class="rs-label">Videos</div>
           </div>
         </div>
-        <div class="top-video">
-          <div class="tv-label">Top Performer</div>
+        <div class="top-video" data-video="thowN_vdA9I">
+          <div class="tv-label">Top Performer <span class="tv-play">&#9654; Play</span></div>
           <div class="tv-title">They Stole $73 Million From a Moving Train</div>
           <div class="tv-views">1,768 views</div>
         </div>
@@ -1378,8 +1420,8 @@ footer p {
             <div class="rs-label">Videos</div>
           </div>
         </div>
-        <div class="top-video">
-          <div class="tv-label">Top Performer</div>
+        <div class="top-video" data-video="6qRIMa9YqYg">
+          <div class="tv-label">Top Performer <span class="tv-play">&#9654; Play</span></div>
           <div class="tv-title">🛏️ سر خدعة غطاء الوسادة لإزالة تجاعيد النوم</div>
           <div class="tv-views">1,297 views</div>
         </div>
@@ -1419,8 +1461,8 @@ footer p {
             <div class="rs-label">Videos</div>
           </div>
         </div>
-        <div class="top-video">
-          <div class="tv-label">Top Performer</div>
+        <div class="top-video" data-video="RzZ50FusL7s">
+          <div class="tv-label">Top Performer <span class="tv-play">&#9654; Play</span></div>
           <div class="tv-title">He's Cold, She's Hooked</div>
           <div class="tv-views">146 views</div>
         </div>
@@ -1685,7 +1727,35 @@ footer p {
   </div>
 </div>
 
+<!-- Top-performer video lightbox -->
+<div id="videoModal" onclick="if(event.target===this)closeVideo()">
+  <div class="vm-inner">
+    <button class="vm-close" onclick="closeVideo()" aria-label="Close">&times;</button>
+    <div id="videoModalFrame"></div>
+  </div>
+</div>
+
 <script>
+function closeVideo(){
+  var m=document.getElementById('videoModal');
+  m.classList.remove('active');
+  document.getElementById('videoModalFrame').innerHTML='';
+  document.body.style.overflow='';
+}
+function openVideo(id){
+  document.getElementById('videoModalFrame').innerHTML=
+    '<iframe src="https://www.youtube.com/embed/'+id+'?autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  document.getElementById('videoModal').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+document.querySelectorAll('.top-video[data-video],.top-video[data-yt]').forEach(function(el){
+  el.addEventListener('click',function(){
+    var vid=el.getAttribute('data-video');
+    if(vid){ openVideo(vid); }
+    else { var u=el.getAttribute('data-yt'); if(u) window.open(u,'_blank','noopener'); }
+  });
+});
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeVideo(); });
 document.querySelectorAll('.channel-age[data-launch]').forEach(function(el){
   var days=Math.floor((new Date()-new Date(el.dataset.launch))/(864e5));
   el.textContent=days<2?'Just launched':'Live for '+days+' days';
