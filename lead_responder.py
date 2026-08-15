@@ -431,7 +431,7 @@ def _call_llm_for_reply(prompt):
                     "content-type": "application/json",
                 },
                 json={
-                    "model": "llama-3.3-70b-versatile",
+                    "model": "openai/gpt-oss-120b",
                     "max_tokens": 500,
                     "messages": [
                         {"role": "system", "content": SMART_REPLY_SYSTEM},
