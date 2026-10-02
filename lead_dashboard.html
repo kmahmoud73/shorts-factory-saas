@@ -371,7 +371,7 @@ function renderDetail(id) {
       <div class="detail-email">${esc(lead.email)}</div>
       <div class="detail-badges">
         <span class="detail-badge score ${lead.score_label}">Score: ${lead.score}</span>
-        <span class="detail-badge stage-badge ${stageClass}">${lead.stage}</span>
+        <span class="detail-badge stage-badge ${stageClass}">${esc(lead.stage)}</span>
         <span class="detail-badge niche">${esc(lead.niche || 'N/A')}</span>
         ${lead.plan && lead.plan !== 'General' ? `<span class="detail-badge plan">${esc(lead.plan)}</span>` : ''}
         <span class="detail-badge source">${esc(lead.source)}</span>
@@ -390,7 +390,7 @@ function renderDetail(id) {
       <div class="section-title">Conversation Thread</div>
       ${thread.length > 0 ? thread.map((t, idx) => {
         let dirLabel = '';
-        if (t.direction === 'submission') dirLabel = t.label || 'Form Submission';
+        if (t.direction === 'submission') dirLabel = esc(t.label || 'Form Submission');
         else if (t.direction === 'sent') dirLabel = `You &rarr; ${esc(lead.name || 'Lead')}`;
         else dirLabel = `${esc(lead.name || 'Lead')} &rarr; You`;
         const tid = `thread-${lead.id}-${idx}`;
@@ -398,7 +398,7 @@ function renderDetail(id) {
         <div class="thread-item ${t.direction}">
           <div class="thread-meta">
             <span class="thread-direction ${t.direction}">${dirLabel}</span>
-            <span>${t.date}</span>
+            <span>${esc(t.date)}</span>
           </div>
           <div class="thread-body" id="${tid}">${esc(t.body)}</div>
           <span class="thread-toggle" id="${tid}-toggle" onclick="toggleThread('${tid}')">Show full message</span>

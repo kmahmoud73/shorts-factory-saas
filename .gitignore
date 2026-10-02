@@ -29,3 +29,6 @@ reengagement_log.jsonl
 LEAD_AUDIT_*.md
 lead_audit_*.md
 *_leads.jsonl
+
+# re-engagement kill switch (local only)
+.reengagement_STOP
