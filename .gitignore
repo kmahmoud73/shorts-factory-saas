@@ -32,3 +32,14 @@ lead_audit_*.md
 
 # re-engagement kill switch (local only)
 .reengagement_STOP
+
+# internal-only — kept on disk, never published (3 Oct 2026 review)
+saas_transformation_strategy.html
+SAAS_DEMO.html
+lead_dashboard.html
+lead_responder.py
+DEPLOY_WIDGET.md
+lead_reengagement_campaign.md
+logs/
+__pycache__/
+.no_auto_reply.json

@@ -25,7 +25,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 import uvicorn
@@ -450,9 +450,13 @@ def _formspree_poller_loop():
         time.sleep(FORMSPREE_POLL_INTERVAL)
 
 
-@app.get("/api/formspree/poll")
-async def force_formspree_poll():
+@app.post("/api/formspree/poll")
+async def force_formspree_poll(x_dashboard: str = Header(default="")):
     """Force an immediate Formspree poll (non-blocking — runs in thread)."""
+    # POST + a custom header: a cross-site page can't send this header without a
+    # CORS preflight, which this app never answers, so only the dashboard can trigger sends.
+    if x_dashboard != "1":
+        raise HTTPException(status_code=403, detail="dashboard only")
     if _poller_state["running"]:
         return {"status": "already_running", **_poller_state}
     thread = threading.Thread(target=_run_formspree_poll, daemon=True)
@@ -512,4 +516,4 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8009)
     args = parser.parse_args()
     print(f"\n  Lead Command Center -> http://localhost:{args.port}\n")
-    uvicorn.run(app, host="0.0.0.0", port=args.port)
+    uvicorn.run(app, host="127.0.0.1", port=args.port)
